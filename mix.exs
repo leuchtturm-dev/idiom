@@ -1,13 +1,15 @@
-defmodule I18ex.MixProject do
+defmodule Idiom.MixProject do
   use Mix.Project
 
   def project do
     [
-      app: :i18ex,
+      app: :idiom,
+      description: "Modern internationalization library",
       version: "0.1.0",
-      elixir: "~> 1.15",
+      elixir: "~> 1.13",
       start_permanent: Mix.env() == :prod,
-      deps: deps()
+      deps: deps(),
+      package: package()
     ]
   end
 
@@ -19,5 +21,13 @@ defmodule I18ex.MixProject do
 
   defp deps do
     []
+  end
+
+  defp package do
+    [
+      name: "idiom",
+      licenses: ["MIT"],
+      links: %{"GitHub" => "https://github.com/cschmatzler/idiom"}
+    ]
   end
 end

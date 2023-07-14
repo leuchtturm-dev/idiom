@@ -1,7 +1,7 @@
-defmodule I18ex do
-  alias I18ex.Translator
+defmodule Idiom do
+  alias Idiom.Translator
 
-  defdelegate child_spec(options), to: I18ex.Supervisor
+  defdelegate child_spec(options), to: Idiom.Supervisor
 
   def t(key, opts \\ []), do: translate(key, opts)
 
@@ -14,6 +14,6 @@ defmodule I18ex do
   defp backend(options) do
     options
     |> Keyword.get(:backend, __MODULE__)
-    |> I18ex.Supervisor.backend_name()
+    |> Idiom.Supervisor.backend_name()
   end
 end

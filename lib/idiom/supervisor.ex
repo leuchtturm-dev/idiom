@@ -1,5 +1,6 @@
-defmodule I18ex.Supervisor do
-  alias I18ex.Backends.Memory
+defmodule Idiom.Supervisor do
+  alias Idiom.Cache
+  alias Idiom.Backends.Memory
   use Supervisor
 
   def start_link(options) when is_list(options) do
@@ -12,11 +13,14 @@ defmodule I18ex.Supervisor do
   end
 
   defp default_options do
-    [name: I18ex]
+    [name: Idiom]
   end
 
   @impl Supervisor
   def init(options) do
+    local_data = Keyword.get(options, :local_data, %{})
+    Cache.init(local_data)
+
     backend_options = Keyword.update!(options, :name, &backend_name/1)
 
     children =
