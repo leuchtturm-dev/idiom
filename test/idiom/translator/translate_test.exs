@@ -17,6 +17,11 @@ defmodule Idiom.Translator.TranslateTest do
         "natural language key with dot. it continues" => "natural language key with dot. it continues"
       }
     },
+    "en-US" => %{
+      "translation" => %{
+        "test.locale" => "en-US"
+      }
+    },
     "de" => %{
       "translation" => %{
         "test" => "test_de"
@@ -49,9 +54,13 @@ defmodule Idiom.Translator.TranslateTest do
     # With other language
     %{key: "test", opts: [to: "de"], expected: "test_de"},
     # With fallback language
-    %{key: "natural language key with dot. it continues", opts: [to: "de", fallback_lang: "en"], expected: "natural language key with dot. it continues"},
+    %{key: "natural language key with dot. it continues", opts: [to: "de", fallback: "en"], expected: "natural language key with dot. it continues"},
     # With domain and other language
-    %{key: "login:Sign in", opts: [to: "de"], expected: "Registrieren"}
+    %{key: "login:Sign in", opts: [to: "de"], expected: "Registrieren"},
+    # With locale
+    %{key: "test.locale", opts: [to: "en-US"], expected: "en-US"},
+    # With locale falling back to language
+    %{key: "test", opts: [to: "en-US"], expected: "test_en"}
   ]
 
   for %{key: key, opts: opts, expected: expected} <- @tests do
