@@ -8,7 +8,7 @@ ci:
   BUILD +lint
 
 setup-base:
-  FROM hexpm/elixir:$ELIXIR_VERSION-erlang-$OTP_VERSION-alpine-3.18.2
+  FROM hexpm/elixir:$ELIXIR_VERSION-erlang-$OTP_VERSION
 
   RUN apk add --no-cache build-base git
   RUN mix do local.rebar --force, \
