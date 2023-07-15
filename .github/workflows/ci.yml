@@ -25,6 +25,6 @@ jobs:
         uses: earthly/actions-setup@v1
 
       - name: Run Earthly
-        run: earthly --org cschmatzler --sat github-actions --no-output +lint --ELIXIR_VERSION=$ELIXIR_VERSION --OTP_VERSION=$OTP_VERSION
+        run: earthly --org cschmatzler --sat github-actions --no-output +lint --ELIXIR_VERSION=${{ matrix.ELIXIR_VERSION }} --OTP_VERSION=${{ matrix.OTP_VERSION }}
         env:
           EARTHLY_TOKEN: ${{ secrets.EARTHLY_TOKEN }}
