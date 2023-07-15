@@ -29,6 +29,6 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Run Earthly
-        run: earthly --org cschmatzler --sat github-actions --no-output +lint --BASE=${{ matrix.base }}
+        run: earthly --org cschmatzler --sat github-actions --no-output +ci --BASE=${{ matrix.base }}
         env:
           EARTHLY_TOKEN: ${{ secrets.EARTHLY_TOKEN }}
