@@ -1,5 +1,4 @@
 defmodule Idiom.Translator do
-  alias Idiom.LanguageUtils
   alias Idiom.Cache
 
   def translate(key, opts \\ [])
@@ -8,24 +7,23 @@ defmodule Idiom.Translator do
   def translate(key, opts) do
     cache_table_name = Keyword.get(opts, :cache_table_name)
 
-    language =
-      Keyword.get(opts, :language) || Keyword.get(opts, :default_language) || "en"
-
+    lang = Keyword.get(opts, :to) || raise "No language provided"
     {namespace, key} = extract_namespace(key, opts)
+    langs = to_resolve_hierarchy(lang, opts)
 
-    codes = to_resolve_hierarchy(language)
-
-    Cache.get_translation(language, namespace, key, cache_table_name)
+    Enum.find_value(langs, fn lang -> Cache.get_translation(lang, namespace, key, cache_table_name) end)
   end
 
-  def exists(backend, key, opts \\ []) do
-    case GenServer.call(backend, {:get_resource, "en", "default", key}) do
-      {:ok, _} -> true
-      {:error, _} -> false
-    end
+  @doc false
+  def to_resolve_hierarchy(code, opts \\ []) do
+    fallback_lang = Keyword.get(opts, :fallback_lang)
+
+    ([code, get_script_part_from_code(code), get_language_part_from_code(code)] ++ List.wrap(fallback_lang))
+    |> Enum.reject(&is_nil/1)
+    |> Enum.uniq()
   end
 
-  def extract_namespace(key, opts \\ []) do
+  defp extract_namespace(key, opts) do
     default_namespace = Keyword.get(opts, :default_namespace, "translation")
     namespace_separator = Keyword.get(opts, :namespace_separator, ":")
     key_separator = Keyword.get(opts, :key_separator, ".")
@@ -38,13 +36,7 @@ defmodule Idiom.Translator do
     end
   end
 
-  def to_resolve_hierarchy(code, fallback_code \\ %{}) do
-    ([code] ++ [get_script_part_from_code(code)] ++ [get_language_part_from_code(code)])
-    |> Enum.reject(&is_nil/1)
-    |> Enum.uniq()
-  end
-
-  def get_script_part_from_code(code) do
+  defp get_script_part_from_code(code) do
     if String.contains?(code, "-") do
       String.replace(code, "_", "-")
       |> String.split("-")
@@ -59,7 +51,7 @@ defmodule Idiom.Translator do
     end
   end
 
-  def get_language_part_from_code(code) do
+  defp get_language_part_from_code(code) do
     if String.contains?(code, "-") do
       String.replace(code, "_", "-") |> String.split("-") |> List.first()
     else

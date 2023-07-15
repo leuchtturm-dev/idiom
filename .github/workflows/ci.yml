@@ -1,0 +1,30 @@
+name: CI
+on:
+  pull_request:
+
+jobs:
+  test:
+    name: Test
+    strategy:
+      fail-fast: false
+      matrix:
+        ELIXIR_VERSION:
+          - 1.15.3
+          - 1.14.5
+          - 1.13.3
+        OTP_VERSION:
+          - 26.0.2
+          - 25.3.2
+          - 24.3.4
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3
+
+      - name: Setup Earthly
+        uses: earthly/actions-setup@v1
+
+      - name: Run Earthly
+        run: earthly --org cschmatzler --sat github-actions --no-output +lint --ELIXIR_VERSION=$ELIXIR_VERSION --OTP_VERSION=$OTP_VERSION
+        env:
+          EARTHLY_TOKEN: ${{ secrets.EARTHLY_TOKEN }}

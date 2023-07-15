@@ -20,7 +20,9 @@ defmodule Idiom.MixProject do
   end
 
   defp deps do
-    []
+    [
+      {:ex_doc, "~> 0.30.2"}
+    ]
   end
 
   defp package do
