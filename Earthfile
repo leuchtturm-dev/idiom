@@ -1,14 +1,13 @@
 VERSION 0.7
 
-ARG --global --required ELIXIR_VERSION
-ARG --global --required OTP_VERSION
+ARG --global --required BASE
 
 ci:
   BUILD +test
   BUILD +lint
 
 setup-base:
-  FROM hexpm/elixir:$ELIXIR_VERSION-erlang-$OTP_VERSION-alpine-3.18.2
+  FROM hexpm/elixir:$BASE
 
   RUN apk add --no-cache build-base git
   RUN mix do local.rebar --force, \
@@ -23,7 +22,7 @@ build:
   ENV MIX_ENV=test
   RUN mix deps.compile
 
-  COPY --dir lib .
+  COPY --dir lib src priv .
   RUN mix compile --warnings-as-errors
 
 test:

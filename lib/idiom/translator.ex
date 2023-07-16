@@ -1,28 +1,28 @@
 defmodule Idiom.Translator do
+  alias Idiom.Pluralizer
   alias Idiom.Cache
+  alias Idiom.Languages
 
   def translate(key, opts \\ [])
   def translate(nil, _opts), do: ""
 
   def translate(key, opts) do
-    cache_table_name = Keyword.get(opts, :cache_table_name)
+    cache_table_name = Keyword.get(opts, :cache_table_name, Cache.cache_table_name())
 
     lang = Keyword.get(opts, :to) || raise "No language provided"
+    count = Keyword.get(opts, :count)
     {namespace, key} = extract_namespace(key, opts)
-    langs = to_resolve_hierarchy(lang, opts)
+    langs = Languages.to_resolve_hierarchy(lang, opts)
 
-    Enum.find_value(langs, fn lang -> Cache.get_translation(lang, namespace, key, cache_table_name) end)
+    keys =
+      Enum.reduce(langs, [], fn lang, acc ->
+        acc ++ [Cache.to_cache_key(lang, namespace, key), Cache.to_cache_key(lang, namespace, "#{key}_#{Pluralizer.get_suffix(lang, count)}")]
+      end)
+
+    Enum.find_value(keys, fn key -> Cache.get_key(key, cache_table_name) end)
   end
 
   @doc false
-  def to_resolve_hierarchy(code, opts \\ []) do
-    fallback_lang = Keyword.get(opts, :fallback_lang)
-
-    ([code, get_script_part_from_code(code), get_language_part_from_code(code)] ++ List.wrap(fallback_lang))
-    |> Enum.reject(&is_nil/1)
-    |> Enum.uniq()
-  end
-
   defp extract_namespace(key, opts) do
     default_namespace = Keyword.get(opts, :default_namespace, "translation")
     namespace_separator = Keyword.get(opts, :namespace_separator, ":")
@@ -33,29 +33,6 @@ defmodule Idiom.Translator do
       {namespace, Enum.join(key_parts, key_separator)}
     else
       {default_namespace, key}
-    end
-  end
-
-  defp get_script_part_from_code(code) do
-    if String.contains?(code, "-") do
-      String.replace(code, "_", "-")
-      |> String.split("-")
-      |> case do
-        nil -> nil
-        parts when is_list(parts) and length(parts) == 2 -> nil
-        # TODO: Format language code
-        parts when is_list(parts) -> Enum.take(parts, 2) |> Enum.join("-")
-      end
-    else
-      code
-    end
-  end
-
-  defp get_language_part_from_code(code) do
-    if String.contains?(code, "-") do
-      String.replace(code, "_", "-") |> String.split("-") |> List.first()
-    else
-      code
     end
   end
 end
