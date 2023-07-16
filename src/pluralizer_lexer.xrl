@@ -1,20 +1,19 @@
 Definitions.
 
-Variable            = n|i|f|t|v|w|e
-And                 = and
-Or                  = or
-Equals              = =
-NotEquals           = !=
-Modulo              = %
-Tilde               = ~
-Comma               = ,
-Range               = \.\.
-Ellipsis            = …|\.\.\.
-IntegerExampleStart = @integer
-DecimalExampleStart = @decimal
-Integer             = [0-9]+([c][0-9]+)?
-Decimal             = [0-9]+(\.[0-9]+([c][0-9]+)?)
-Whitespace          = [\s\n\t]
+Whitespace = [\s\n\t]
+Variable   = n|i|f|t|v|w|e
+And        = and
+Or         = or
+Equals     = =
+NotEquals  = !=
+Modulo     = %
+Tilde      = ~
+Comma      = ,
+Range      = \.\.
+Ellipsis   = …|\.\.\.
+Integer    = [0-9]+([c][0-9]+)?
+Decimal    = [0-9]+(\.[0-9]+([c][0-9]+)?)
+Examples   = @.*
 
 Rules.
 
@@ -28,10 +27,9 @@ Rules.
 {Comma}                  : {token, {comma, TokenLine, TokenChars}}.
 {Range}                  : {token, {range_op, TokenLine, TokenChars}}.
 {Ellipsis}               : {token, {ellipsis, TokenLine, TokenChars}}.
-{IntegerExampleStart}    : {token, {example, TokenLine, 'integer'}}.
-{DecimalExampleStart}    : {token, {example, TokenLine, 'decimal'}}.
 {Integer}                : {token, {integer, TokenLine, integer_exponent(TokenChars)}}.
 {Decimal}                : {token, {decimal, TokenLine, decimal_exponent(TokenChars)}}.
+{Examples}               : skip_token.
 {Whitespace}+            : skip_token.
 
 Erlang code.

@@ -8,7 +8,7 @@ defmodule Idiom.Pluralizer do
 
   @rules [:code.priv_dir(Mix.Project.config()[:app]), "/idiom"]
          |> :erlang.iolist_to_binary()
-         |> Path.join("/plural_rules.json")
+         |> Path.join("/plurals.json")
          |> File.read!()
          |> Jason.decode!()
          |> get_in(["supplemental", "plurals-type-cardinal"])
@@ -32,14 +32,8 @@ defmodule Idiom.Pluralizer do
   end
 
   defp get_suffix(lang, _n, _i, _v, _w, _f, _t) do
-    Logger.warning("No plural rules found for #{lang} - returning empty string")
-    ""
-  end
-
-  def get_suffixes(lang) do
-    Map.get(@rules, lang)
-    |> Map.new()
-    |> Map.keys()
+    Logger.warning("No plural rules found for #{lang} - returning `other`")
+    "other"
   end
 
   def get_suffix(lang, count)
@@ -68,7 +62,9 @@ defmodule Idiom.Pluralizer do
         other -> Decimal.new(other) |> Decimal.to_integer()
       end
 
-    w = Integer.digits(t) |> length()
+    w = Integer.to_string(f) |> String.trim_trailing("0") |> String.length()
+
+    n = Decimal.to_float(n)
 
     get_suffix(lang, n, i, v, f, t, w)
   end
