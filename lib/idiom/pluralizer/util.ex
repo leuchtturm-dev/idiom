@@ -1,32 +1,48 @@
 defmodule Idiom.Pluralizer.Util do
+  def in?(%Decimal{} = number, range) do
+    Decimal.to_float(number) |> in?(range)
+  end
+
   def in?(number, range) when is_integer(number) do
     number in range
   end
 
-  def in?(number, first..last) when is_float(number) do
-    number == trunc(number) && number >= first && number <= last
+  def in?(number, range) when is_float(number) do
+    trunc(number) in range
   end
 
-  def mod(number, modulus) when is_float(number) and is_number(modulus) do
-    number - Float.floor(number / modulus) * modulus
+  def mod(dividend, divisor) when is_float(dividend) and is_number(divisor) do
+    dividend - Float.floor(dividend / divisor) * divisor
   end
 
-  def mod(number, modulus) when is_integer(number) and is_integer(modulus) do
+  def mod(dividend, divisor) when is_integer(dividend) and is_integer(divisor) do
     modulo =
-      number
-      |> Integer.floor_div(modulus)
-      |> Kernel.*(modulus)
+      dividend
+      |> Integer.floor_div(divisor)
+      |> Kernel.*(divisor)
 
-    number - modulo
+    dividend - modulo
   end
 
-  def mod(number, modulus) when is_integer(number) and is_number(modulus) do
+  def mod(dividend, divisor) when is_integer(dividend) and is_number(divisor) do
     modulo =
-      number
-      |> Kernel./(modulus)
+      dividend
+      |> Kernel./(divisor)
       |> Float.floor()
-      |> Kernel.*(modulus)
+      |> Kernel.*(divisor)
 
-    number - modulo
+    dividend - modulo
   end
+
+  def mod(%Decimal{} = dividend, %Decimal{} = divisor) do
+    modulo =
+      dividend
+      |> Decimal.div(divisor)
+      |> Decimal.round(0, :floor)
+      |> Decimal.mult(divisor)
+
+    Decimal.sub(dividend, modulo)
+  end
+
+  def mod(%Decimal{} = dividend, divisor) when is_integer(divisor), do: mod(dividend, Decimal.new(divisor))
 end

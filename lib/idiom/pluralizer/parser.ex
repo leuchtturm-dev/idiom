@@ -10,6 +10,7 @@ defmodule Idiom.Pluralizer.Parser do
     {lang, parsed_rules}
   end
 
+  defp parse([]), do: {:ok, []}
   defp parse(tokens) when is_list(tokens), do: :pluralizer_parser.parse(tokens)
 
   defp parse(definition) when is_binary(definition) do

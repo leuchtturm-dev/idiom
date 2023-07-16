@@ -2,9 +2,7 @@ Terminals
     and_op
     comma
     decimal
-    ellipsis
     equals
-    example
     in
     integer
     is_op
@@ -13,7 +11,6 @@ Terminals
     not_op
     or_op
     range_op
-    tilde
     variable
     within_op.
 
@@ -21,9 +18,6 @@ Nonterminals
     and_condition
     condition
     conditional
-    example_list
-    example_range
-    examples
     expression
     in_relation
     is_relation
@@ -42,9 +36,7 @@ Nonassoc  200   equals not_equals.
 Left      300   and_op.
 Left      400   or_op.
 
-plural_rule       ->  condition examples : append({ast, '$1'}, '$2').
 plural_rule       ->  condition          : [{ast, '$1'}].
-plural_rule       ->  examples           : [].
 
 condition         ->  and_condition or_op condition : or_ast('$1', '$3').
 condition         ->  and_condition                 : '$1'.
@@ -82,16 +74,6 @@ range             ->  value range_op value : range_ast('$1', '$3').
 
 value             ->  integer : unwrap('$1').
 value             ->  decimal : unwrap('$1').
-
-examples           ->  example example_list examples : append({unwrap('$1'), '$2'}, '$3').
-examples           ->  example example_list : [{unwrap('$1'), '$2'}].
-
-example_list       ->  example_range comma example_list : append('$1', '$3').
-example_list       ->  example_range : ['$1'].
-
-example_range      ->  value tilde value : range_ast('$1', '$3').
-example_range      ->  value : '$1'.
-example_range      ->  ellipsis : 'ellipsis'.
 
 Erlang code.
 
