@@ -11,16 +11,19 @@ defmodule Idiom.Cache do
     |> Enum.each(fn {key, value} -> :ets.insert(table_name, {key, value}) end)
   end
 
-  def get_translation(language, namespace, key, table_name \\ @cache_table_name) do
-    cache_key = to_cache_key(language, namespace, key)
-
+  def get_key(cache_key, table_name \\ @cache_table_name) do
     case :ets.lookup(table_name, cache_key) do
       [{^cache_key, translation}] -> translation
       [] -> nil
     end
   end
 
-  defp to_cache_key(language, namespace, key), do: "#{language}:#{namespace}:#{key}"
+  def get_translation(language, namespace, key, table_name \\ @cache_table_name) do
+    to_cache_key(language, namespace, key)
+    |> get_key(table_name)
+  end
+
+  def to_cache_key(language, namespace, key), do: "#{language}:#{namespace}:#{key}"
 
   # Input: %{en: %{translation: %{"foo.baz" => "bar"}}, de: %{login: %{bar: "baz", foo: %{bar: "baz"}}}}}}
   # Output: %{"en:translation:foo.baz" => "bar", "de:login:bar" => "baz", "de:login:foo.bar" => "baz"}

@@ -1,9 +1,9 @@
 defmodule Idiom.Pluralizer.Util do
-  def within(number, range) when is_integer(number) do
+  def in?(number, range) when is_integer(number) do
     number in range
   end
 
-  def within(number, first..last) when is_float(number) do
+  def in?(number, first..last) when is_float(number) do
     number == trunc(number) && number >= first && number <= last
   end
 

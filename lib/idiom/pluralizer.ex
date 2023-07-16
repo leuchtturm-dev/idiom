@@ -1,6 +1,8 @@
 defmodule Idiom.Pluralizer do
-  alias Idiom.Languages
-  alias Idiom.Pluralizer.Compiler
+  require Logger
+
+  alias Idiom.Pluralizer.Parser
+  alias Idiom.Pluralizer.AST
 
   import Idiom.Pluralizer.Util
 
@@ -9,17 +11,66 @@ defmodule Idiom.Pluralizer do
          |> Path.join("/plural_rules.json")
          |> File.read!()
          |> Jason.decode!()
-         |> Map.get("cardinal")
-         |> Enum.map(&Compiler.normalize_locale_rules/1)
+         |> get_in(["supplemental", "plurals-type-cardinal"])
+         |> Enum.map(&Parser.parse_rules/1)
          |> Map.new()
+         |> IO.inspect()
 
-  for {lang, conditions} <- @rules do
-    defp do_get_plural(unquote(lang), n, i, v, w, f, t, e) do
+  for {lang, rules} <- @rules do
+    # Parameter | Value
+    # ----------|------------------------------------------------------------------
+    # n         | absolute value of the source number (integer/float/decimal).
+    # i         | integer digits of n.
+    # v         | number of visible fractional digits in n, with trailing zeros.
+    # w         | number of visible fractional digits in n, without trailing zeros.
+    # f         | visible fractional digits in n, with trailing zeros.
+    # t         | visible fractional digits in n, without trailing zeros.
+    defp get_suffix(unquote(lang), n, i, v, w, f, t) do
+      e = 0
       _ = {n, i, v, w, f, t, e}
-      unquote(Compiler.rules_to_condition_statement(conditions, __MODULE__))
+      unquote(AST.rules_to_cond(rules))
     end
   end
 
-  def get_plural(lang, count) when is_binary(count), do: get_plural(lang, Decimal.new(count))
-  def get_plural(lang, count) when is_integer(count), do: do_get_plural(lang, abs(count), abs(count), 0, 0, 0, 0, 0)
+  defp get_suffix(lang, _n, _i, _v, _w, _f, _t) do
+    Logger.warning("No plural rules found for #{lang} - returning empty string")
+    ""
+  end
+
+  def get_suffixes(lang) do
+    Map.get(@rules, lang)
+    |> Map.new()
+    |> Map.keys()
+  end
+
+  def get_suffix(lang, count)
+  def get_suffix(_lang, nil), do: "other"
+  def get_suffix(lang, count) when is_binary(count), do: get_suffix(lang, Decimal.new(count))
+  def get_suffix(lang, count) when is_float(count), do: get_suffix(lang, Decimal.new(Float.to_string(count)))
+  def get_suffix(lang, count) when is_integer(count), do: get_suffix(lang, abs(count), abs(count), 0, 0, 0, 0)
+
+  def get_suffix(lang, count) do
+    n = Decimal.abs(count)
+    i = Decimal.round(count, 0, :floor) |> Decimal.to_integer()
+    v = abs(n.exp)
+
+    f =
+      n
+      |> Decimal.sub(i)
+      |> Decimal.mult(Decimal.new(Integer.pow(10, v)))
+      |> Decimal.round(0, :floor)
+      |> Decimal.to_integer()
+
+    t =
+      Integer.to_string(f)
+      |> String.trim_trailing("0")
+      |> case do
+        "" -> 0
+        other -> Decimal.new(other) |> Decimal.to_integer()
+      end
+
+    w = Integer.digits(t) |> length()
+
+    get_suffix(lang, n, i, v, f, t, w)
+  end
 end

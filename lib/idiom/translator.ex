@@ -1,4 +1,5 @@
 defmodule Idiom.Translator do
+  alias Idiom.Pluralizer
   alias Idiom.Cache
   alias Idiom.Languages
 
@@ -6,13 +7,19 @@ defmodule Idiom.Translator do
   def translate(nil, _opts), do: ""
 
   def translate(key, opts) do
-    cache_table_name = Keyword.get(opts, :cache_table_name)
+    cache_table_name = Keyword.get(opts, :cache_table_name, Cache.cache_table_name())
 
     lang = Keyword.get(opts, :to) || raise "No language provided"
+    count = Keyword.get(opts, :count)
     {namespace, key} = extract_namespace(key, opts)
     langs = Languages.to_resolve_hierarchy(lang, opts)
 
-    Enum.find_value(langs, fn lang -> Cache.get_translation(lang, namespace, key, cache_table_name) end)
+    keys =
+      Enum.reduce(langs, [], fn lang, acc ->
+        acc ++ [Cache.to_cache_key(lang, namespace, key), Cache.to_cache_key(lang, namespace, "#{key}_#{Pluralizer.get_suffix(lang, count)}")]
+      end)
+
+    Enum.find_value(keys, fn key -> Cache.get_key(key, cache_table_name) end)
   end
 
   @doc false
