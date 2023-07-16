@@ -22,7 +22,7 @@ build:
   ENV MIX_ENV=test
   RUN mix deps.compile
 
-  COPY --dir lib .
+  COPY --dir lib src priv .
   RUN mix compile --warnings-as-errors
 
 test:

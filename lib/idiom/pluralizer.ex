@@ -14,7 +14,6 @@ defmodule Idiom.Pluralizer do
          |> get_in(["supplemental", "plurals-type-cardinal"])
          |> Enum.map(&Parser.parse_rules/1)
          |> Map.new()
-         |> IO.inspect()
 
   for {lang, rules} <- @rules do
     # Parameter | Value
