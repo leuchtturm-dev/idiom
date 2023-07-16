@@ -7,10 +7,8 @@ Or         = or
 Equals     = =
 NotEquals  = !=
 Modulo     = %
-Tilde      = ~
 Comma      = ,
 Range      = \.\.
-Ellipsis   = …|\.\.\.
 Integer    = [0-9]+([c][0-9]+)?
 Decimal    = [0-9]+(\.[0-9]+([c][0-9]+)?)
 Examples   = @.*
@@ -23,10 +21,8 @@ Rules.
 {Equals}                 : {token, {equals, TokenLine, TokenChars}}.
 {NotEquals}              : {token, {not_equals, TokenLine, TokenChars}}.
 {Modulo}                 : {token, {modulo_op, TokenLine, TokenChars}}.
-{Tilde}                  : {token, {tilde, TokenLine, TokenChars}}.
 {Comma}                  : {token, {comma, TokenLine, TokenChars}}.
 {Range}                  : {token, {range_op, TokenLine, TokenChars}}.
-{Ellipsis}               : {token, {ellipsis, TokenLine, TokenChars}}.
 {Integer}                : {token, {integer, TokenLine, integer_exponent(TokenChars)}}.
 {Decimal}                : {token, {decimal, TokenLine, decimal_exponent(TokenChars)}}.
 {Examples}               : skip_token.

@@ -36,7 +36,7 @@ Nonassoc  200   equals not_equals.
 Left      300   and_op.
 Left      400   or_op.
 
-plural_rule       ->  condition          : [{ast, '$1'}].
+plural_rule       ->  condition          : '$1'.
 
 condition         ->  and_condition or_op condition : or_ast('$1', '$3').
 condition         ->  and_condition                 : '$1'.

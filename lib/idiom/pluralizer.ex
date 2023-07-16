@@ -15,6 +15,8 @@ defmodule Idiom.Pluralizer do
          |> Enum.map(&Parser.parse_rules/1)
          |> Map.new()
 
+def rules, do: @rules
+
   for {lang, rules} <- @rules do
     # Parameter | Value
     # ----------|------------------------------------------------------------------

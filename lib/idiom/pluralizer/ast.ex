@@ -1,8 +1,8 @@
 defmodule Idiom.Pluralizer.AST do
   def rules_to_cond(rules) do
     clauses =
-      Enum.map(rules, fn {suffix, rule} ->
-        rule_to_clause(rule[:ast], suffix)
+      Enum.map(rules, fn {suffix, ast} ->
+        rule_to_clause(ast, suffix)
       end)
       |> Enum.sort(fn {:->, [], [[ast], _suffix]}, _ -> not (ast == true) end)
 
