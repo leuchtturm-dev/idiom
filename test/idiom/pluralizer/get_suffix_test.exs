@@ -1,6 +1,6 @@
 defmodule Idiom.Pluralizer.GetSuffixTest do
   use ExUnit.Case, async: true
-
+  import ExUnit.CaptureLog
   alias Idiom.Pluralizer
 
   describe "when count is nil" do
@@ -9,6 +9,29 @@ defmodule Idiom.Pluralizer.GetSuffixTest do
       assert Pluralizer.get_suffix("de", nil) == "other"
       assert Pluralizer.get_suffix("ar", nil) == "other"
       assert Pluralizer.get_suffix("cy", nil) == "other"
+    end
+  end
+
+  describe "when lang is not supported" do
+    @tag capture_log: true
+    test "returns `other` for any count" do
+      Pluralizer.get_suffix("foo", 0)
+      Pluralizer.get_suffix("foo", 1)
+      Pluralizer.get_suffix("foo", 500)
+    end
+
+    test "logs a warning that language is unsuppored" do
+      assert capture_log(fn ->
+               Pluralizer.get_suffix("foo", 0)
+             end) =~ "No plural rules found for foo"
+
+      assert capture_log(fn ->
+               Pluralizer.get_suffix("foo", 1)
+             end) =~ "No plural rules found for foo"
+
+      assert capture_log(fn ->
+               Pluralizer.get_suffix("foo", 500)
+             end) =~ "No plural rules found for foo"
     end
   end
 
@@ -64,12 +87,12 @@ defmodule Idiom.Pluralizer.GetSuffixTest do
         %{lang: "de", count: Decimal.new(1), expected: "one"},
         %{lang: "ar", count: Decimal.new(0), expected: "zero"},
         %{lang: "ar", count: Decimal.new(1), expected: "one"},
-        %{lang: "ar", count: Decimal.new(2), expected: "two"},
-        %{lang: "ar", count: Decimal.new(3), expected: "few"},
-        %{lang: "ar", count: Decimal.new(50), expected: "many"},
-        %{lang: "ar", count: Decimal.new(500), expected: "other"},
-        %{lang: "cy", count: Decimal.new(3), expected: "few"},
-        %{lang: "cy", count: Decimal.new(6), expected: "many"}
+        %{lang: "ar", count: Decimal.new("2"), expected: "two"},
+        %{lang: "ar", count: Decimal.new("3"), expected: "few"},
+        %{lang: "ar", count: Decimal.new("50"), expected: "many"},
+        %{lang: "ar", count: Decimal.new("500.0"), expected: "other"},
+        %{lang: "cy", count: Decimal.new("3.1"), expected: "other"},
+        %{lang: "cy", count: Decimal.new("6.5"), expected: "other"}
       ]
       |> Enum.map(fn test -> Map.update!(test, :count, &Macro.escape/1) end)
 
