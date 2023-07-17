@@ -1,33 +1,27 @@
 Terminals
     and_op
     comma
-    decimal
     equals
     in
     integer
-    is_op
     modulo_op
     not_equals
     not_op
     or_op
     range_op
-    variable
-    within_op.
+    variable.
 
 Nonterminals
     and_condition
     condition
     conditional
     expression
-    in_relation
-    is_relation
     plural_rule
     range
     range_list
     range_or_value
     relation
-    value
-    within_relation.
+    value.
 
 Rootsymbol plural_rule.
 
@@ -44,28 +38,18 @@ condition         ->  and_condition                 : '$1'.
 and_condition     ->  relation and_op and_condition : and_ast('$1', '$3').
 and_condition     ->  relation                      : '$1'.
 
-relation          ->  is_relation : '$1'.
-relation          ->  in_relation : '$1'.
-relation          ->  within_relation : '$1'.
+relation       ->  expression not_equals range_list  : not_ast(or_range_list('$1', '$3')).
+relation       ->  expression conditional range_list : or_range_list('$1', '$3').
+relation       ->  expression not_op in range_list   : not_ast(or_range_list('$1', '$4')).
 
-is_relation       ->  expression is_op value : or_range_list('$1', '$3').
-is_relation       ->  expression is_op not_op value : not_ast(or_range_list('$1', '$4')).
-
-in_relation       ->  expression not_equals range_list : not_ast(or_range_list('$1', '$3')).
-in_relation       ->  expression conditional range_list : or_range_list('$1', '$3').
-in_relation       ->  expression not_op in range_list : not_ast(or_range_list('$1', '$4')).
-
-within_relation   ->  expression within_op range_list : or_range_list('$1', '$3').
-within_relation   ->  expression not_op within_op range_list : not_ast(or_range_list('$1', '$4')).
-
-conditional       ->  in : 'in'.
+conditional       ->  in     : 'in'.
 conditional       ->  equals : '='.
 
 expression        ->  variable modulo_op value : mod('$1', '$3').
-expression        ->  variable : variable('$1').
+expression        ->  variable                 : variable('$1').
 
 range_list        ->  range_or_value comma range_list : append('$1', '$3').
-range_list        ->  range_or_value : '$1'.
+range_list        ->  range_or_value                  : '$1'.
 
 range_or_value    ->  range : '$1'.
 range_or_value    ->  value : '$1'.
@@ -73,7 +57,6 @@ range_or_value    ->  value : '$1'.
 range             ->  value range_op value : range_ast('$1', '$3').
 
 value             ->  integer : unwrap('$1').
-value             ->  decimal : unwrap('$1').
 
 Erlang code.
 
