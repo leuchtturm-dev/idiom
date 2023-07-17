@@ -1,7 +1,7 @@
 defmodule Idiom.Supervisor do
-  alias Idiom.Cache
-  alias Idiom.Backends.Memory
   use Supervisor
+
+  alias Idiom.Cache
 
   def start_link(options) when is_list(options) do
     options =
@@ -18,15 +18,14 @@ defmodule Idiom.Supervisor do
 
   @impl Supervisor
   def init(options) do
-    local_data = Keyword.get(options, :local_data, %{})
-    Cache.init(local_data)
+    data = Keyword.get(options, :data, %{})
+    local_data = Idiom.Source.Local.data()
 
-    backend_options = Keyword.update!(options, :name, &backend_name/1)
+    Map.merge(local_data, data)
+    |> Cache.init()
 
     children =
-      [
-        {Memory, backend_options}
-      ]
+      []
       |> Enum.reject(&is_nil/1)
 
     Supervisor.init(children, strategy: :one_for_one)

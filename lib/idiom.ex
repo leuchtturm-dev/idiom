@@ -6,6 +6,8 @@ defmodule Idiom do
   def t(key, opts \\ []), do: translate(key, opts)
 
   def translate(key, opts \\ []) do
-    Translator.translate(key, opts)
+    lang = Keyword.get(opts, :to) || Application.get_env(:idiom, :default_lang)
+
+    Translator.translate(lang, key, opts)
   end
 end

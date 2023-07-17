@@ -1,9 +1,6 @@
 defmodule Idiom.Pluralizer do
   require Logger
 
-  alias Idiom.Pluralizer.Parser
-  alias Idiom.Pluralizer.AST
-
   import Idiom.Pluralizer.Util
 
   @rules [:code.priv_dir(Mix.Project.config()[:app]), "/idiom"]
@@ -12,10 +9,8 @@ defmodule Idiom.Pluralizer do
          |> File.read!()
          |> Jason.decode!()
          |> get_in(["supplemental", "plurals-type-cardinal"])
-         |> Enum.map(&Parser.parse_rules/1)
+         |> Enum.map(&parse_rules/1)
          |> Map.new()
-
-def rules, do: @rules
 
   for {lang, rules} <- @rules do
     # Parameter | Value
@@ -29,7 +24,7 @@ def rules, do: @rules
     defp get_suffix(unquote(lang), n, i, v, w, f, t) do
       e = 0
       _ = {n, i, v, w, f, t, e}
-      unquote(AST.rules_to_cond(rules))
+      unquote(rules_to_cond(rules))
     end
   end
 

@@ -38,35 +38,35 @@ defmodule Idiom.Translator.TranslateTest do
 
   @tests [
     # Basic
-    %{key: "test", opts: [to: "en"], expected: "test_en"},
+    %{lang: "en", key: "test", expected: "test_en"},
     # With domain
-    %{key: "translation:test", opts: [to: "en"], expected: "test_en"},
+    %{lang: "en", key: "translation:test", expected: "test_en"},
     # With dot
-    %{key: "key.with.dot", opts: [to: "en"], expected: "dot"},
+    %{lang: "en", key: "key.with.dot", expected: "dot"},
     # With nested source data
-    %{key: "deep.test", opts: [to: "en"], expected: "deep_en"},
+    %{lang: "en", key: "deep.test", expected: "deep_en"},
     # With domain and nested source data
-    %{key: "translation:deep.test", opts: [to: "en"], expected: "deep_en"},
+    %{lang: "en", key: "translation:deep.test", expected: "deep_en"},
     # With natural language key
-    %{key: "natural language key", opts: [to: "en"], expected: "natural language key"},
+    %{lang: "en", key: "natural language key", expected: "natural language key"},
     # With natural language key containing dot
-    %{key: "natural language key with dot. it continues", opts: [to: "en"], expected: "natural language key with dot. it continues"},
+    %{lang: "en", key: "natural language key with dot. it continues", expected: "natural language key with dot. it continues"},
     # With other language
-    %{key: "test", opts: [to: "de"], expected: "test_de"},
+    %{lang: "de", key: "test", expected: "test_de"},
     # With fallback language
-    %{key: "natural language key with dot. it continues", opts: [to: "de", fallback: "en"], expected: "natural language key with dot. it continues"},
+    %{lang: "de", key: "natural language key with dot. it continues", opts: [fallback: "en"], expected: "natural language key with dot. it continues"},
     # With domain and other language
-    %{key: "login:Sign in", opts: [to: "de"], expected: "Registrieren"},
+    %{lang: "de", key: "login:Sign in", expected: "Registrieren"},
     # With locale
-    %{key: "test.locale", opts: [to: "en-US"], expected: "en-US"},
+    %{lang: "en-US", key: "test.locale", expected: "en-US"},
     # With locale falling back to language
-    %{key: "test", opts: [to: "en-US"], expected: "test_en"}
+    %{lang: "en-US", key: "test", expected: "test_en"}
   ]
 
-  for %{key: key, opts: opts, expected: expected} <- @tests do
-    test "correctly translates `#{key}` with opts `#{inspect(opts)}`" do
+  for %{key: key, lang: lang, opts: opts, expected: expected} <- @tests do
+    test "correctly translates `#{key}` to `#{lang}`" do
       opts = unquote(opts) |> Keyword.put(:cache_table_name, @cache_table_name)
-      assert Translator.translate(unquote(key), opts) == unquote(expected)
+      assert Translator.translate(unquote(lang), unquote(key), opts) == unquote(expected)
     end
   end
 end

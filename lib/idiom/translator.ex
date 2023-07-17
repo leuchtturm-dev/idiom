@@ -3,13 +3,12 @@ defmodule Idiom.Translator do
   alias Idiom.Cache
   alias Idiom.Languages
 
-  def translate(key, opts \\ [])
-  def translate(nil, _opts), do: ""
+  def translate(lang, key, opts \\ [])
+  def translate(_lang, nil, _opts), do: ""
 
-  def translate(key, opts) do
+  def translate(lang, key, opts) do
     cache_table_name = Keyword.get(opts, :cache_table_name, Cache.cache_table_name())
 
-    lang = Keyword.get(opts, :to) || raise "No language provided"
     count = Keyword.get(opts, :count)
     {namespace, key} = extract_namespace(key, opts)
     langs = Languages.to_resolve_hierarchy(lang, opts)

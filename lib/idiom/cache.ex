@@ -11,6 +11,12 @@ defmodule Idiom.Cache do
     |> Enum.each(fn {key, value} -> :ets.insert(table_name, {key, value}) end)
   end
 
+  def insert_keys(keys, table_name \\ @cache_table_name) do
+    Enum.each(keys, fn {key, value} ->
+      :ets.insert(table_name, {key, value})
+    end)
+  end
+
   def get_key(cache_key, table_name \\ @cache_table_name) do
     case :ets.lookup(table_name, cache_key) do
       [{^cache_key, translation}] -> translation
@@ -27,7 +33,7 @@ defmodule Idiom.Cache do
 
   # Input: %{en: %{translation: %{"foo.baz" => "bar"}}, de: %{login: %{bar: "baz", foo: %{bar: "baz"}}}}}}
   # Output: %{"en:translation:foo.baz" => "bar", "de:login:bar" => "baz", "de:login:foo.bar" => "baz"}
-  defp map_to_cache_data(map, acc \\ %{}, prefix \\ "", depth \\ 0) do
+  def map_to_cache_data(map, acc \\ %{}, prefix \\ "", depth \\ 0) do
     Enum.reduce(map, acc, fn {key, value}, acc ->
       separator = if depth < 3, do: ":", else: "."
       new_key = if prefix == "", do: to_string(key), else: prefix <> separator <> to_string(key)
