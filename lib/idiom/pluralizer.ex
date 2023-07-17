@@ -23,7 +23,7 @@ defmodule Idiom.Pluralizer do
     # t         | visible fractional digits in n, without trailing zeros.
     defp get_suffix(unquote(lang), n, i, v, w, f, t) do
       e = 0
-      _ = {n, i, v, w, f, t, e}
+      _silence_unused_warnings = {n, i, v, w, f, t, e}
       unquote(rules_to_cond(rules))
     end
   end
@@ -44,10 +44,11 @@ defmodule Idiom.Pluralizer do
     i = Decimal.round(count, 0, :floor) |> Decimal.to_integer()
     v = abs(n.exp)
 
+    mult = Decimal.new(Integer.pow(10, v))
     f =
       n
       |> Decimal.sub(i)
-      |> Decimal.mult(Decimal.new(Integer.pow(10, v)))
+      |> Decimal.mult(mult)
       |> Decimal.round(0, :floor)
       |> Decimal.to_integer()
 
@@ -61,8 +62,6 @@ defmodule Idiom.Pluralizer do
 
     w = Integer.to_string(f) |> String.trim_trailing("0") |> String.length()
 
-    n = Decimal.to_float(n)
-
-    get_suffix(lang, n, i, v, f, t, w)
+    get_suffix(lang, Decimal.to_float(n), i, v, f, t, w)
   end
 end
