@@ -25,7 +25,10 @@ defmodule Idiom.Supervisor do
     |> Cache.init()
 
     children =
-      []
+      [
+        {Finch, name: IdiomFinch},
+        Idiom.Source.PhraseStrings
+      ]
       |> Enum.reject(&is_nil/1)
 
     Supervisor.init(children, strategy: :one_for_one)
