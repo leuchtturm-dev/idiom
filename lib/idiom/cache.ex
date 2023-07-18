@@ -4,7 +4,7 @@ defmodule Idiom.Cache do
   def cache_table_name, do: @cache_table_name
 
   def init(local_data \\ %{}, table_name \\ @cache_table_name) do
-    :ets.new(table_name, [:named_table, read_concurrency: true])
+    :ets.new(table_name, [:public, :named_table, read_concurrency: true])
 
     local_data
     |> map_to_cache_data()

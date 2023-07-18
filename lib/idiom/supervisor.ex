@@ -33,6 +33,4 @@ defmodule Idiom.Supervisor do
 
     Supervisor.init(children, strategy: :one_for_one)
   end
-
-  def backend_name(name), do: :"#{name}.Backend"
 end

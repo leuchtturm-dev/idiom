@@ -23,7 +23,7 @@ defmodule Idiom.Translator do
 
   @doc false
   defp extract_namespace(key, opts) do
-    default_namespace = Keyword.get(opts, :default_namespace, "translation")
+    default_namespace = Keyword.get(opts, :default_namespace, "translations")
     namespace_separator = Keyword.get(opts, :namespace_separator, ":")
     key_separator = Keyword.get(opts, :key_separator, ".")
 
