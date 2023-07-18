@@ -45,6 +45,7 @@ defmodule Idiom.Pluralizer do
     v = abs(n.exp)
 
     mult = Decimal.new(Integer.pow(10, v))
+
     f =
       n
       |> Decimal.sub(i)
