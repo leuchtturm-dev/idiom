@@ -87,7 +87,6 @@
           {Credo.Check.Readability.MultiAlias, []},
           {Credo.Check.Readability.NestedFunctionCalls, []},
           {Credo.Check.Readability.OneArityFunctionInPipe, []},
-          {Credo.Check.Readability.OnePipePerLine, []},
           {Credo.Check.Readability.SeparateAliasRequire, []},
           {Credo.Check.Readability.SingleFunctionToBlockPipe, []},
           {Credo.Check.Readability.StrictModuleLayout, []},
@@ -109,9 +108,10 @@
           {Credo.Check.Warning.UnsafeToAtom, []}
         ],
         disabled: [
-          {Credo.Check.Readability.BlockPipe, []},
           {Credo.Check.Consistency.UnusedVariableNames, []},
           {Credo.Check.Design.AliasUsage, []},
+          {Credo.Check.Readability.BlockPipe, []},
+          {Credo.Check.Readability.OnePipePerLine, []},
           {Credo.Check.Readability.SinglePipe, []},
           {Credo.Check.Readability.Specs, []},
           {Credo.Check.Refactor.ModuleDependencies, []},

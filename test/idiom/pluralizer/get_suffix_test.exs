@@ -1,36 +1,36 @@
-defmodule Idiom.Pluralizer.GetSuffixTest do
+defmodule Idiom.Plural.GetSuffixTest do
   use ExUnit.Case, async: true
   import ExUnit.CaptureLog
-  alias Idiom.Pluralizer
+  alias Idiom.Plural
 
   describe "when count is nil" do
     test "returns `other` for any language" do
-      assert Pluralizer.get_suffix("en", nil) == "other"
-      assert Pluralizer.get_suffix("de", nil) == "other"
-      assert Pluralizer.get_suffix("ar", nil) == "other"
-      assert Pluralizer.get_suffix("cy", nil) == "other"
+      assert Plural.get_suffix("en", nil) == "other"
+      assert Plural.get_suffix("de", nil) == "other"
+      assert Plural.get_suffix("ar", nil) == "other"
+      assert Plural.get_suffix("cy", nil) == "other"
     end
   end
 
   describe "when lang is not supported" do
     @tag capture_log: true
     test "returns `other` for any count" do
-      Pluralizer.get_suffix("foo", 0)
-      Pluralizer.get_suffix("foo", 1)
-      Pluralizer.get_suffix("foo", 500)
+      Plural.get_suffix("foo", 0)
+      Plural.get_suffix("foo", 1)
+      Plural.get_suffix("foo", 500)
     end
 
     test "logs a warning that language is unsuppored" do
       assert capture_log(fn ->
-               Pluralizer.get_suffix("foo", 0)
+               Plural.get_suffix("foo", 0)
              end) =~ "No plural rules found for foo"
 
       assert capture_log(fn ->
-               Pluralizer.get_suffix("foo", 1)
+               Plural.get_suffix("foo", 1)
              end) =~ "No plural rules found for foo"
 
       assert capture_log(fn ->
-               Pluralizer.get_suffix("foo", 500)
+               Plural.get_suffix("foo", 500)
              end) =~ "No plural rules found for foo"
     end
   end
@@ -52,7 +52,7 @@ defmodule Idiom.Pluralizer.GetSuffixTest do
 
     for %{lang: lang, count: count, expected: expected} <- tests do
       test "returns the correct suffix for lang #{lang} and count #{count}" do
-        assert Pluralizer.get_suffix(unquote(lang), unquote(count)) == unquote(expected)
+        assert Plural.get_suffix(unquote(lang), unquote(count)) == unquote(expected)
       end
     end
   end
@@ -74,7 +74,7 @@ defmodule Idiom.Pluralizer.GetSuffixTest do
 
     for %{lang: lang, count: count, expected: expected} <- tests do
       test "returns the correct suffix for lang #{lang} and count #{count}" do
-        assert Pluralizer.get_suffix(unquote(lang), unquote(count)) == unquote(expected)
+        assert Plural.get_suffix(unquote(lang), unquote(count)) == unquote(expected)
       end
     end
   end
@@ -98,7 +98,7 @@ defmodule Idiom.Pluralizer.GetSuffixTest do
 
     for %{lang: lang, count: count, expected: expected} <- tests do
       test "returns the correct suffix for lang #{lang} and count #{inspect(count)}" do
-        assert Pluralizer.get_suffix(unquote(lang), unquote(count)) == unquote(expected)
+        assert Plural.get_suffix(unquote(lang), unquote(count)) == unquote(expected)
       end
     end
   end

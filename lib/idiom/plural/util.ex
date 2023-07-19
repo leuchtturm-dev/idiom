@@ -1,4 +1,4 @@
-defmodule Idiom.Pluralizer.Util do
+defmodule Idiom.Plural.Util do
   def parse_rules({lang, rules}) do
     parsed_rules =
       Enum.map(rules, fn {"pluralRule-count-" <> suffix, rule} ->
@@ -6,6 +6,7 @@ defmodule Idiom.Pluralizer.Util do
         {suffix, ast}
       end)
       |> Enum.sort(&suffix_sorter/2)
+      |> rules_to_cond()
 
     {lang, parsed_rules}
   end
@@ -18,13 +19,13 @@ defmodule Idiom.Pluralizer.Util do
   defp suffix_sorter(_, _), do: false
 
   defp parse([]), do: {:ok, []}
-  defp parse(tokens) when is_list(tokens), do: :pluralizer_parser.parse(tokens)
+  defp parse(tokens) when is_list(tokens), do: :plural_parser.parse(tokens)
 
   defp parse(definition) when is_binary(definition) do
     {:ok, tokens, _} =
       definition
       |> String.to_charlist()
-      |> :pluralizer_lexer.string()
+      |> :plural_lexer.string()
 
     parse(tokens)
   end

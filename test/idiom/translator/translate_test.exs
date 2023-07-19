@@ -1,13 +1,12 @@
 defmodule Idiom.Translator.TranslateTest do
   use ExUnit.Case, async: true
-
+  import Idiom
   alias Idiom.Cache
-  alias Idiom.Translator
 
   @cache_table_name :idiom_translator_translate_test
   @data %{
     "en" => %{
-      "translation" => %{
+      "translations" => %{
         "test" => "test_en",
         "key.with.dot" => "dot",
         "deep" => %{
@@ -18,12 +17,12 @@ defmodule Idiom.Translator.TranslateTest do
       }
     },
     "en-US" => %{
-      "translation" => %{
+      "translations" => %{
         "test.locale" => "en-US"
       }
     },
     "de" => %{
-      "translation" => %{
+      "translations" => %{
         "test" => "test_de"
       },
       "login" => %{
@@ -65,8 +64,13 @@ defmodule Idiom.Translator.TranslateTest do
 
   for %{key: key, lang: lang, opts: opts, expected: expected} <- @tests do
     test "correctly translates `#{key}` to `#{lang}`" do
-      opts = unquote(opts) |> Keyword.put(:cache_table_name, @cache_table_name)
-      assert Translator.translate(unquote(lang), unquote(key), opts) == unquote(expected)
+      opts = unquote(opts) |> Keyword.put(:cache_table_name, @cache_table_name) |> Keyword.put(:to, unquote(lang))
+      assert translate(unquote(key), opts) == unquote(expected)
     end
+  end
+
+  test "respects `lang` in Process" do
+    Process.put(:lang, "de")
+    assert translate("login:Sign in", cache_table_name: @cache_table_name) == "Registrieren"
   end
 end
