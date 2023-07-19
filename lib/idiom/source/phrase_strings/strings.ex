@@ -1,7 +1,7 @@
 defmodule Idiom.Source.PhraseStrings.Strings do
   use Tesla
 
-  # adapter Tesla.Adapter.Finch, name: IdiomFinch
+  adapter Tesla.Adapter.Finch, name: IdiomFinch
 
   plug Tesla.Middleware.BaseUrl, "https://api.phrase.com/v2"
   plug Tesla.Middleware.FollowRedirects, max_redirects: 3

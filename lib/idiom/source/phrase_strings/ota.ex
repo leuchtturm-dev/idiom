@@ -1,7 +1,7 @@
 defmodule Idiom.Source.PhraseStrings.OTA do
   use Tesla
 
-  # adapter Tesla.Adapter.Finch, name: IdiomFinch
+  adapter Tesla.Adapter.Finch, name: IdiomFinch
 
   plug Tesla.Middleware.BaseUrl, "https://ota.eu.phrase.com/"
   plug Tesla.Middleware.FollowRedirects, max_redirects: 3

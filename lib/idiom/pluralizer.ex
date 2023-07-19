@@ -1,7 +1,7 @@
 defmodule Idiom.Pluralizer do
   require Logger
-
   import Idiom.Pluralizer.Util
+  alias Idiom.Languages
 
   @rules [:code.priv_dir(Mix.Project.config()[:app]), "/idiom"]
          |> :erlang.iolist_to_binary()
@@ -37,7 +37,7 @@ defmodule Idiom.Pluralizer do
   def get_suffix(_lang, nil), do: "other"
   def get_suffix(lang, count) when is_binary(count), do: get_suffix(lang, Decimal.new(count))
   def get_suffix(lang, count) when is_float(count), do: get_suffix(lang, Decimal.new(Float.to_string(count)))
-  def get_suffix(lang, count) when is_integer(count), do: get_suffix(lang, abs(count), abs(count), 0, 0, 0, 0)
+  def get_suffix(lang, count) when is_integer(count), do: get_suffix(Languages.get_language_part_from_code(lang), abs(count), abs(count), 0, 0, 0, 0)
 
   def get_suffix(lang, count) do
     n = Decimal.abs(count)
@@ -63,6 +63,6 @@ defmodule Idiom.Pluralizer do
 
     w = Integer.to_string(f) |> String.trim_trailing("0") |> String.length()
 
-    get_suffix(lang, Decimal.to_float(n), i, v, f, t, w)
+    get_suffix(Languages.get_language_part_from_code(lang), Decimal.to_float(n), i, v, f, t, w)
   end
 end
