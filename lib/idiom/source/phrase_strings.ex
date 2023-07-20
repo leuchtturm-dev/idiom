@@ -1,8 +1,8 @@
 defmodule Idiom.Source.PhraseStrings do
   use GenServer
   alias Idiom.Cache
-  alias Idiom.Source.PhraseStrings.Strings
   alias Idiom.Source.PhraseStrings.OTA
+  alias Idiom.Source.PhraseStrings.Strings
   require Logger
 
   def start_link(opts) do
