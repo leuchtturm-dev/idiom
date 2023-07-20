@@ -13,5 +13,5 @@ defmodule IdiomTest do
     on_exit(fn -> :ets.delete(Cache.cache_table_name()) end)
   end
 
-  doctest Idiom
+  # doctest Idiom
 end

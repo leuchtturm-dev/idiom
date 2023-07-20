@@ -1,4 +1,5 @@
 defmodule Idiom do
+  require Logger
   alias Idiom.Cache
   alias Idiom.Languages
   alias Idiom.Plural
@@ -66,36 +67,36 @@ defmodule Idiom do
   @spec translate(String.t(), translate_opts()) :: String.t()
   def translate(key, opts \\ []) do
     lang = Keyword.get(opts, :to) || Process.get(:lang) || Application.get_env(:idiom, :default_lang)
-
-    translate(lang, key, opts)
-  end
-
-  defp translate(lang, key, opts)
-  defp translate(_lang, nil, _opts), do: ""
-
-  defp translate(lang, key, opts) do
-    cache_table_name = Keyword.get(opts, :cache_table_name, Cache.cache_table_name())
-
+    fallback = Keyword.get(opts, :fallback) || Process.get(:lang_fallback) || Application.get_env(:idiom, :default_fallback)
     count = Keyword.get(opts, :count)
     {namespace, key} = extract_namespace(key, opts)
-    langs = Languages.to_resolve_hierarchy(lang, opts)
+
+    resolve_hierarchy =
+      [lang | List.wrap(fallback)]
+      |> Enum.map(&Languages.to_resolve_hierarchy/1)
 
     keys =
-      Enum.reduce(langs, [], fn lang, acc ->
+      Enum.reduce(resolve_hierarchy, [], fn lang, acc ->
         acc ++ [Cache.to_cache_key(lang, namespace, key), Cache.to_cache_key(lang, namespace, "#{key}_#{Plural.get_suffix(lang, count)}")]
       end)
 
+    cache_table_name = Keyword.get(opts, :cache_table_name, Cache.cache_table_name())
     Enum.find_value(keys, fn key -> Cache.get_key(key, cache_table_name) end)
   end
 
   @doc false
   defp extract_namespace(key, opts) do
-    default_namespace = Keyword.get(opts, :default_namespace, "translations")
+    default_namespace = Keyword.get(opts, :default_namespace) || Application.get_env(:idiom, :default_namespace)
     namespace_separator = Keyword.get(opts, :namespace_separator, ":")
     key_separator = Keyword.get(opts, :key_separator, ".")
 
     if String.contains?(key, namespace_separator) do
       [namespace | key_parts] = String.split(key, namespace_separator)
+
+      if is_binary(Keyword.get(opts, :namespace)) or is_binary(Process.get(:idiom_namespace)) do
+        Logger.warning("Namespace was set in options/process, but key #{key} already includes a namespace. Using the key's namespace: #{namespace}.")
+      end
+
       {namespace, Enum.join(key_parts, key_separator)}
     else
       {default_namespace, key}

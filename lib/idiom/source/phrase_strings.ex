@@ -1,15 +1,15 @@
 defmodule Idiom.Source.PhraseStrings do
   use GenServer
-  require Logger
   alias Idiom.Cache
   alias Idiom.Source.PhraseStrings.Strings
   alias Idiom.Source.PhraseStrings.OTA
+  require Logger
 
   def start_link(opts) do
     GenServer.start_link(__MODULE__, opts, name: __MODULE__)
   end
 
-  def init(opts) do
+  def init(_opts) do
     Process.send(self(), {:fetch_data, 5}, [])
 
     {:ok, []}
@@ -18,12 +18,10 @@ defmodule Idiom.Source.PhraseStrings do
   def handle_info({:fetch_data, _retries}, state) do
     Logger.info("Fetching data from Phrase Strings")
 
-    languages =
-      Strings.list_available_languages()
-      |> Enum.map(&get_data_for_language/1)
-      |> Enum.map(&Cache.map_to_cache_data/1)
-      |> Enum.reduce(%{}, fn keys, acc -> Map.merge(keys, acc) end)
-      |> Cache.insert_keys()
+    Strings.list_available_languages()
+    |> Enum.map(fn lang -> lang |> get_data_for_language() |> Cache.map_to_cache_data() end)
+    |> Enum.reduce(%{}, fn keys, acc -> Map.merge(keys, acc) end)
+    |> Cache.insert_keys()
 
     schedule_fetch()
 
