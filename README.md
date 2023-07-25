@@ -23,7 +23,7 @@ Add `idiom` to your `mix.exs`:
 ```elixir
 deps = [
 …
-    {:idiom, "0.1.1"}
+    {:idiom, "0.1.3"}
 …
 ]
 ```
@@ -60,12 +60,33 @@ These defaults will be used when the option isn't passed to either `t` itself or
 The main way you are going to interact with Idiom is its `t` function.
 
 ```elixir
-t("key", to: "en")
-t("namespace:key", to: "en-US")
-t("key", to: "de", fallback: "en-US")
-t("key", to: "de", fallback: ["en-US"])
-t("key with {{interpolation}}", %{interpolation: "foo"}, to: "de", fallback: ["en-US"])
-t("key with plural", to: "ar", count: 5)
+data = %{
+    "en" => %{
+        "translations" => %{
+            "foo" => "bar",
+            "hello" => "Hello {{name}}",
+            "carrot_one" => "1 carrot",
+            "carrot_other" => "{{count}} carrots"
+        },
+        "signup" => %{
+            "Create account" => "Create account"
+        }
+    },
+    "de" => %{
+        "signup" => "Account erstellen"
+    },
+}
+
+# `translations` is configured as the default namespace.
+t("foo", to: "en") # bar
+t("foo", to: "en-US") # bar
+t("foo", to: "de", fallback: "en") # bar
+t("carrot", to: "en", count: 1) # 1 carrot
+t("carrot", %{count: 3}, to: "en", count: 3) # 3 carrots
+t("Create account", to: "en", namespace: "signup") # Create account
+t("signup:Create account", to: "en") # Create account
+t("signup:Create account", to: "de") # Account erstellen
+t("hello", %{name: "Phil"}, to: "en") # Hello Phil
 ```
 
 For the `to` and `fallback` options, Idiom also supports setting them through the process dictionary.
