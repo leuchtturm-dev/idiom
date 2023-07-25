@@ -1,4 +1,19 @@
 defmodule Idiom.Plural do
+  @moduledoc """
+  Functionality for handling plurals and plural suffixes.
+
+  Idiom handles plurals by adding suffixes to keys. These suffixes are as defined by the Unicode CLDR plural rules:
+  - `zero`
+  - `one`
+  - `two`
+  - `few`
+  - `many`
+  - `other`
+
+  Used suffixes differ greatly by language. In order to support them all, and also make this module easier to keep up-to-date, the `PluralPreprocess` module
+  parses them and generates ASTs for `cond` expressions. This module reads the definition file at compile time, and generates helper functions for each
+  language.
+  """
   import Idiom.PluralPreprocess
   alias Idiom.Locales
   require Logger
@@ -8,18 +23,20 @@ defmodule Idiom.Plural do
          |> File.read!()
          |> Jason.decode!()
          |> get_in(["supplemental", "plurals-type-cardinal"])
-         |> Enum.map(&parse_rules/1)
+         |> Enum.map(fn {lang, rules} -> {lang, parse_rules(rules)} end)
          |> Map.new()
 
   for {locale, rules} <- @rules do
-    # Parameter | Value
-    # ----------|------------------------------------------------------------------
-    # n         | absolute value of the source number (integer/float/decimal).
-    # i         | integer digits of n.
-    # v         | number of visible fractional digits in n, with trailing zeros.
-    # w         | number of visible fractional digits in n, without trailing zeros.
-    # f         | visible fractional digits in n, with trailing zeros.
-    # t         | visible fractional digits in n, without trailing zeros.
+    # | ----------|-------------------------------------------------------------------|
+    # | Parameter | Value                                                             |
+    # | ----------|------------------------------------------------------------------ |
+    # | n         | absolute value of the source number (integer/float/decimal).      |
+    # | i         | integer digits of n.                                              |
+    # | v         | number of visible fractional digits in n, with trailing zeros.    |
+    # | w         | number of visible fractional digits in n, without trailing zeros. |
+    # | f         | visible fractional digits in n, with trailing zeros.              |
+    # | t         | visible fractional digits in n, without trailing zeros.           |
+    # | ----------|-------------------------------------------------------------------|
     defp get_suffix(unquote(locale), n, i, v, w, f, t) do
       e = 0
       _silence_unused_warnings = {n, i, v, w, f, t, e}
@@ -32,6 +49,34 @@ defmodule Idiom.Plural do
     "other"
   end
 
+  @doc """
+  Returns the appropriate plural suffix based on a given locale and count.
+
+  The function will determine the correct plural form to use based on the `count` parameter.
+  It supports different types of count values, including binary, float, integer and Decimal types.
+
+  When the count is `nil`, the function will default to `other`.
+
+  ## Examples
+
+  ```elixir
+  iex> Idiom.Plural.get_suffix("en", 1)
+  "one"
+
+  iex> Idiom.Plural.get_suffix("en", 2)
+  "other"
+
+  iex> Idiom.Plural.get_suffix("ar", 0)
+  "zero"
+
+  iex> Idiom.Plural.get_suffix("ar", "5")
+  "few"
+
+  iex> Idiom.Plural.get_suffix("ar", Decimal.new(5))
+  "few"
+  ```
+  """
+  @spec get_suffix(String.t(), binary() | float() | integer() | Decimal.t()) :: String.t()
   def get_suffix(locale, count)
   def get_suffix(_locale, nil), do: "other"
   def get_suffix(locale, count) when is_binary(count), do: get_suffix(locale, Decimal.new(count))
@@ -42,7 +87,7 @@ defmodule Idiom.Plural do
   end
 
   def get_suffix(locale, count) when is_integer(count) do
-    locale = Locales.to_language(locale)
+    locale = Locales.get_language(locale)
     n = abs(count)
     i = abs(count)
     get_suffix(locale, n, i, 0, 0, 0, 0)
@@ -75,7 +120,7 @@ defmodule Idiom.Plural do
       |> String.trim_trailing("0")
       |> String.length()
 
-    get_suffix(Locales.to_language(locale), Decimal.to_float(n), i, v, f, t, w)
+    get_suffix(Locales.get_language(locale), Decimal.to_float(n), i, v, f, t, w)
   end
 
   defp in?(%Decimal{} = number, range) do

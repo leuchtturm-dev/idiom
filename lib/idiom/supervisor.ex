@@ -23,6 +23,7 @@ defmodule Idiom.Supervisor do
   @impl Supervisor
   def init(options) do
     data = Keyword.get(options, :data, %{})
+    ota_source = Application.get_env(:idiom, :ota_source)
     local_data = Idiom.Source.Local.data()
 
     Map.merge(local_data, data)
@@ -31,9 +32,8 @@ defmodule Idiom.Supervisor do
     children =
       [
         {Finch, name: IdiomFinch},
-        # TODO: make this configurable
-        Idiom.Source.PhraseStrings
-      ]
+        ota_source
+     ]
       |> Enum.reject(&is_nil/1)
 
     Supervisor.init(children, strategy: :one_for_one)

@@ -30,7 +30,7 @@ defmodule Idiom.LocalesToHierarchyTest do
 
   for %{code: lang, opts: opts, expected: expected} <- tests do
     test "correctly creates resolve hierarchy for lang `#{lang}` with opts `#{inspect(opts)}`" do
-      assert Locales.to_hierarchy(unquote(lang), unquote(opts)) == unquote(expected)
+      assert Locales.get_hierarchy(unquote(lang), unquote(opts)) == unquote(expected)
     end
   end
 end

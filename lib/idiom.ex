@@ -85,7 +85,7 @@ defmodule Idiom do
 
     resolve_hierarchy =
       [lang | List.wrap(fallback)]
-      |> Enum.map(&Locales.to_hierarchy/1)
+      |> Enum.map(&Locales.get_hierarchy/1)
       |> List.flatten()
 
     keys =

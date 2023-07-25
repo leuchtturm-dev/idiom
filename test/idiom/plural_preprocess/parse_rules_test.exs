@@ -2,6 +2,10 @@ defmodule Idiom.PluralPreprocess.ParseRulesTest do
   use ExUnit.Case, async: true
   alias Idiom.PluralPreprocess
 
+  # NOTE:
+  # This is not testing public API, as these functions should never be used by an end user.
+  # Instead, they serve as regression test for the lexer, parser and AST generators.
+
   tests = [
     %{rule: [{"pluralRule-count-one", "n = 1"}], expected_ast: quote(do: {:cond, [], [[do: [{:->, [], [[{:==, [], [{:n, [], nil}, 1]}], "one"]}]]]})},
     %{
@@ -43,7 +47,7 @@ defmodule Idiom.PluralPreprocess.ParseRulesTest do
 
   for %{rule: rule, expected_ast: expected_ast} <- tests do
     test "generates the correct ast for rule #{inspect(rule)}" do
-      assert {"en", unquote(expected_ast)} = PluralPreprocess.parse_rules({"en", unquote(rule)})
+      assert unquote(expected_ast) = PluralPreprocess.parse_rules(unquote(rule))
     end
   end
 end

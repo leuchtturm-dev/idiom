@@ -2,6 +2,7 @@ defmodule Idiom.Source.PhraseStrings.Strings do
   # TODO:
   @moduledoc """
   """
+
   use Tesla
 
   adapter Tesla.Adapter.Finch, name: IdiomFinch
@@ -10,7 +11,7 @@ defmodule Idiom.Source.PhraseStrings.Strings do
   plug Tesla.Middleware.FollowRedirects, max_redirects: 3
   plug Tesla.Middleware.JSON
 
-  def client do
+  defp client do
     api_token = Application.get_env(:idiom, Idiom.Source.PhraseStrings)[:api_token]
 
     Tesla.client([
@@ -18,6 +19,9 @@ defmodule Idiom.Source.PhraseStrings.Strings do
     ])
   end
 
+  # TODO:
+  @doc """
+  """
   def list_available_languages() do
     with account_id when is_binary(account_id) <- Application.get_env(:idiom, Idiom.Source.PhraseStrings)[:account_id],
          distribution_id when is_binary(distribution_id) <- Application.get_env(:idiom, Idiom.Source.PhraseStrings)[:distribution_id],

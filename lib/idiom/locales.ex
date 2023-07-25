@@ -8,26 +8,29 @@ defmodule Idiom.Locales do
   @doc """
   Constructs a hierarchical list of locale identifiers from the given locale.
 
-  This function builds a list that starts with the full locale, followed by the locale with language and script without region code (if any), then the language code, and finally a fallback locale if provided.
-
-  The `fallback` option allows you to specify a fallback locale that will be added to the end of the hierarchy if it's not already included. By default, no fallback language is included.
+  The `fallback` option allows you to specify a fallback locale that will be added to the end of the hierarchy if it's not already included. By default, no
+  fallback language is added.
 
   ## Examples
 
-      iex> Idiom.Locales.to_hierarchy("en-Latn-US")
-      ["en-Latn-US", "en-Latn", "en"]
+  ```elixir
+  iex> Idiom.Locales.get_hierarchy("en-Latn-US")
+  ["en-Latn-US", "en-Latn", "en"]
 
-      iex> Idiom.Locales.to_hierarchy("de-DE", fallback: "en")
-      ["de-DE", "de", "en"]
+  iex> Idiom.Locales.get_hierarchy("de-DE", fallback: "en")
+  ["de-DE", "de", "en"]
+  ```
   """
-  def to_hierarchy(locale, opts \\ []) do
+  def get_hierarchy(locale, opts \\ []) do
     fallback = Keyword.get(opts, :fallback)
 
-    ([
-       locale,
-       to_language_and_script(locale),
-       to_language(locale)
-     ] ++ List.wrap(fallback))
+    [
+      locale,
+      get_language_and_script(locale),
+      get_language(locale),
+      fallback
+    ]
+    |> List.flatten()
     |> Enum.reject(&is_nil/1)
     |> Enum.uniq()
   end
@@ -37,37 +40,43 @@ defmodule Idiom.Locales do
 
   ## Examples
 
-    iex> Idiom.Locales.to_language("en-Latn-US")
-    "en"
+  ```elixir
+  iex> Idiom.Locales.get_language("en-Latn-US")
+  "en"
 
-    iex> Idiom.Locales.to_language("de-DE")
-    "de"
+  iex> Idiom.Locales.get_language("de-DE")
+  "de"
+  ```
   """
-  def to_language(locale) do
+  @spec get_language(String.t()) :: String.t()
+  def get_language(locale) when is_binary(locale) do
     locale
     |> String.split("-")
-    |> List.first()
+    |> hd()
   end
 
   @doc """
   Extracts the language and script codes from the given locale identifier.
 
-  Returns nil if the given locale does not have a script code.
+  Returns `nil` if the given locale does not have a script code.
 
   ## Examples
 
-      iex> Idiom.Locales.to_language_and_script("en-Latn-US")
-      "en-Latn"
+  ```elixir
+  iex> Idiom.Locales.get_language_and_script("en-Latn-US")
+  "en-Latn"
 
-      iex> Idiom.Locales.to_language_and_script("de-DE")
-      nil
+  iex> Idiom.Locales.get_language_and_script("de-DE")
+  nil
+  ```
   """
-  def to_language_and_script(locale) do
+  @spec get_language_and_script(String.t()) :: String.t() | nil
+  def get_language_and_script(locale) when is_binary(locale) do
     locale
     |> String.split("-")
     |> case do
-      parts when is_list(parts) and length(parts) <= 2 -> nil
-      parts when is_list(parts) -> Enum.take(parts, 2) |> Enum.join("-")
+      parts when length(parts) <= 2 -> nil
+      parts -> Enum.take(parts, 2) |> Enum.join("-")
     end
   end
 end

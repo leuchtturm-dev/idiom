@@ -6,20 +6,21 @@ defmodule Idiom.Interpolation do
   @doc """
   Interpolates a message string with a map of bindings.
 
-  The message string can include variables wrapped in `{{}}`. For example, in the string "Hello, {{name}}!", "{{name}}" is a variable.
+  The message string can include variables wrapped in `{{}}`. For example, in the string `Hello, {{name}}!`, `{{name}}` is a variable.  
   If a variable exists in the message string, but not in the bindings, it is converted to a string in-place.
 
   ## Examples
 
-    iex> Idiom.Interpolation.interpolate("Hello, {{name}}!", %{name: "John"})
-    "Hello, John!"
+  ```elixir
+  iex> Idiom.Interpolation.interpolate("Hello, {{name}}!", %{name: "John"})
+  "Hello, John!"
 
-    iex> Idiom.Interpolation.interpolate("Hello, {{name}}! It is {{day_of_week}}.", %{name: "John", day_of_week: "Monday"})
-    "Hello, John! It is Monday."
+  iex> Idiom.Interpolation.interpolate("Hello, {{name}}! It is {{day_of_week}}.", %{name: "John", day_of_week: "Monday"})
+  "Hello, John! It is Monday."
 
-    iex> Idiom.Interpolation.interpolate("Hello, {{name}}! It is {{day_of_week}}.", %{name: "John"})
-    "Hello, John! It is day_of_week."
-
+  iex> Idiom.Interpolation.interpolate("Hello, {{name}}! It is {{day_of_week}}.", %{name: "John"})
+  "Hello, John! It is day_of_week."
+  ```
   """
   def interpolate(message, bindings) do
     message
@@ -43,7 +44,7 @@ defmodule Idiom.Interpolation do
     |> IO.iodata_to_binary()
   end
 
-  def parse(message) when is_binary(message) do
+  defp parse(message) when is_binary(message) do
     parse(message, "", [])
     |> Enum.reject(fn part -> is_binary(part) and String.equivalent?(part, "") end)
     |> Enum.reverse()

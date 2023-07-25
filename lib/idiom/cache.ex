@@ -28,14 +28,21 @@ defmodule Idiom.Cache do
   """
   @spec init(map(), atom()) :: :ok
   def init(initial_state \\ %{}, table_name \\ @cache_table_name) when is_map(initial_state) do
-    start(table_name)
+    :ets.new(table_name, [:public, :named_table, read_concurrency: true])
     insert_keys(initial_state, table_name)
   end
 
-  defp start(table_name), do: :ets.new(table_name, [:public, :named_table, read_concurrency: true])
-
-  # TODO:
   @doc """
+  Adds a map of keys to the cache.
+
+  Supports both nested maps (with nest levels `locale` -> `domain` -> `key`) and already flattened keys (with keys in format of `locale:domain:key`).
+
+  ## Examples
+
+  ```elixir
+  iex> Idiom.Cache.insert_keys(%{"en" => %{"signup" => %{"Create your account" => "Create your account"}}, "de" => %{"signup" => %{"Create your account" => "Erstelle deinen Account"}}})
+  :ok
+  ```
   """
   def insert_keys(keys, table_name \\ @cache_table_name) do
     keys
@@ -45,7 +52,6 @@ defmodule Idiom.Cache do
     end)
   end
 
-  # TODO:
   @doc """
   """
   def get_key(cache_key, table_name \\ @cache_table_name) do
