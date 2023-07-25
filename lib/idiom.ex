@@ -11,8 +11,10 @@ defmodule Idiom do
 
   defdelegate child_spec(options), to: Idiom.Supervisor
 
-  @doc "Alias for `translate/2`"
+  @doc "Alias for `translate/3`"
   def t(key, opts) when is_list(opts), do: t(key, %{}, opts)
+
+  @doc "Alias for `translate/3`"
   def t(key, bindings \\ %{}, opts \\ []), do: translate(key, bindings, opts)
 
   @type translate_opts() :: [to: String.t(), fallback: String.t() | list(String.t())]
@@ -27,14 +29,14 @@ defmodule Idiom do
 
   For both target and fallback languages, the selected options are based on the following order of priority:
   1. The `:to` and `:fallback` keys in `opts`.
-  2. The `:lang` and `:fallback` keys in the current process dictionary.
-  3. The application configuration's `:default_lang` and `:default_fallback` keys.
+  2. The `:locale` and `:fallback` keys in the current process dictionary.
+  3. The application configuration's `:default_locale` and `:default_fallback` keys.
 
   The language needs to be a single string, whereas the fallback can both be a single string or a list of strings.
 
   ## Namespaces
 
-  Keys can be namespaced.
+  Keys can be namespaced. ... write stuff here
 
   ## Configuration
 
@@ -42,7 +44,7 @@ defmodule Idiom do
 
   ```elixir
   config :idiom,
-    default_lang: "en",
+    default_locale: "en",
     default_fallback: "fr"
     # default_fallback: ["fr", "es"]
   ```
