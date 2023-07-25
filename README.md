@@ -44,12 +44,13 @@ Depending on which source you decide to add, you might also need to configure it
 
 ## Configuration
 
-The default locale and fallback can be set in `config.exs`:
+The default locale, fallback and namespace can be set in `config.exs`:
 
 ```
 config :idiom,
     default_locale: "fr",
-    default_fallback: "en"
+    default_fallback: "en",
+    default_namespace: "translations"
 ```
 
 These defaults will be used when the option isn't passed to either `t` itself or set in the process dictionary.
@@ -96,11 +97,20 @@ should offer the following suffixes for translations that support pluralization:
 
 You can then pass a `count` to `t`. `count` can be an integer, string, float or `Decimal`.
 
-## Interpolation
+### Interpolation
 
 Idiom also supports interpolation in your translations. Variables can be marked inside `{{}}`, for example `Hello, {{name}}`.  
 You can then pass bindings to `t` as second parameter, such as `t("Hello, {{name}}!", %{name: "world"}, to: "de")`.  
 If the variable has no binding, it will be left as-is, without the braces: `t("Hello, {{name}}!", %{}, to: "en")` results in `Hello, name!`.
+
+### Namespaces
+
+Keys can be separated into different namespaces. These can be accessed in multiple ways (in order of priority):
+
+- In the key itself, as a prefix separated by a colon: `t("signup:Create account")`
+- As an option: `t("Create account", namespace: "signup")`
+- As a key in the process dictionary: `Process.put(:namespace, "signup")`
+- The default namespace set in `config.exs` (see [Configuration](#configuration))
 
 ## Sources
 

@@ -97,20 +97,20 @@ defmodule Idiom do
 
   @doc false
   defp extract_namespace(key, opts) do
-    default_namespace = Keyword.get(opts, :default_namespace) || Application.get_env(:idiom, :default_namespace)
+    namespace_from_opts = Keyword.get(opts, :namespace) || Process.get(:namespace) || Application.get_env(:idiom, :default_namespace)
     namespace_separator = Keyword.get(opts, :namespace_separator, ":")
     key_separator = Keyword.get(opts, :key_separator, ".")
 
     if String.contains?(key, namespace_separator) do
       [namespace | key_parts] = String.split(key, namespace_separator)
 
-      if is_binary(Keyword.get(opts, :namespace)) or is_binary(Process.get(:idiom_namespace)) do
+      if is_binary(Keyword.get(opts, :namespace)) or is_binary(Process.get(:namespace)) do
         Logger.warning("Namespace was set in options/process, but key #{key} already includes a namespace. Using the key's namespace: #{namespace}.")
       end
 
       {namespace, Enum.join(key_parts, key_separator)}
     else
-      {default_namespace, key}
+      {namespace_from_opts, key}
     end
   end
 end
