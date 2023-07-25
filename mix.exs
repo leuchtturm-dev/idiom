@@ -5,12 +5,13 @@ defmodule Idiom.MixProject do
     [
       app: :idiom,
       description: "Modern internationalization library",
-      version: "0.1.0",
+      version: "0.1.1",
       elixir: "~> 1.13",
       elixirc_paths: elixirc_paths(Mix.env()),
       start_permanent: Mix.env() == :prod,
       deps: deps(),
-      package: package()
+      package: package(),
+      docs: docs()
     ]
   end
 
@@ -38,7 +39,16 @@ defmodule Idiom.MixProject do
     [
       name: "idiom",
       licenses: ["MIT"],
+      maintainers: ["Christoph Schmatzler"],
+      files: ["lib LICENSE mix.exs README.md"],
       links: %{"GitHub" => "https://github.com/cschmatzler/idiom"}
+    ]
+  end
+
+  defp docs do
+    [
+      main: "readme",
+      extras: ["README.md"]
     ]
   end
 end

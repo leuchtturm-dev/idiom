@@ -1,4 +1,7 @@
 defmodule Idiom.Source.PhraseStrings.Strings do
+  # TODO:
+  @moduledoc """
+  """
   use Tesla
 
   adapter Tesla.Adapter.Finch, name: IdiomFinch

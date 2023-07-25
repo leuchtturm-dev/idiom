@@ -1,5 +1,5 @@
 import Config
 
 config :idiom,
-  default_lang: "en",
+  default_locale: "en",
   default_namespace: "translations"

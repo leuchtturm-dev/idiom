@@ -1,4 +1,7 @@
 defmodule Idiom.Source.PhraseStrings do
+  # TODO:
+  @moduledoc """
+  """
   use GenServer
   alias Idiom.Cache
   alias Idiom.Source.PhraseStrings.OTA
@@ -9,12 +12,14 @@ defmodule Idiom.Source.PhraseStrings do
     GenServer.start_link(__MODULE__, opts, name: __MODULE__)
   end
 
+  @impl GenServer
   def init(_opts) do
     Process.send(self(), {:fetch_data, 5}, [])
 
     {:ok, []}
   end
 
+  @impl GenServer
   def handle_info({:fetch_data, _retries}, state) do
     Logger.info("Fetching data from Phrase Strings")
 

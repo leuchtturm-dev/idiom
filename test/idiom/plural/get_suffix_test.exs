@@ -1,4 +1,4 @@
-defmodule Idiom.Plural.GetSuffixTest do
+defmodule Idiom.PluralGetSuffixTest do
   use ExUnit.Case, async: true
   import ExUnit.CaptureLog
   alias Idiom.Plural
@@ -12,7 +12,7 @@ defmodule Idiom.Plural.GetSuffixTest do
     end
   end
 
-  describe "when lang is not supported" do
+  describe "when language is not supported" do
     @tag capture_log: true
     test "returns `other` for any count" do
       Plural.get_suffix("foo", 0)

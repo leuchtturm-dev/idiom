@@ -12,10 +12,8 @@ defmodule Idiom.PluralPreprocess do
 
   ## Examples
 
-  ```elixir
-  iex> Idiom.PluralPreprocess.parse_rules({"en", [{"pluralRule-count-one", "n = 1"}]})
-  {"en", {:cond, [], [[do: [{:->, [], [[{:==, [], [{:n, [], nil}, 1]}], "one"]}]]]}}
-  ```
+    iex> Idiom.PluralPreprocess.parse_rules({"en", [{"pluralRule-count-one", "n = 1"}]})
+    {"en", {:cond, [], [[do: [{:->, [], [[{:==, [], [{:n, [], nil}, 1]}], "one"]}]]]}}
   """
   def parse_rules({lang, rules}) do
     parsed_rules =

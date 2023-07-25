@@ -1,13 +1,19 @@
 defmodule Idiom do
-  require Logger
+  @moduledoc """
+  Test
+  """
+
+  import Idiom.Interpolation
   alias Idiom.Cache
-  alias Idiom.Languages
+  alias Idiom.Locales
   alias Idiom.Plural
+  require Logger
 
   defdelegate child_spec(options), to: Idiom.Supervisor
 
   @doc "Alias for `translate/2`"
-  def t(key, opts \\ []), do: translate(key, opts)
+  def t(key, opts) when is_list(opts), do: t(key, %{}, opts)
+  def t(key, bindings \\ %{}, opts \\ []), do: translate(key, bindings, opts)
 
   @type translate_opts() :: [to: String.t(), fallback: String.t() | list(String.t())]
   @doc """
@@ -64,16 +70,19 @@ defmodule Idiom do
       iex> translate("hello", to: "de", fallback: ["pl", "fr"])
       "bonjour"
   """
-  @spec translate(String.t(), translate_opts()) :: String.t()
-  def translate(key, opts \\ []) do
-    lang = Keyword.get(opts, :to) || Process.get(:lang) || Application.get_env(:idiom, :default_lang)
-    fallback = Keyword.get(opts, :fallback) || Process.get(:lang_fallback) || Application.get_env(:idiom, :default_fallback)
+
+  def translate(key, bindings \\ %{}, opts \\ [])
+
+  @spec translate(String.t(), map(), translate_opts()) :: String.t()
+  def translate(key, bindings, opts) do
+    lang = Keyword.get(opts, :to) || Process.get(:locale) || Application.get_env(:idiom, :default_locale)
+    fallback = Keyword.get(opts, :fallback) || Process.get(:fallback) || Application.get_env(:idiom, :default_fallback)
     count = Keyword.get(opts, :count)
     {namespace, key} = extract_namespace(key, opts)
 
     resolve_hierarchy =
       [lang | List.wrap(fallback)]
-      |> Enum.map(&Languages.to_resolve_hierarchy/1)
+      |> Enum.map(&Locales.to_hierarchy/1)
 
     keys =
       Enum.reduce(resolve_hierarchy, [], fn lang, acc ->
@@ -81,7 +90,9 @@ defmodule Idiom do
       end)
 
     cache_table_name = Keyword.get(opts, :cache_table_name, Cache.cache_table_name())
-    Enum.find_value(keys, fn key -> Cache.get_key(key, cache_table_name) end)
+
+    Enum.find_value(keys, key, fn key -> Cache.get_key(key, cache_table_name) end)
+    |> interpolate(bindings)
   end
 
   @doc false

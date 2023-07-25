@@ -1,10 +1,9 @@
 defmodule Idiom.Plural do
   import Idiom.PluralPreprocess
+  alias Idiom.Locales
   require Logger
-  alias Idiom.Languages
 
-  @rules [:code.priv_dir(Mix.Project.config()[:app]), "/idiom"]
-         |> :erlang.iolist_to_binary()
+  @rules "priv/idiom"
          |> Path.join("/plurals.json")
          |> File.read!()
          |> Jason.decode!()
@@ -12,7 +11,7 @@ defmodule Idiom.Plural do
          |> Enum.map(&parse_rules/1)
          |> Map.new()
 
-  for {lang, rules} <- @rules do
+  for {locale, rules} <- @rules do
     # Parameter | Value
     # ----------|------------------------------------------------------------------
     # n         | absolute value of the source number (integer/float/decimal).
@@ -21,35 +20,35 @@ defmodule Idiom.Plural do
     # w         | number of visible fractional digits in n, without trailing zeros.
     # f         | visible fractional digits in n, with trailing zeros.
     # t         | visible fractional digits in n, without trailing zeros.
-    defp get_suffix(unquote(lang), n, i, v, w, f, t) do
+    defp get_suffix(unquote(locale), n, i, v, w, f, t) do
       e = 0
       _silence_unused_warnings = {n, i, v, w, f, t, e}
       unquote(rules)
     end
   end
 
-  defp get_suffix(lang, _n, _i, _v, _w, _f, _t) do
-    Logger.warning("No plural rules found for #{lang} - returning `other`")
+  defp get_suffix(locale, _n, _i, _v, _w, _f, _t) do
+    Logger.warning("No plural rules found for #{locale} - returning `other`")
     "other"
   end
 
-  def get_suffix(lang, count)
-  def get_suffix(_lang, nil), do: "other"
-  def get_suffix(lang, count) when is_binary(count), do: get_suffix(lang, Decimal.new(count))
+  def get_suffix(locale, count)
+  def get_suffix(_locale, nil), do: "other"
+  def get_suffix(locale, count) when is_binary(count), do: get_suffix(locale, Decimal.new(count))
 
-  def get_suffix(lang, count) when is_float(count) do
+  def get_suffix(locale, count) when is_float(count) do
     count = count |> Float.to_string() |> Decimal.new()
-    get_suffix(lang, count)
+    get_suffix(locale, count)
   end
 
-  def get_suffix(lang, count) when is_integer(count) do
-    lang = Languages.get_language_part_from_code(lang)
+  def get_suffix(locale, count) when is_integer(count) do
+    locale = Locales.to_language(locale)
     n = abs(count)
     i = abs(count)
-    get_suffix(lang, n, i, 0, 0, 0, 0)
+    get_suffix(locale, n, i, 0, 0, 0, 0)
   end
 
-  def get_suffix(lang, count) do
+  def get_suffix(locale, count) do
     n = Decimal.abs(count)
     i = Decimal.round(count, 0, :floor) |> Decimal.to_integer()
     v = abs(n.exp)
@@ -76,7 +75,7 @@ defmodule Idiom.Plural do
       |> String.trim_trailing("0")
       |> String.length()
 
-    get_suffix(Languages.get_language_part_from_code(lang), Decimal.to_float(n), i, v, f, t, w)
+    get_suffix(Locales.to_language(locale), Decimal.to_float(n), i, v, f, t, w)
   end
 
   defp in?(%Decimal{} = number, range) do

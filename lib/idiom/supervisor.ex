@@ -1,4 +1,8 @@
 defmodule Idiom.Supervisor do
+  # TODO:
+  @moduledoc """
+  """
+
   use Supervisor
 
   alias Idiom.Cache
@@ -27,6 +31,7 @@ defmodule Idiom.Supervisor do
     children =
       [
         {Finch, name: IdiomFinch},
+        # TODO: make this configurable
         Idiom.Source.PhraseStrings
       ]
       |> Enum.reject(&is_nil/1)
