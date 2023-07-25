@@ -30,7 +30,7 @@ defmodule Idiom.MixProject do
       {:finch, "~> 0.16"},
       {:jason, "~> 1.0"},
       {:decimal, "~> 2.1"},
-      {:credo, "~> 1.7", only: :dev},
+      {:credo, "~> 1.7", only: [:dev, :test]},
       {:ex_doc, "~> 0.30.2", only: :dev}
     ]
   end
