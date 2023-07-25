@@ -23,7 +23,7 @@ Add `idiom` to your `mix.exs`:
 ```elixir
 deps = [
 …
-    {:idiom, "0.1.3"}
+    {:idiom, "0.1.4"}
 …
 ]
 ```
@@ -60,21 +60,22 @@ These defaults will be used when the option isn't passed to either `t` itself or
 The main way you are going to interact with Idiom is its `t` function.
 
 ```elixir
-data = %{
-    "en" => %{
-        "translations" => %{
-            "foo" => "bar",
-            "hello" => "Hello {{name}}",
-            "carrot_one" => "1 carrot",
-            "carrot_other" => "{{count}} carrots"
-        },
-        "signup" => %{
-            "Create account" => "Create account"
-        }
+# Not set manually - just here for contextualisation of the examples.
+cache_contents = %{
+  "en" => %{
+    "translations" => %{
+      "foo" => "bar",
+      "hello" => "Hello {{name}}",
+      "carrot_one" => "1 carrot",
+      "carrot_other" => "{{count}} carrots"
     },
-    "de" => %{
-        "signup" => "Account erstellen"
-    },
+    "signup" => %{
+      "Create account" => "Create account"
+    }
+  },
+  "de" => %{
+    "signup" => "Account erstellen"
+  },
 }
 
 # `translations` is configured as the default namespace.
@@ -90,6 +91,7 @@ t("hello", %{name: "Phil"}, to: "en") # Hello Phil
 ```
 
 For the `to` and `fallback` options, Idiom also supports setting them through the process dictionary.
+
 ```elixir
 Process.put(:locale, "en-US")
 t("key")
@@ -99,14 +101,14 @@ t("key.that.does.not.have.an.english.translation")
 
 ### Languages, locales and scripts
 
-Idiom automatically builds a hierarchy to resolve a given key. Assuming your user has set their locale to `en-US`, but you don't differentiate between regions 
+Idiom automatically builds a hierarchy to resolve a given key. Assuming your user has set their locale to `en-US`, but you don't differentiate between regions
 (or scripts) in your translation files and only offer an `en` locale, this will be handled automatically. For a translation that is requested with
 `to: "en-Latn-US"`, Idiom will try to resolve the key for `en-Latn-US`, `en-Latn` and finally `en`, returning the first that exists.
 
 ### Plurals
 
-For translations that have different versions based on a plural count, Idiom supports those using the 
-[Unicode CLDR Plural Rules](https://cldr.unicode.org/index/cldr-spec/plural-rules) specification. In detail, this means that keys in your translation files 
+For translations that have different versions based on a plural count, Idiom supports those using the
+[Unicode CLDR Plural Rules](https://cldr.unicode.org/index/cldr-spec/plural-rules) specification. In detail, this means that keys in your translation files
 should offer the following suffixes for translations that support pluralization:
 
 - `zero`
