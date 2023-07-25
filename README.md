@@ -82,12 +82,12 @@ cache_contents = %{
 t("foo", to: "en") # bar
 t("foo", to: "en-US") # bar
 t("foo", to: "de", fallback: "en") # bar
+t("hello", %{name: "Phil"}, to: "en") # Hello Phil
 t("carrot", to: "en", count: 1) # 1 carrot
-t("carrot", %{count: 3}, to: "en", count: 3) # 3 carrots
+t("carrot", to: "en", count: 3) # 3 carrots - `count` is a magic option that is automatically available as binding as well.
 t("Create account", to: "en", namespace: "signup") # Create account
 t("signup:Create account", to: "en") # Create account
 t("signup:Create account", to: "de") # Account erstellen
-t("hello", %{name: "Phil"}, to: "en") # Hello Phil
 ```
 
 For the `to` and `fallback` options, Idiom also supports setting them through the process dictionary.

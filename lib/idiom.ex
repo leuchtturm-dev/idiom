@@ -80,15 +80,17 @@ defmodule Idiom do
     lang = Keyword.get(opts, :to) || Process.get(:locale) || Application.get_env(:idiom, :default_locale)
     fallback = Keyword.get(opts, :fallback) || Process.get(:fallback) || Application.get_env(:idiom, :default_fallback)
     count = Keyword.get(opts, :count)
+    bindings = Map.put(bindings, :count, count)
     {namespace, key} = extract_namespace(key, opts)
 
     resolve_hierarchy =
       [lang | List.wrap(fallback)]
       |> Enum.map(&Locales.to_hierarchy/1)
+      |> List.flatten()
 
     keys =
-      Enum.reduce(resolve_hierarchy, [], fn lang, acc ->
-        acc ++ [Cache.to_cache_key(lang, namespace, key), Cache.to_cache_key(lang, namespace, "#{key}_#{Plural.get_suffix(lang, count)}")]
+      Enum.reduce(resolve_hierarchy, [], fn locale, acc ->
+        acc ++ [Cache.to_cache_key(locale, namespace, key), Cache.to_cache_key(locale, namespace, "#{key}_#{Plural.get_suffix(locale, count)}")]
       end)
 
     cache_table_name = Keyword.get(opts, :cache_table_name, Cache.cache_table_name())
