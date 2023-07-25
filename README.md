@@ -1,21 +1,8 @@
-# Idiom
+# Idiom - a modern internationalisation (or localisation?) library
 
-**TODO: Add description**
+> #### Stability notice {: .warning}
+>
+> This is currently nowhere near stable. I'm messing around with different APIs, the documentation is incomplete, and some modules are missing proper tests.
+> I would appreciate feedback on the current API and notes on where I could improve existing documentation, but please don't use this right now.
 
-## Installation
-
-If [available in Hex](https://hex.pm/docs/publish), the package can be installed
-by adding `idiom` to your list of dependencies in `mix.exs`:
-
-```elixir
-def deps do
-  [
-    {:idiom, "~> 0.1.0"}
-  ]
-end
-```
-
-Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
-and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
-be found at <https://hexdocs.pm/idiom>.
 
