@@ -1,9 +1,10 @@
 defmodule Idiom.Cache do
   @moduledoc """
   Cache for translations.
+
   Idiom is flexible in terms of which source translations can be retrieved from. It comes with a few different ones out of the box, and can also be extended
-  through plugins. `Idiom.Cache` provides utilities to interact with the ETS that acts as a central storage for translations, both for adding/updating keys
-  and retrieving values. table
+  through plugins. `Idiom.Cache` provides utilities to interact with the ETS table that acts as a central storage for translations, both for adding/updating
+  keys and retrieving values.
   """
 
   @cache_table_name :idiom_cache
