@@ -11,11 +11,7 @@ defmodule Idiom do
 
   defdelegate child_spec(options), to: Idiom.Supervisor
 
-  @doc "Alias for `translate/3`"
   def t(key, opts) when is_list(opts), do: t(key, %{}, opts)
-
-  @doc "Alias for `translate/3`"
-  def t(key, bindings \\ %{}, opts \\ []), do: translate(key, bindings, opts)
 
   @type translate_opts() :: [to: String.t(), fallback: String.t() | list(String.t())]
   @doc """
@@ -73,10 +69,8 @@ defmodule Idiom do
       "bonjour"
   """
 
-  def translate(key, bindings \\ %{}, opts \\ [])
-
-  @spec translate(String.t(), map(), translate_opts()) :: String.t()
-  def translate(key, bindings, opts) do
+  @spec t(String.t(), map(), translate_opts()) :: String.t()
+  def t(key, bindings \\ %{}, opts \\ []) do
     lang = Keyword.get(opts, :to) || Process.get(:locale) || Application.get_env(:idiom, :default_locale)
     fallback = Keyword.get(opts, :fallback) || Process.get(:fallback) || Application.get_env(:idiom, :default_fallback)
     count = Keyword.get(opts, :count)

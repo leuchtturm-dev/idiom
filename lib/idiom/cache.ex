@@ -21,7 +21,10 @@ defmodule Idiom.Cache do
   ## Examples
 
   ```elixir
-  iex> initial_state = %{"en" => %{"signup" => %{"Create your account" => "Create your account"}}, "de" => %{"signup" => %{"Create your account" => "Erstelle deinen Account"}}}
+  iex> initial_state = %{
+  ...>  "en" => %{"signup" => %{"Create your account" => "Create your account"}}, 
+  ...>  "de" => %{"signup" => %{"Create your account" => "Erstelle deinen Account"}}
+  ...>}
   iex> Idiom.Cache.init(initial_state)
   :ok
   ```
@@ -35,12 +38,13 @@ defmodule Idiom.Cache do
   @doc """
   Adds a map of keys to the cache.
 
-  Supports both nested maps (with nest levels `locale` -> `domain` -> `key`) and already flattened keys (with keys in format of `locale:domain:key`).
-
   ## Examples
 
   ```elixir
-  iex> Idiom.Cache.insert_keys(%{"en" => %{"signup" => %{"Create your account" => "Create your account"}}, "de" => %{"signup" => %{"Create your account" => "Erstelle deinen Account"}}})
+  iex> Idiom.Cache.insert_keys(%{
+  ...>  "en" => %{"signup" => %{"Create your account" => "Create your account"}}, 
+  ...>  "de" => %{"signup" => %{"Create your account" => "Erstelle deinen Account"}}}
+  ...>)
   :ok
   ```
   """
@@ -61,22 +65,25 @@ defmodule Idiom.Cache do
     end
   end
 
-  # TODO:
   @doc """
+  Retrieves a translation from the cache.
+
+  ## Examples
+
+  ```elixir
+  iex> Cache.get_translation("de", "default", "butterfly")
+  "Schmetterling"
+  ```
   """
+  @spec get_translation(String.t(), String.t(), String.t(), atom()) :: String.t() | nil
   def get_translation(language, namespace, key, table_name \\ @cache_table_name) do
     to_cache_key(language, namespace, key)
     |> get_key(table_name)
   end
 
-  # TODO:
-  @doc """
-  """
-  def to_cache_key(language, namespace, key), do: "#{language}:#{namespace}:#{key}"
+  defp to_cache_key(language, namespace, key), do: "#{language}:#{namespace}:#{key}"
 
-  # Input: %{en: %{translation: %{"foo.baz" => "bar"}}, de: %{login: %{bar: "baz", foo: %{bar: "baz"}}}}}}
-  # Output: %{"en:translation:foo.baz" => "bar", "de:login:bar" => "baz", "de:login:foo.bar" => "baz"}
-  def map_to_cache_data(map, acc \\ %{}, prefix \\ "", depth \\ 0) do
+  defp map_to_cache_data(map, acc \\ %{}, prefix \\ "", depth \\ 0) do
     Enum.reduce(map, acc, fn {key, value}, acc ->
       separator = if depth < 3, do: ":", else: "."
       new_key = if prefix == "", do: to_string(key), else: prefix <> separator <> to_string(key)

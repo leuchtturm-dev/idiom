@@ -1,0 +1,16 @@
+{
+  "en": {
+    "translations": {
+      "foo": "bar",
+      "deep.foo": "Deep bar",
+      "Natural language: the colon-ing": "Colons",
+      "carrot_one": "1 carrot",
+      "carrot_other": "{{count}} carrots"
+    }
+  },
+  "de": {
+    "default": {
+      "butterfly": "Schmetterling"
+    }
+  }
+}

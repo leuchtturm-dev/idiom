@@ -7,6 +7,7 @@ defmodule Idiom.MixProject do
       description: "Modern internationalization library",
       version: "0.1.4",
       elixir: "~> 1.13",
+      compilers: Mix.compilers() ++ [:leex, :yecc],
       elixirc_paths: elixirc_paths(Mix.env()),
       start_permanent: Mix.env() == :prod,
       deps: deps(),
@@ -47,7 +48,10 @@ defmodule Idiom.MixProject do
   defp docs do
     [
       main: "readme",
-      extras: ["README.md"]
+      extras: ["README.md"] ++ Path.wildcard("guides/**/*.md"),
+      groups_for_extras: [
+        "Basic Usage": Path.wildcard("guides/usage/*")
+      ]
     ]
   end
 end
