@@ -18,8 +18,6 @@ defmodule Idiom.PluralPreprocess do
   {:cond, [], [[do: [{:->, [], [[{:==, [], [{:n, [], nil}, 1]}], "one"]}]]]}
   ```
   """
-  # NOTE: I have no idea if typespecs are actually helpful here.
-  @spec parse_rules(list(tuple())) :: tuple()
   def parse_rules(rules) do
     Enum.map(rules, fn {"pluralRule-count-" <> suffix, rule} ->
       {:ok, ast} = parse(rule)

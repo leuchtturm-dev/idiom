@@ -123,10 +123,6 @@ defmodule Idiom.Plural do
     get_suffix(Locales.get_language(locale), Decimal.to_float(n), i, v, f, t, w)
   end
 
-  defp in?(%Decimal{} = number, range) do
-    Decimal.to_float(number) |> in?(range)
-  end
-
   defp in?(number, range) when is_integer(number) do
     number in range
   end
@@ -147,26 +143,4 @@ defmodule Idiom.Plural do
 
     dividend - modulo
   end
-
-  defp mod(dividend, divisor) when is_integer(dividend) and is_number(divisor) do
-    modulo =
-      dividend
-      |> Kernel./(divisor)
-      |> Float.floor()
-      |> Kernel.*(divisor)
-
-    dividend - modulo
-  end
-
-  defp mod(%Decimal{} = dividend, %Decimal{} = divisor) do
-    modulo =
-      dividend
-      |> Decimal.div(divisor)
-      |> Decimal.round(0, :floor)
-      |> Decimal.mult(divisor)
-
-    Decimal.sub(dividend, modulo)
-  end
-
-  defp mod(%Decimal{} = dividend, divisor) when is_integer(divisor), do: mod(dividend, Decimal.new(divisor))
 end
