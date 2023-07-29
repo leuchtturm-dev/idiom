@@ -2,12 +2,11 @@ defmodule Idiom.Cache do
   @moduledoc """
   Cache for translations.
 
-  Idiom supports multiple sources for translations. It comes out of the box with a few, but also allows anyone to add another source as an external plugin. To
-  keep performance up and also have a shared state for all sources, it is using an ETS as a cache. This is a public that can be written to from any other
-  source module.  
-  The cache holds translations with the following key format: `{locale}:{domain}:{key}`, e.g. `en-US:signup:Create your account`  
-  It provides a helper function, `map_to_cache_data/4`, to Elixir maps into this format, allowing easily adding new keys.
+  Idiom is flexible in terms of which source translations can be retrieved from. It comes with a few different ones out of the box, and can also be extended
+  through plugins. `Idiom.Cache` provides utilities to interact with the ETS table that acts as a central storage for translations, both for adding/updating
+  keys and retrieving values.
   """
+
   @cache_table_name :idiom_cache
 
   @doc false
@@ -26,6 +25,9 @@ defmodule Idiom.Cache do
   ...>  "de" => %{"signup" => %{"Create your account" => "Erstelle deinen Account"}}
   ...>}
   iex> Idiom.Cache.init(initial_state)
+  :ok
+
+  iex> Idiom.Cache.init(%{}, :different_cache_name)
   :ok
   ```
   """
@@ -57,15 +59,6 @@ defmodule Idiom.Cache do
   end
 
   @doc """
-  """
-  def get_key(cache_key, table_name \\ @cache_table_name) do
-    case :ets.lookup(table_name, cache_key) do
-      [{^cache_key, translation}] -> translation
-      [] -> nil
-    end
-  end
-
-  @doc """
   Retrieves a translation from the cache.
 
   ## Examples
@@ -81,10 +74,19 @@ defmodule Idiom.Cache do
     |> get_key(table_name)
   end
 
+  defp get_key(cache_key, table_name) do
+    case :ets.lookup(table_name, cache_key) do
+      [{^cache_key, translation}] -> translation
+      [] -> nil
+    end
+  end
+
   defp to_cache_key(language, namespace, key), do: "#{language}:#{namespace}:#{key}"
 
   defp map_to_cache_data(map, acc \\ %{}, prefix \\ "", depth \\ 0) do
     Enum.reduce(map, acc, fn {key, value}, acc ->
+      # The keys have a layout of `locale:namespace:key`, separated by colons.
+      # Nested keys in the map will be flattened and separated by a dot.
       separator = if depth < 3, do: ":", else: "."
       new_key = if prefix == "", do: to_string(key), else: prefix <> separator <> to_string(key)
 

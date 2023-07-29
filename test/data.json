@@ -1,6 +1,6 @@
 {
   "en": {
-    "translations": {
+    "default": {
       "foo": "bar",
       "deep.foo": "Deep bar",
       "Natural language: the colon-ing": "Colons",

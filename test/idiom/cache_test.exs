@@ -3,8 +3,6 @@ defmodule Idiom.CacheTest do
   alias Idiom.Cache
 
   setup %{test: test} = _context do
-    name = Cache.cache_table_name()
-
     # NOTE:
     # We want our cache running for all tests, except for `Cache.init/2`.
     # We can pluck the currently running test out of `context` and match here to only start a testing cache when it's not for `init/2`.

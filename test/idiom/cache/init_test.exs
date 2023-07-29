@@ -2,9 +2,13 @@ defmodule Idiom.Cache.InitTest do
   use ExUnit.Case, async: true
   alias Idiom.Cache
 
-  test "initializes a public ETS with read concurrency table" do
+  setup do
+    %{default_table_name: Cache.cache_table_name()}
+  end
+
+  test "initializes a public ETS with read concurrency table", %{default_table_name: default_table_name} do
     Cache.init()
-    info = :ets.info(Cache.cache_table_name())
+    info = :ets.info(default_table_name)
 
     assert %{
              protection: :public,
@@ -18,17 +22,17 @@ defmodule Idiom.Cache.InitTest do
     assert :ets.info(:test_table) != :undefined
   end
 
-  test "allows setting initial data" do
+  test "allows setting initial data", %{default_table_name: default_table_name} do
     data = File.read!("test/data.json") |> Jason.decode!()
 
     Cache.init(data)
 
-    assert Map.new(:ets.tab2list(Cache.cache_table_name())) == %{
-             "en:translations:foo" => "bar",
-             "en:translations:deep.foo" => "Deep bar",
-             "en:translations:Natural language: the colon-ing" => "Colons",
-             "en:translations:carrot_one" => "1 carrot",
-             "en:translations:carrot_other" => "{{count}} carrots",
+    assert Map.new(:ets.tab2list(default_table_name)) == %{
+             "en:default:foo" => "bar",
+             "en:default:deep.foo" => "Deep bar",
+             "en:default:Natural language: the colon-ing" => "Colons",
+             "en:default:carrot_one" => "1 carrot",
+             "en:default:carrot_other" => "{{count}} carrots",
              "de:default:butterfly" => "Schmetterling"
            }
   end

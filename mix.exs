@@ -12,7 +12,13 @@ defmodule Idiom.MixProject do
       start_permanent: Mix.env() == :prod,
       deps: deps(),
       package: package(),
-      docs: docs()
+      docs: docs(),
+      preferred_cli_env: [
+        coveralls: :test,
+        "coveralls.html": :test,
+        "coveralls.json": :test
+      ],
+      test_coverage: [tool: ExCoveralls]
     ]
   end
 
@@ -32,7 +38,8 @@ defmodule Idiom.MixProject do
       {:jason, "~> 1.0"},
       {:decimal, "~> 2.1"},
       {:credo, "~> 1.7", only: [:dev, :test]},
-      {:ex_doc, "~> 0.30.2", only: :dev}
+      {:ex_doc, "~> 0.30", only: :dev},
+      {:excoveralls, "~> 0.16", only: :test}
     ]
   end
 

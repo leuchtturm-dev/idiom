@@ -41,7 +41,7 @@ defmodule Idiom.Interpolation do
 
   defp interpolate([], parts, _bindings) do
     Enum.reverse(parts)
-    |> IO.iodata_to_binary()
+    |> Enum.join("")
   end
 
   defp parse(message) when is_binary(message) do

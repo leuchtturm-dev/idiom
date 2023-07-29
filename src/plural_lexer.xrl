@@ -28,14 +28,5 @@ Rules.
 
 Erlang code.
 
--import('Elixir.Decimal', [new/1]).
-
 integer(Chars) ->
-  case string:split(Chars, "c") of
-    [I, E] ->
-      Exp = list_to_integer(E),
-      Int = list_to_integer(I),
-      {Int * trunc(math:pow(10, Exp)), Exp};
-    [I] ->
-      list_to_integer(I)
-  end.
+  list_to_integer(Chars).

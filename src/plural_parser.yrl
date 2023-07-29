@@ -38,9 +38,9 @@ condition         ->  and_condition                 : '$1'.
 and_condition     ->  relation and_op and_condition : and_ast('$1', '$3').
 and_condition     ->  relation                      : '$1'.
 
-relation       ->  expression not_equals range_list  : not_ast(or_range_list('$1', '$3')).
-relation       ->  expression conditional range_list : or_range_list('$1', '$3').
-relation       ->  expression not_op in range_list   : not_ast(or_range_list('$1', '$4')).
+relation       ->  expression not_equals range_list  : not_ast(conditional(equals, '$1', '$3')).
+relation       ->  expression conditional range_list : conditional(equals, '$1', '$3').
+relation       ->  expression not_op in range_list   : not_ast(conditional(equals, '$1', '$4')).
 
 conditional       ->  in     : 'in'.
 conditional       ->  equals : '='.
@@ -62,11 +62,11 @@ Erlang code.
 
 unwrap({_,_,V}) -> V.
 
-atomize(Token) ->
+atom(Token) ->
   list_to_atom(unwrap(Token)).
 
 variable(Variable) ->
-  {atomize(Variable), [], nil}.
+  {atom(Variable), [], nil}.
 
 not_ast(A) ->
   {'!', [], [A]}.
@@ -88,19 +88,6 @@ conditional(equals, A, B = {'..', _C, [_From, _To]}) ->
 conditional(equals, A, B) ->
   {'==', [], [A, B]}.
 
-or_range_list(Variable, [A, B]) ->
-  or_ast(conditional(equals, Variable, A),
-              conditional(equals, Variable, B));
-or_range_list(Variable, [A | B]) ->
-  or_ast(conditional(equals, Variable, A),
-              or_range_list(Variable, B));
-or_range_list(Variable, Value) ->
-  conditional(equals, Variable, Value).
-
-append(A, B) when is_list(A) and is_list(B) ->
-  A ++ B;
-append(A, B) when is_list(A) and not is_list(B)->
-  A ++ [B];
 append(A, B) when not is_list(A) and is_list(B) ->
   [A] ++ B;
 append(A, B) when not is_list(A) and not is_list(B) ->

@@ -74,7 +74,7 @@ defmodule Idiom do
     lang = Keyword.get(opts, :to) || Process.get(:locale) || Application.get_env(:idiom, :default_locale)
     fallback = Keyword.get(opts, :fallback) || Process.get(:fallback) || Application.get_env(:idiom, :default_fallback)
     count = Keyword.get(opts, :count)
-    bindings = Map.put(bindings, :count, count)
+    bindings = Map.put_new(bindings, :count, fn -> count end)
     {namespace, key} = extract_namespace(key, opts)
 
     resolve_hierarchy =
