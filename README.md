@@ -3,6 +3,7 @@
 A new take on internationalisation in Elixir.
 
 [![Hex.pm](https://img.shields.io/hexpm/v/idiom.svg)](https://hex.pm/packages/idiom) [![Documentation](https://img.shields.io/badge/documentation-gray)](https://hexdocs.pm/idiom/)
+
 Please see the documentation on [HexDocs](https://hexdocs.pm/idiom/) for a full rundown on Idiom's features.
 
 ## Basic usage
