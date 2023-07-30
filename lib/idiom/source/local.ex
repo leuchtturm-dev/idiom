@@ -1,6 +1,28 @@
 defmodule Idiom.Source.Local do
-  # TODO:
   @moduledoc """
+
+  ## File format
+
+  The `json` files expected by `Idiom.Source.Local` are a subset of the [i18next format](https://www.i18next.com/misc/json-format). The following example shows 
+  all of its features that Idiom currently supports.
+
+  ```json
+  {
+    "key": "value",
+    "keyDeep": {
+      "inner": "value"
+    },
+    "keyInterpolate": "replace this {{value}}",
+    "keyPluralSimple_one": "the singular",
+    "keyPluralSimple_other": "the plural",
+    "keyPluralMultipleEgArabic_zero": "the plural form 0",
+    "keyPluralMultipleEgArabic_one": "the plural form 1",
+    "keyPluralMultipleEgArabic_two": "the plural form 2",
+    "keyPluralMultipleEgArabic_few": "the plural form 3",
+    "keyPluralMultipleEgArabic_many": "the plural form 4",
+    "keyPluralMultipleEgArabic_other": "the plural form 5",
+  }
+  ```
   """
   require Logger
 
@@ -10,8 +32,7 @@ defmodule Idiom.Source.Local do
   def data(opts \\ []) do
     data_dir =
       Keyword.get(opts, :data_dir) ||
-        Application.get_env(:idiom, __MODULE__)[:data_dir] ||
-        "priv/idiom"
+        Application.get_env(:idiom, __MODULE__)[:data_dir]
 
     Path.join(data_dir, "**/*.json")
     |> Path.wildcard()

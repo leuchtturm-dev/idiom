@@ -15,11 +15,11 @@ defmodule Idiom do
   # With natural language key
   t("Hello Idiom!")
 
-  # With plural
-  t("You need to buy carrots", count: 1)
-
   # With interpolation
   t("Good morning, {{name}}. We hope you are having a great day.", %{name: "Tim"})
+
+  # With plural and interpolation
+  t("You need to buy {{count}} carrots", count: 1)
 
   # With namespace
   t("signup:Create your account")
@@ -33,22 +33,6 @@ defmodule Idiom do
   # With fallback locale
   t("Create your account", to: "fr", fallback: "en")
   ```
-
-  ## Motivation
-
-  Today, internationalisation in Elixir is dominated by Gettext. While a great library that has served the community well since its inception, and the
-  default in Phoenix, there are a few things that Idiom is looking to change:
-
-  1. Translations do not need to be available at compile-time, with pluggable sources available.  
-  Gettext requires all translations to be stored in `.po` files that need to be available at compile-time. Baking the translations into the compiled project
-  has lots of advantages, in particular performance, but it also comes with a large downside: in order to update a single string in your application, you
-  are required to rebuild and redeploy the entire project. Idiom builds on a different architecture, using an ETS cache as central store, and being flexible
-  as to where its contents are coming from. Like Gettext, Idiom comes with an in-built source to source translations from the file-system, but can also be
-  set up to pull translations from external services, allowing you to use a software localisation platform to manage all of your translations, and pushing new
-  versions of it without having to redeploy your Elixir service.
-  2. The public API for translating messages only includes one function, `t/3`.  
-  This is in contrast to Gettext, which exposes different functions for  choosing a domain (Idiom calls these namespaces), plural, or interpolation. With 
-  Idiom, you just need to remember the three parameters of `t/3`: `key`, `bindings` (optional) and `opts` (also optional).
 
   ## Installation
 
@@ -86,7 +70,7 @@ defmodule Idiom do
 
   ## Locales
 
-  When calling `t/3`, Idiom follows these steps to determine which locale to translate the key to:
+  When calling `t/3`, Idiom looks at the following settings to determine which locale to translate the key to, in order of priority:
 
   1. The explicit `to` option. When you call `t("key", to: "fr")`, Idiom will always use `fr` as a locale.
   2. The locale set in the current process. You can call `Idiom.put_locale/1` to set it.
@@ -169,6 +153,41 @@ defmodule Idiom do
   t("Key that is not available in any locale", to: "es")
   ```
 
+  ## Namespaces
+
+  Idiom allows grouping your keys into namespaces.
+
+  When calling `t/3`, Idiom looks at the following settings to determine which namespace to resolve the key in, in order of priority:
+  1. The `namespace` option, like `t("Create your account", namespace: "signup")`
+  2. As prefix in the key itself.  
+  You can prefix your key with `{namespace}:` in order to select a namespace, like `t("signup:Create your account")`
+  3. The namespace set in the current process. You can call `Idiom.put_namespace/1` to set it.  
+  Since this is just a wrapper around the process dictionary, it needs to be set for each process you are using Idiom in.
+  4. The `default_namespace` setting. See the [Configuration](#module-configuration) section for more details on how to set it.
+
+  ### Namespace prefixes and natural language keys
+
+  By default, you can use a prefix separated by a colon (`:`) to namespace a key. When using natural language keys, this can cause issues, such as when the key
+  itself contains a colon.
+
+  Consider the following key: 
+  ```elixir
+  t("Get started on GitHub: create your account")
+  ```
+  Using the colon as a separator, Idiom would try to resolve this as key ` create your account` in the `Get started on GitHub` namespace.
+
+  There are multiple ways to work around this:
+
+  1. Explicitly specify the namespace - when a namespace is set this way, the key is left as-is without trying to extract the namespace.
+  ```elixir
+  t("Get started on GitHub: create your account", namespace: "default")
+  ```
+
+  2. Set a different namespace separator for the key.
+  ```elixir
+  t("Get started on GitHub: create your account", namespace_separator: "|")
+  ```
+
   ## Interpolation
 
   Idiom supports interpolation in messages.  
@@ -195,6 +214,52 @@ defmodule Idiom do
   t("It is currently {{temperature}} degrees in {{city}}", %{temperature: "31", city: "Hong Kong"})
   # -> It is currently 31 degrees in Hong Kong
   ```
+
+  ## Pluralisation
+
+  Idiom supports the following key suffixes for pluralisation:
+
+  - `zero`
+  - `one`
+  - `two`
+  - `few`
+  - `many`
+  - `other`
+
+  Your keys, for English, might then look like this:
+
+  ```json
+  {
+    "carrot_one": "{{count}} carrot"
+    "carrot_other": "{{count}} carrots"
+  }
+  ```
+
+  You can then pluralise your messages by passing `count` to `t/3`, such as:
+
+  ```elixir
+  t("carrot", count: 1)
+  # -> 1 carrot
+  t("carrot", count: 2)
+  # -> 2 carrot
+  ```
+
+  > #### `{{count}}` and pluralisation {: .info}
+  >
+  > As you can see in the above example, we are not passing an extra `%{count: x}` binding. This is because the `count` option acts as a magic binding that is
+  > automatically available for interpolation.
+
+  ## Sources
+
+  ### Local
+
+  Idiom loads translations from the file system at startup.  
+  Please see `Idiom.Source.Local` for details on the file structure, file format and things to keep in mind.
+
+  ### Over the air
+
+  Idiom is designed to be extensible with multiple over the air providers. Please see the modules in `Idiom.Source` for the ones built-in, and always feel free
+  to extend the ecosystem by creating new ones.
   """
 
   import Idiom.Interpolation
