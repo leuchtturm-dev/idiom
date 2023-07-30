@@ -49,6 +49,27 @@ defmodule Idiom.ModuledocTest do
     assert t("Key that is not available in any locale", to: "es", cache_table_name: :locales_fallback_locales_test) == "Key that is not available in any locale"
   end
 
+  test "Namespaces" do
+    data = %{"en" => %{"signup" => %{"Create your account" => "Create your account"}}}
+
+    Cache.init(data, :namespaces_test)
+
+    assert t("Create your account", namespace: "signup", cache_table_name: :namespaces_test) == "Create your account"
+    assert t("signup:Create your account", cache_table_name: :namespaces_test) == "Create your account"
+
+    Idiom.put_namespace("signup")
+    assert t("Create your account", cache_table_name: :namespaces_test) == "Create your account"
+  end
+
+  test "Namespaces - Namespace prefixes and natural language keys" do
+    data = %{"en" => %{"default" => %{"Get started on GitHub: create your account" => "message"}}}
+
+    Cache.init(data, :namespace_prefixes_test)
+
+    assert t("Get started on GitHub: create your account", namespace: "default", cache_table_name: :namespace_prefixes_test) == "message"
+    assert t("Get started on GitHub: create your account", namespace_separator: "|", cache_table_name: :namespace_prefixes_test) == "message"
+  end
+
   test "Interpolation" do
     data =
       Jason.decode!("""

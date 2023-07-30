@@ -1,6 +1,7 @@
 {
   "en": {
     "default": {
+      "hello": "hello",
       "foo": "bar",
       "deep.foo": "Deep bar",
       "Natural language: the colon-ing": "Colons",
@@ -11,6 +12,16 @@
   "de": {
     "default": {
       "butterfly": "Schmetterling"
+    }
+  },
+  "es": {
+    "default": {
+      "hello": "hola"
+    }
+  },
+  "fr": {
+    "default": {
+      "hello": "bonjour"
     }
   }
 }

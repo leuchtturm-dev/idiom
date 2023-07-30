@@ -28,12 +28,15 @@ defmodule Idiom.Cache.InitTest do
     Cache.init(data)
 
     assert Map.new(:ets.tab2list(default_table_name)) == %{
-             "en:default:foo" => "bar",
-             "en:default:deep.foo" => "Deep bar",
+             "de:default:butterfly" => "Schmetterling",
              "en:default:Natural language: the colon-ing" => "Colons",
              "en:default:carrot_one" => "1 carrot",
              "en:default:carrot_other" => "{{count}} carrots",
-             "de:default:butterfly" => "Schmetterling"
+             "en:default:deep.foo" => "Deep bar",
+             "en:default:foo" => "bar",
+             "en:default:hello" => "hello",
+             "es:default:hello" => "hola",
+             "fr:default:hello" => "bonjour"
            }
   end
 end
