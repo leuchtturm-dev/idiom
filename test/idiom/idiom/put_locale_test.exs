@@ -1,5 +1,9 @@
 defmodule Idiom.Idiom.PutLocaleTest do
-  use ExUnit.Case, async: true
+  use ExUnit.Case, async: false
+
+  setup_all do
+    on_exit(fn -> Process.delete(:idiom_locale) end)
+  end
 
   test "puts the value into the process dictionary - 1" do
     Idiom.put_locale("en-US")

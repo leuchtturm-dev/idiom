@@ -1,5 +1,9 @@
 defmodule Idiom.Idiom.GetLocaleTest do
-  use ExUnit.Case, async: true
+  use ExUnit.Case, async: false
+
+  setup_all do
+    on_exit(fn -> Process.delete(:idiom_locale) end)
+  end
 
   describe "with value from process dictionary" do
     test "returns the value from the process dictionary" do

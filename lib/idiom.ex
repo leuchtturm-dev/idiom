@@ -289,26 +289,28 @@ defmodule Idiom do
 
   ## Examples
 
-      iex> Idiom.t("hello", to: "es")
-      "hola"
+  ```elixir
+  iex> Idiom.t("hello", to: "es")
+  "hola"
 
-      # With process-wide locale
-      iex> Idiom.put_locale("fr")
-      iex> Idiom.t("hello")
-      "bonjour"
+  # With process-wide locale
+  iex> Idiom.put_locale("fr")
+  iex> Idiom.t("hello")
+  "bonjour"
 
-      # If neither `:to` option is provided nor `:lang` is set in the process, it will check the application configuration:
-      # Given `config :idiom, default_lang: "en"` is set in the `config.exs` file:
-      iex> Idiom.t("hello")
-      "hello"
+  # If neither `:to` option is provided nor `:lang` is set in the process, it will check the application configuration:
+  # Given `config :idiom, default_lang: "en"` is set in the `config.exs` file:
+  iex> Idiom.t("hello")
+  "hello"
 
-      # If a key does not exist in the target language, it will use the `:fallback` option:
-      iex> Idiom.t("hello", to: "de", fallback: "fr")
-      "bonjour"
+  # If a key does not exist in the target language, it will use the `:fallback` option:
+  iex> Idiom.t("hello", to: "de", fallback: "fr")
+  "bonjour"
 
-      # If a key does not exist in the target language or the first fallback language:
-      iex> Idiom.t("hello", to: "de", fallback: ["pl", "fr"])
-      "bonjour"
+  # If a key does not exist in the target language or the first fallback language:
+  iex> Idiom.t("hello", to: "de", fallback: ["pl", "fr"])
+  "bonjour"
+  ```
   """
 
   @spec t(String.t(), map(), translate_opts()) :: String.t()
@@ -316,7 +318,7 @@ defmodule Idiom do
     locale = Keyword.get(opts, :to) || get_locale()
     fallback = Keyword.get(opts, :fallback) || Application.get_env(:idiom, :default_fallback)
     count = Keyword.get(opts, :count)
-    bindings = Map.put_new(bindings, :count, fn -> count end)
+    bindings = Map.put_new(bindings, :count, count)
     {namespace, key} = extract_namespace(key, opts)
 
     resolve_hierarchy =

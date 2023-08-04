@@ -36,7 +36,10 @@ defmodule Idiom.Cache.InitTest do
              "en:default:foo" => "bar",
              "en:default:hello" => "hello",
              "es:default:hello" => "hola",
-             "fr:default:hello" => "bonjour"
+             "fr:default:hello" => "bonjour",
+             "de:signup:create.account" => "Erstelle dein Konto",
+             "en:signup:create.account" => "Create your account",
+             "en:default:welcome" => "welcome, {{name}}"
            }
   end
 end

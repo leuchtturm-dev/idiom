@@ -1,5 +1,30 @@
 defmodule Idiom.Source.Local do
   @moduledoc """
+  Local source for Idiom.
+
+  While Idiom supports over-the-air sources, it also always loads from the local filesystem. This prevents from the application missing messages entirely
+  when the OTA source is not reachable. For this reason, you should always have a somewhat recent version of your translations exported and bundled with your
+  release.
+
+  ## Directory structure
+
+  You can set the data directory changing the `:data_dir` setting of `Idiom.Source.Local` as such:
+
+  ```elixir
+  config :idiom, Idiom.Source.Local,
+    data_dir: "priv/idiom"
+  ```
+
+  Inside that directory, the structure should be as follows:
+
+  ```
+  priv/idiom
+  └── en
+    ├── default.json
+    └── login.json
+  ```
+
+  Where `en` is the target locale and `default` and `login` are namespaces.
 
   ## File format
 
@@ -26,8 +51,8 @@ defmodule Idiom.Source.Local do
   """
   require Logger
 
-  # TODO:
   @doc """
+  Parses all local data.
   """
   def data(opts \\ []) do
     data_dir =

@@ -6,12 +6,19 @@
       "deep.foo": "Deep bar",
       "Natural language: the colon-ing": "Colons",
       "carrot_one": "1 carrot",
-      "carrot_other": "{{count}} carrots"
+      "carrot_other": "{{count}} carrots",
+      "welcome": "welcome, {{name}}"
+    },
+    "signup": {
+      "create.account": "Create your account"
     }
   },
   "de": {
     "default": {
       "butterfly": "Schmetterling"
+    },
+    "signup": {
+      "create.account": "Erstelle dein Konto"
     }
   },
   "es": {
