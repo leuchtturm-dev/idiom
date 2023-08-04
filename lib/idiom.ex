@@ -361,7 +361,7 @@ defmodule Idiom do
   ```
   """
   @spec put_locale(String.t()) :: String.t()
-  def put_locale(locale) do
+  def put_locale(locale) when is_binary(locale) do
     Process.put(:idiom_locale, locale)
 
     locale
@@ -393,7 +393,7 @@ defmodule Idiom do
   ```
   """
   @spec put_namespace(String.t()) :: String.t()
-  def put_namespace(namespace) do
+  def put_namespace(namespace) when is_binary(namespace) do
     Process.put(:idiom_namespace, namespace)
 
     namespace
