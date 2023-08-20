@@ -33,7 +33,7 @@ defmodule Idiom.Supervisor do
       [
         {Finch, name: IdiomFinch},
         ota_source
-     ]
+      ]
       |> Enum.reject(&is_nil/1)
 
     Supervisor.init(children, strategy: :one_for_one)

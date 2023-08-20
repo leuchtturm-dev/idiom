@@ -14,7 +14,7 @@ defmodule Idiom.Cache.InsertKeysTest do
     Cache.insert_keys(data, @cache_table_name)
     cache_state = Map.new(:ets.tab2list(@cache_table_name))
 
-    assert %{"en:default:foo" => "bar", "de:default:bar" => "baz"} = cache_state
+    assert %{{"en", "default", "foo"} => "bar", {"de", "default", "bar"} => "baz"} = cache_state
   end
 
   test "flattens nested keys with dot separator" do
@@ -22,7 +22,7 @@ defmodule Idiom.Cache.InsertKeysTest do
     Cache.insert_keys(data, @cache_table_name)
     cache_state = Map.new(:ets.tab2list(@cache_table_name))
 
-    assert %{"en:default:foo.bar.baz" => "what even comes after baz"} = cache_state
+    assert %{{"en", "default", "foo.bar.baz"} => "what even comes after baz"} = cache_state
   end
 
   test "overwrites existing keys" do
@@ -30,7 +30,7 @@ defmodule Idiom.Cache.InsertKeysTest do
     Cache.insert_keys(data, @cache_table_name)
     cache_state = Map.new(:ets.tab2list(@cache_table_name))
 
-    assert %{"en:default:foo" => "baz"} = cache_state
+    assert %{{"en", "default", "foo"} => "baz"} = cache_state
   end
 
   test "does not delete existing keys" do
@@ -38,6 +38,6 @@ defmodule Idiom.Cache.InsertKeysTest do
     Cache.insert_keys(data, @cache_table_name)
     cache_state = Map.new(:ets.tab2list(@cache_table_name))
 
-    assert %{"en:default:deep.foo" => "Deep bar"} = cache_state
+    assert %{{"en", "default", "deep.foo"} => "Deep bar"} = cache_state
   end
 end

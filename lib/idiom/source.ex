@@ -3,7 +3,7 @@ defmodule Idiom.Source do
   Idiom is extensible with different sources, which are grouped under `Idiom.Source`.
 
   ## Building a source
- 
+
   Building an over-the-air source is easy!  
 
   It only has two requirements:

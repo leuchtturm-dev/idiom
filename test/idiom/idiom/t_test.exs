@@ -49,7 +49,7 @@ defmodule Idiom.Idiom.TTest do
       # With plural
       %{key: "carrot", bindings: Macro.escape(%{count: 3}), opts: [count: 2, cache_table_name: :t_test], expected: "3 carrots"}
     ]
-    
+
     for %{key: key, bindings: bindings, opts: opts, expected: expected} <- tests do
       test "correctly translates `#{key}` with bindings `#{inspect(bindings)}` and opts `#{inspect(opts)}`" do
         assert Idiom.t(unquote(key), unquote(bindings), unquote(opts)) == unquote(expected)
