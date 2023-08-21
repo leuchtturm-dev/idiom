@@ -67,6 +67,7 @@ defmodule Idiom do
     default_locale: "en",
     default_fallback: "en",
     default_namespace: "default",
+    data_dir: "priv/idiom",
     backend: nil
   ```
 
@@ -340,7 +341,7 @@ defmodule Idiom do
   @spec t(String.t(), map(), translate_opts()) :: String.t()
   def t(key_or_keys, bindings \\ %{}, opts \\ []) do
     locale = Keyword.get(opts, :to) || get_locale()
-    fallback = Keyword.get(opts, :fallback) || Application.get_env(:idiom, :default_fallback)
+    fallback = Keyword.get(opts, :fallback) || Application.get_env(:idiom, :default_fallback) || "en"
     count = Keyword.get(opts, :count)
     bindings = Map.put_new(bindings, :count, count)
 
@@ -379,7 +380,7 @@ defmodule Idiom do
   """
   @spec get_locale() :: String.t() | nil
   def get_locale() do
-    Process.get(:idiom_locale) || Application.get_env(:idiom, :default_locale)
+    Process.get(:idiom_locale) || Application.get_env(:idiom, :default_locale) || "en"
   end
 
   @doc """
@@ -411,7 +412,7 @@ defmodule Idiom do
   """
   @spec get_namespace() :: String.t() | nil
   def get_namespace() do
-    Process.get(:idiom_namespace) || Application.get_env(:idiom, :default_namespace)
+    Process.get(:idiom_namespace) || Application.get_env(:idiom, :default_namespace) || "default"
   end
 
   @doc """

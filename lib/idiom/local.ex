@@ -7,11 +7,10 @@ defmodule Idiom.Local do
 
   ## Directory structure
 
-  You can set the data directory changing the `:data_dir` setting of `Idiom.Local` as such:
+  You can set the data directory changing the `:data_dir` setting `Idiom.Local` will use as such:
 
   ```elixir
-  config :idiom, Idiom.Local,
-    data_dir: "priv/idiom"
+  config :idiom, data_dir: "priv/idiom"
   ```
 
   Inside that directory, the structure should be as follows:
@@ -56,13 +55,14 @@ defmodule Idiom.Local do
   def data(opts \\ []) do
     data_dir =
       Keyword.get(opts, :data_dir) ||
-        Application.get_env(:idiom, __MODULE__)[:data_dir]
+        Application.get_env(:idiom, :data_dir) ||
+        "priv/idiom"
 
     Path.join(data_dir, "**/*.json")
     |> Path.wildcard()
     |> Enum.map(&parse_file/1)
     |> Enum.reject(&is_nil/1)
-    |> Enum.reduce(%{}, fn keys, acc -> Map.merge(keys, acc) end)
+    |> Enum.reduce(%{}, fn keys, acc -> Map.merge(acc, keys, fn _k, v1, v2 -> Map.merge(v1, v2) end) end)
   end
 
   defp parse_file(path) do
