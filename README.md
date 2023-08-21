@@ -47,3 +47,8 @@ t("Create your account", to: "fr")
 # With fallback locale
 t("Create your account", to: "fr", fallback: "en")
 ```
+
+## Usage with Phoenix
+
+At the time of writing, Idiom doesn't (yet) have a deep integration with Phoenix. This might change in the future. To see a basic example on how to integrate
+the two, check out [this repository](https://github.com/cschmatzler/idiom-phoenix-example).
