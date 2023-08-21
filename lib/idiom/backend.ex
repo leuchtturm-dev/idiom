@@ -1,18 +1,18 @@
-defmodule Idiom.Source do
+defmodule Idiom.Backend do
   @moduledoc """
-  Idiom is extensible with different sources, which are grouped under `Idiom.Source`.
+  Idiom is extensible with different backends, which are grouped under `Idiom.Backend`.
 
-  ## Building a source
+  ## Building a backend
 
-  Building an over-the-air source is easy!  
+  Building an over-the-air backend is easy!  
 
   It only has two requirements:
   1. Be a `GenServer` that can be started as a child to Idiom's supervisor.
-  The OTA source is configured by setting Idiom's `ota_source` configuration to a module, which will then be passed to the supervisor. As such, it needs a
+  The backend is configured by setting Idiom's `backend` configuration to a module, which will then be passed to the supervisor. As such, it needs a 
   `start_link/1` method.
 
   2. Write data to `Idiom.Cache`.
-  Idiom's translations are stored inside an ETS table that is wrapped by `Idiom.Cache`. Your source should update the cache by calling 
+  Idiom's translations are stored inside an ETS table that is wrapped by `Idiom.Cache`. Your backend should update the cache by calling 
   `Idiom.Cache.insert_keys/1`.
   That function takes a single argument, which is expected to be a map of the following structure:
 

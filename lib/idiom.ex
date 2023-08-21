@@ -4,8 +4,6 @@ defmodule Idiom do
 
   ## Basic usage
 
-  Interaction with Idiom happens through `t/3`.
-
   ```elixir
   # Set the locale
   Idiom.put_locale("en-US")
@@ -19,6 +17,7 @@ defmodule Idiom do
   t("Good morning, {{name}}. We hope you are having a great day.", %{name: "Tim"})
 
   # With plural and interpolation
+  # `count` is a magic option that automatically is available as binding.
   t("You need to buy {{count}} carrots", count: 1)
 
   # With namespace
@@ -29,6 +28,9 @@ defmodule Idiom do
 
   # With explicit locale
   t("Create your account", to: "fr")
+
+  # With fallback key
+  t(["Create your account", "Register"])
 
   # With fallback locale
   t("Create your account", to: "fr", fallback: "en")
@@ -65,10 +67,10 @@ defmodule Idiom do
     default_locale: "en",
     default_fallback: "en",
     default_namespace: "default",
-    ota_provider: nil
+    backend: nil
   ```
 
-  In order to configure your OTA provider, please have a look at its module documentation.  
+  In order to configure your backend, please have a look at its module documentation.  
 
   ## Locales
 
@@ -134,9 +136,19 @@ defmodule Idiom do
   # -> Create your account
   ```
 
+  ### Fallback keys
+
+  For scenarios where multiple keys might apply, `t/3` allows specifying a list of keys as well.
+
+  ```elixir
+  t(["Create your account", "Register"], to: "en-US")
+  ```
+
+  This snippet will first try to resolve the `Create your account` key, and fall back to resolving `Register` when it does not exist.
+
   ### Fallback locales
 
-  For when a key might not be available in the set locale, you can set a fallback.  
+  For when a key might not be available in the set locale, you can set a fallback locale.  
   A fallback can be either a string or a list of strings. If you set the fallback as a list, Idiom will return the translation of the first locale for which
   the key is available.
 
@@ -154,6 +166,18 @@ defmodule Idiom do
   # will return "Key that is not available in any locale"
   t("Key that is not available in any locale", to: "es")
   ```
+
+  ### Using fallback keys and locales together
+
+  When both fallback keys and locales are provided, Idiom will first try to resolve all keys in each locale before jumping to the next one.  
+  For example, the resolution order for `t(["Create your account", "Register"], to: "es", fallback: ["fr", "de"])` will be:
+
+  1. `Create your account` in `es`
+  2. `Register` in `es`
+  3. `Create your account` in `fr`
+  4. `Register` in `fr`
+  5. `Create your account` in `de`
+  6. `Register` in `de`
 
   ## Namespaces
 
@@ -314,26 +338,32 @@ defmodule Idiom do
   """
 
   @spec t(String.t(), map(), translate_opts()) :: String.t()
-  def t(key, bindings \\ %{}, opts \\ []) do
+  def t(key_or_keys, bindings \\ %{}, opts \\ []) do
     locale = Keyword.get(opts, :to) || get_locale()
     fallback = Keyword.get(opts, :fallback) || Application.get_env(:idiom, :default_fallback)
     count = Keyword.get(opts, :count)
     bindings = Map.put_new(bindings, :count, count)
-    {namespace, key} = extract_namespace(key, opts)
 
-    resolve_hierarchy =
+    locale_resolve_hierarchy =
       [locale | List.wrap(fallback)]
       |> Enum.map(&Locales.get_hierarchy/1)
       |> List.flatten()
 
-    keys =
-      Enum.reduce(resolve_hierarchy, [], fn locale, acc ->
-        acc ++ [{locale, namespace, key}, {locale, namespace, "#{key}_#{Plural.get_suffix(locale, count)}"}]
+    lookup_keys =
+      Enum.reduce(locale_resolve_hierarchy, [], fn locale, acc ->
+        keys = extract_namespace(key_or_keys, opts) |> List.wrap()
+
+        acc ++
+          Enum.flat_map(keys, fn {namespace, key} ->
+            [{locale, namespace, key}, {locale, namespace, "#{key}_#{Plural.get_suffix(locale, count)}"}]
+          end)
       end)
 
     cache_table_name = Keyword.get(opts, :cache_table_name, Cache.cache_table_name())
 
-    Enum.find_value(keys, key, fn {locale, namespace, key} -> Cache.get_translation(locale, namespace, key, cache_table_name) end)
+    fallback_message = List.wrap(key_or_keys) |> List.first()
+
+    Enum.find_value(lookup_keys, fallback_message, fn {locale, namespace, key} -> Cache.get_translation(locale, namespace, key, cache_table_name) end)
     |> interpolate(bindings)
   end
 
@@ -401,7 +431,11 @@ defmodule Idiom do
     namespace
   end
 
-  defp extract_namespace(key, opts) do
+  defp extract_namespace(keys, opts) when is_list(keys) do
+    Enum.map(keys, &extract_namespace(&1, opts))
+  end
+
+  defp extract_namespace(key, opts) when is_binary(key) do
     case Keyword.pop(opts, :namespace) do
       {nil, opts} ->
         namespace_from_key_or_default(key, opts)

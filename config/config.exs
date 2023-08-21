@@ -4,4 +4,4 @@ config :idiom,
   default_locale: "en",
   default_fallback: "en",
   default_namespace: "default",
-  ota_provider: nil
+  backend: nil

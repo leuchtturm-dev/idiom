@@ -1,17 +1,16 @@
-defmodule Idiom.Source.Local do
+defmodule Idiom.Local do
   @moduledoc """
   Local source for Idiom.
 
-  While Idiom supports over-the-air sources, it also always loads from the local filesystem. This prevents from the application missing messages entirely
-  when the OTA source is not reachable. For this reason, you should always have a somewhat recent version of your translations exported and bundled with your
-  release.
+  Idiom is backend-agnostic and can be used with many different sources. By default, it also loads resources from the local filesystem at boot time. This can
+  be turned off in configuration, but it is highly recommended to have it as a fallback in case your chosen backend is unavailable.
 
   ## Directory structure
 
-  You can set the data directory changing the `:data_dir` setting of `Idiom.Source.Local` as such:
+  You can set the data directory changing the `:data_dir` setting of `Idiom.Local` as such:
 
   ```elixir
-  config :idiom, Idiom.Source.Local,
+  config :idiom, Idiom.Local,
     data_dir: "priv/idiom"
   ```
 
@@ -28,8 +27,8 @@ defmodule Idiom.Source.Local do
 
   ## File format
 
-  The `json` files expected by `Idiom.Source.Local` are a subset of the [i18next format](https://www.i18next.com/misc/json-format). The following example shows 
-  all of its features that Idiom currently supports.
+  The `json` files expected by `Idiom.Local` are a subset of the [i18next format](https://www.i18next.com/misc/json-format). The following example shows all of
+  its features that Idiom currently supports.
 
   ```json
   {

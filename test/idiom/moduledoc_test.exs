@@ -35,6 +35,16 @@ defmodule Idiom.ModuledocTest do
     assert t("Create your account", to: "en-GB", cache_table_name: :locales_resolution_hierarchy_test) == "Create your account"
   end
 
+  test "Locales - Fallback keys" do
+    data = %{
+      "en" => %{"default" => %{"Register" => "Register"}}
+    }
+
+    Cache.init(data, :locales_fallback_keys_test)
+
+    assert t(["Create your account", "Register"], to: "en", cache_table_name: :locales_fallback_keys_test) == "Register"
+  end
+
   test "Locales - Fallback locales" do
     data = %{
       "en" => %{"default" => %{"Key that is only available in `en` and `fr`" => "en"}},
@@ -47,6 +57,68 @@ defmodule Idiom.ModuledocTest do
     assert t("Key that is only available in `en` and `fr`", to: "es", fallback: ["fr", "en"], cache_table_name: :locales_fallback_locales_test) == "fr"
     assert t("Key that is only available in `en` and `fr`", to: "es", cache_table_name: :locales_fallback_locales_test) == "en"
     assert t("Key that is not available in any locale", to: "es", cache_table_name: :locales_fallback_locales_test) == "Key that is not available in any locale"
+  end
+
+  test "Locales - Using fallback keys and locales together" do
+    data = %{
+      "es" => %{"default" => %{"Create your account" => "Cree su cuenta", "Register" => "Registro"}},
+      "fr" => %{"default" => %{"Create your account" => "Créez votre compte", "Register" => "Registre"}},
+      "de" => %{"default" => %{"Create your account" => "Erstelle dein Konto", "Register" => "Registrieren"}}
+    }
+
+    Cache.init(data, :t_fallback_keys_and_locales_1_test)
+
+    assert t(["Create your account", "Register"], to: "es", fallback: ["fr", "de"], cache_table_name: :t_fallback_keys_and_locales_1_test) ==
+             "Cree su cuenta"
+
+    data = %{
+      "es" => %{"default" => %{"Register" => "Registro"}},
+      "fr" => %{"default" => %{"Create your account" => "Créez votre compte", "Register" => "Registre"}},
+      "de" => %{"default" => %{"Create your account" => "Erstelle dein Konto", "Register" => "Registrieren"}}
+    }
+
+    Cache.init(data, :t_fallback_keys_and_locales_2_test)
+
+    assert t(["Create your account", "Register"], to: "es", fallback: ["fr", "de"], cache_table_name: :t_fallback_keys_and_locales_2_test) ==
+             "Registro"
+
+    data = %{
+      "fr" => %{"default" => %{"Create your account" => "Créez votre compte", "Register" => "Registre"}},
+      "de" => %{"default" => %{"Create your account" => "Erstelle dein Konto", "Register" => "Registrieren"}}
+    }
+
+    Cache.init(data, :t_fallback_keys_and_locales_3_test)
+
+    assert t(["Create your account", "Register"], to: "es", fallback: ["fr", "de"], cache_table_name: :t_fallback_keys_and_locales_3_test) ==
+             "Créez votre compte"
+
+    data = %{
+      "fr" => %{"default" => %{"Register" => "Registre"}},
+      "de" => %{"default" => %{"Create your account" => "Erstelle dein Konto", "Register" => "Registrieren"}}
+    }
+
+    Cache.init(data, :t_fallback_keys_and_locales_4_test)
+
+    assert t(["Create your account", "Register"], to: "es", fallback: ["fr", "de"], cache_table_name: :t_fallback_keys_and_locales_4_test) ==
+             "Registre"
+
+    data = %{
+      "de" => %{"default" => %{"Create your account" => "Erstelle dein Konto", "Register" => "Registrieren"}}
+    }
+
+    Cache.init(data, :t_fallback_keys_and_locales_5_test)
+
+    assert t(["Create your account", "Register"], to: "es", fallback: ["fr", "de"], cache_table_name: :t_fallback_keys_and_locales_5_test) ==
+             "Erstelle dein Konto"
+
+    data = %{
+      "de" => %{"default" => %{"Register" => "Registrieren"}}
+    }
+
+    Cache.init(data, :t_fallback_keys_and_locales_6_test)
+
+    assert t(["Create your account", "Register"], to: "es", fallback: ["fr", "de"], cache_table_name: :t_fallback_keys_and_locales_6_test) ==
+             "Registrieren"
   end
 
   test "Namespaces" do

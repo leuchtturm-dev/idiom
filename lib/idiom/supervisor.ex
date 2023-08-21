@@ -23,8 +23,8 @@ defmodule Idiom.Supervisor do
   @impl Supervisor
   def init(options) do
     data = Keyword.get(options, :data, %{})
-    ota_source = Application.get_env(:idiom, :ota_source)
-    local_data = Idiom.Source.Local.data()
+    backend = Application.get_env(:idiom, :backend)
+    local_data = Idiom.Local.data()
 
     Map.merge(local_data, data)
     |> Cache.init()
@@ -32,7 +32,7 @@ defmodule Idiom.Supervisor do
     children =
       [
         {Finch, name: IdiomFinch},
-        ota_source
+        backend
       ]
       |> Enum.reject(&is_nil/1)
 
