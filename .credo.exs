@@ -98,11 +98,9 @@
           {Credo.Check.Refactor.PassAsyncInTestCases, []},
           {Credo.Check.Refactor.RejectFilter, []},
           {Credo.Check.Refactor.VariableRebinding, []},
-          {Credo.Check.Warning.LazyLogging, []},
           {Credo.Check.Warning.LeakyEnvironment, []},
           {Credo.Check.Warning.MapGetUnsafePass, []},
           {Credo.Check.Warning.MixEnv, []},
-          {Credo.Check.Warning.UnsafeToAtom, []}
         ],
         disabled: [
           {Credo.Check.Consistency.UnusedVariableNames, []},
@@ -116,6 +114,8 @@
           {Credo.Check.Refactor.ABCSize, []},
           {Credo.Check.Refactor.ModuleDependencies, []},
           {Credo.Check.Refactor.PipeChainStart, []},
+          {Credo.Check.Warning.LazyLogging, []},
+          {Credo.Check.Warning.UnsafeToAtom, []}
         ]
       }
     }

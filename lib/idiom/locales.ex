@@ -72,9 +72,7 @@ defmodule Idiom.Locales do
   """
   @spec get_language_and_script(String.t()) :: String.t() | nil
   def get_language_and_script(locale) when is_binary(locale) do
-    locale
-    |> String.split("-")
-    |> case do
+    case String.split(locale, "-") do
       parts when length(parts) <= 2 -> nil
       parts -> Enum.take(parts, 2) |> Enum.join("-")
     end

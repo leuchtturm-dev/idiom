@@ -36,4 +36,4 @@ lint:
 
   COPY .credo.exs .formatter.exs .
   RUN mix format --check-formatted
-  # RUN mix credo
+  RUN mix credo
