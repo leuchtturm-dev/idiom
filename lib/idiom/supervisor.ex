@@ -1,7 +1,5 @@
 defmodule Idiom.Supervisor do
-  # TODO:
-  @moduledoc """
-  """
+  @moduledoc false
 
   use Supervisor
 

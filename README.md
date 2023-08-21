@@ -6,6 +6,16 @@ A new take on internationalisation in Elixir.
 
 Please see the documentation on [HexDocs](https://hexdocs.pm/idiom/) for a full rundown on Idiom's features.
 
+## State of Idiom
+
+Idiom is in active development and should be considered pre-production software. Its core functionality works and is relatively well-tested, but some cases 
+(such as RTL languages) are not yet covered by tests. If you have knowledge about languages and scripts that might be considered edge cases, please get in 
+touch or just submit a pull request with test cases - I'll be forever grateful.  
+There are also no backends packaged with Idiom yet. I will soon start actively adding some, with Phrase Strings first, and then widening the library.
+
+That said, I *think* the API should be relatively stable at this point - I will still leave it at `0.x` for now, though, and not make any promises in that 
+regard. As such, I would not recommend using Idiom in any mission-critical software at this point.
+
 ## Basic usage
 
 Interaction with Idiom happens through `t/3`.
