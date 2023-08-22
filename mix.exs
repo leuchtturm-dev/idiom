@@ -37,7 +37,7 @@ defmodule Idiom.MixProject do
       {:jason, "~> 1.0"},
       {:credo, "~> 1.7", only: [:dev, :test]},
       {:ex_doc, "~> 0.30", only: :dev},
-      {:excoveralls, "~> 0.16", only: :test}
+      {:excoveralls, "~> 0.17", only: :test}
     ]
   end
 
