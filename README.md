@@ -36,7 +36,6 @@ t("Good morning, {{name}}. We hope you are having a great day.", %{name: "Tim"})
 t("You need to buy {{count}} carrots", count: 1)
 
 # With namespace
-t("signup:Create your account")
 t("Create your account", namespace: "signup")
 Idiom.put_namespace("signup")
 t("Create your account")
