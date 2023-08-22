@@ -33,10 +33,8 @@ defmodule Idiom.MixProject do
 
   defp deps do
     [
-      {:tesla, "~> 1.7"},
-      {:finch, "~> 0.16"},
-      {:jason, "~> 1.0"},
       {:decimal, "~> 2.1"},
+      {:jason, "~> 1.0"},
       {:credo, "~> 1.7", only: [:dev, :test]},
       {:ex_doc, "~> 0.30", only: :dev},
       {:excoveralls, "~> 0.16", only: :test}
