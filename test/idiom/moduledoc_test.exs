@@ -127,7 +127,6 @@ defmodule Idiom.ModuledocTest do
     Cache.init(data, :namespaces_test)
 
     assert t("Create your account", namespace: "signup", cache_table_name: :namespaces_test) == "Create your account"
-    assert t("signup:Create your account", cache_table_name: :namespaces_test) == "Create your account"
 
     Idiom.put_namespace("signup")
     assert t("Create your account", cache_table_name: :namespaces_test) == "Create your account"

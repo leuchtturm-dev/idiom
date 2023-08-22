@@ -21,7 +21,6 @@ defmodule Idiom do
   t("You need to buy {{count}} carrots", count: 1)
 
   # With namespace
-  t("signup:Create your account")
   t("Create your account", namespace: "signup")
   Idiom.put_namespace("signup")
   t("Create your account")
@@ -186,34 +185,9 @@ defmodule Idiom do
 
   When calling `t/3`, Idiom looks at the following settings to determine which namespace to resolve the key in, in order of priority:
   1. The `namespace` option, like `t("Create your account", namespace: "signup")`
-  2. As prefix in the key itself.  
-  You can prefix your key with `{namespace}:` in order to select a namespace, like `t("signup:Create your account")`
-  3. The namespace set in the current process. You can call `Idiom.put_namespace/1` to set it.  
+  2. The namespace set in the current process. You can call `Idiom.put_namespace/1` to set it.  
   Since this is just a wrapper around the process dictionary, it needs to be set for each process you are using Idiom in.
-  4. The `default_namespace` setting. See the [Configuration](#module-configuration) section for more details on how to set it.
-
-  ### Namespace prefixes and natural language keys
-
-  By default, you can use a prefix separated by a colon (`:`) to namespace a key. When using natural language keys, this can cause issues, such as when the key
-  itself contains a colon.
-
-  Consider the following key: 
-  ```elixir
-  t("Get started on GitHub: create your account")
-  ```
-  Using the colon as a separator, Idiom would try to resolve this as key ` create your account` in the `Get started on GitHub` namespace.
-
-  There are multiple ways to work around this:
-
-  1. Explicitly specify the namespace - when a namespace is set this way, the key is left as-is without trying to extract the namespace.
-  ```elixir
-  t("Get started on GitHub: create your account", namespace: "default")
-  ```
-
-  2. Set a different namespace separator for the key.
-  ```elixir
-  t("Get started on GitHub: create your account", namespace_separator: "|")
-  ```
+  3. The `default_namespace` setting. See the [Configuration](#module-configuration) section for more details on how to set it.
 
   ## Interpolation
 
@@ -341,6 +315,7 @@ defmodule Idiom do
   @spec t(String.t(), map(), translate_opts()) :: String.t()
   def t(key_or_keys, bindings \\ %{}, opts \\ []) do
     locale = Keyword.get(opts, :to) || get_locale()
+    namespace = Keyword.get(opts, :namespace) || get_namespace()
     fallback = Keyword.get(opts, :fallback) || Application.get_env(:idiom, :default_fallback) || "en"
     count = Keyword.get(opts, :count)
     bindings = Map.put_new(bindings, :count, count)
@@ -352,12 +327,11 @@ defmodule Idiom do
 
     lookup_keys =
       Enum.reduce(locale_resolve_hierarchy, [], fn locale, acc ->
-        keys = extract_namespace(key_or_keys, opts) |> List.wrap()
-
         acc ++
-          Enum.flat_map(keys, fn {namespace, key} ->
-            [{locale, namespace, key}, {locale, namespace, "#{key}_#{Plural.get_suffix(locale, count)}"}]
-          end)
+          (List.wrap(key_or_keys)
+           |> Enum.flat_map(fn key ->
+             [{locale, namespace, key}, {locale, namespace, "#{key}_#{Plural.get_suffix(locale, count)}"}]
+           end))
       end)
 
     cache_table_name = Keyword.get(opts, :cache_table_name, Cache.cache_table_name())
@@ -430,31 +404,5 @@ defmodule Idiom do
     Process.put(:idiom_namespace, namespace)
 
     namespace
-  end
-
-  defp extract_namespace(keys, opts) when is_list(keys) do
-    Enum.map(keys, &extract_namespace(&1, opts))
-  end
-
-  defp extract_namespace(key, opts) when is_binary(key) do
-    case Keyword.pop(opts, :namespace) do
-      {nil, opts} ->
-        namespace_from_key_or_default(key, opts)
-
-      {namespace, _opts} when is_binary(namespace) ->
-        {namespace, key}
-    end
-  end
-
-  defp namespace_from_key_or_default(key, opts) do
-    namespace_separator = Keyword.get(opts, :namespace_separator, ":")
-
-    if String.contains?(key, namespace_separator) do
-      [namespace | key_parts] = String.split(key, namespace_separator)
-
-      {namespace, Enum.join(key_parts, ".")}
-    else
-      {get_namespace(), key}
-    end
   end
 end
