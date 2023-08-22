@@ -13,6 +13,8 @@ setup-base:
   RUN mix do local.rebar --force, \
              local.hex --force
 
+  WORKDIR /idiom
+
   COPY mix.exs mix.lock .
   RUN mix deps.get
 
