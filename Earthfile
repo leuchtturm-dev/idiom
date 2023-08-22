@@ -9,7 +9,7 @@ ci:
 setup-base:
   FROM hexpm/elixir:$BASE
 
-  RUN apk add --no-cache build-base git
+  RUN apt-get update && apt-get install -y build-essential && rm -rf /var/lib/apt/lists/*
   RUN mix do local.rebar --force, \
              local.hex --force
 
