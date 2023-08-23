@@ -44,4 +44,4 @@ lint:
 typespecs:
   FROM +build
 
-  mix dialyzer
+  RUN mix dialyzer
