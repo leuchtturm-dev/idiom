@@ -21,6 +21,8 @@ defmodule Idiom.Locales do
   ["de-DE", "de", "en"]
   ```
   """
+  @type get_hierarchy_opts() :: [fallback: String.t() | list(String.t())]
+  @spec get_hierarchy(String.t(), get_hierarchy_opts()) :: list(String.t())
   def get_hierarchy(locale, opts \\ []) do
     fallback = Keyword.get(opts, :fallback)
 

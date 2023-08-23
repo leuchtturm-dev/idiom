@@ -52,6 +52,7 @@ defmodule Idiom.Local do
   @doc """
   Parses all local data.
   """
+  @spec data(keyword()) :: map()
   def data(opts \\ []) do
     data_dir =
       Keyword.get(opts, :data_dir) ||

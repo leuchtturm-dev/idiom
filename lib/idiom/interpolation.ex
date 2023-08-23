@@ -22,6 +22,7 @@ defmodule Idiom.Interpolation do
   "Hello, John! It is day_of_week."
   ```
   """
+  @spec interpolate(String.t(), map()) :: String.t()
   def interpolate(message, bindings) do
     message
     |> parse()
