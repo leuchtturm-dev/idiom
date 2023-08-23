@@ -49,6 +49,7 @@ defmodule Idiom.Cache do
   :ok
   ```
   """
+  @spec insert_keys(map(), atom()) :: :ok
   def insert_keys(keys, table_name \\ @cache_table_name) do
     keys
     |> map_to_cache_data([])
@@ -75,13 +76,13 @@ defmodule Idiom.Cache do
     end
   end
 
-  def map_to_cache_data(value, keys) when is_map(value) do
+  defp map_to_cache_data(value, keys) when is_map(value) do
     Enum.flat_map(value, fn {key, value} ->
       map_to_cache_data(value, List.insert_at(keys, -1, key))
     end)
   end
 
-  def map_to_cache_data(value, keys) when is_binary(value) do
+  defp map_to_cache_data(value, keys) when is_binary(value) do
     locale = Enum.at(keys, 0)
     namespace = Enum.at(keys, 1)
     key = Enum.slice(keys, 2..-1) |> Enum.join(".")

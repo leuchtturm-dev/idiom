@@ -76,7 +76,8 @@ defmodule Idiom.Plural do
   "few"
   ```
   """
-  @spec get_suffix(String.t(), binary() | float() | integer() | Decimal.t()) :: String.t()
+  @type count() :: binary() | float() | integer() | Decimal.t()
+  @spec get_suffix(String.t(), count()) :: String.t()
   def get_suffix(locale, count)
   def get_suffix(_locale, nil), do: "other"
   def get_suffix(locale, count) when is_binary(count), do: get_suffix(locale, Decimal.new(count))

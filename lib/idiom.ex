@@ -250,17 +250,10 @@ defmodule Idiom do
   > As you can see in the above example, we are not passing an extra `%{count: x}` binding. This is because the `count` option acts as a magic binding that is
   > automatically available for interpolation.
 
-  ## Sources
+  ## Backends
 
-  ### Local
-
-  Idiom loads translations from the file system at startup.  
-  Please see `Idiom.Source.Local` for details on the file structure, file format and things to keep in mind.
-
-  ### Over the air
-
-  Idiom is designed to be extensible with multiple over the air providers. Please see the modules in `Idiom.Source` for the ones built-in, and always feel free
-  to extend the ecosystem by creating new ones.
+  Idiom is designed to be extensible with multiple over the air providers. Please see the modules in `Idiom.Backend` for the ones built-in, and always feel 
+  free to extend the ecosystem by creating new ones.
   """
 
   import Idiom.Interpolation
@@ -272,17 +265,20 @@ defmodule Idiom do
   @doc false
   defdelegate child_spec(options), to: Idiom.Supervisor
 
-  @doc """
-  Alias of `t/3` for when you don't need any bindings.
-  """
-  def t(key, opts) when is_list(opts), do: t(key, %{}, opts)
-
   @type translate_opts() :: [
           namespace: String.t(),
           to: String.t(),
           fallback: String.t() | list(String.t()),
-          count: integer() | float() | Decimal.t() | String.t()
+          count: integer() | float() | Decimal.t() | String.t(),
+          cache_table_name: atom()
         ]
+
+  @doc """
+  Alias of `t/3` for when you don't need any bindings.
+  """
+  @spec t(String.t(), translate_opts()) :: String.t()
+  def t(key, opts) when is_list(opts), do: t(key, %{}, opts)
+
   @doc """
   Translates a key into a target language.
 
@@ -352,7 +348,7 @@ defmodule Idiom do
   "en"
   ```
   """
-  @spec get_locale() :: String.t() | nil
+  @spec get_locale() :: String.t()
   def get_locale() do
     Process.get(:idiom_locale) || Application.get_env(:idiom, :default_locale) || "en"
   end
@@ -384,7 +380,7 @@ defmodule Idiom do
   "default"
   ```
   """
-  @spec get_namespace() :: String.t() | nil
+  @spec get_namespace() :: String.t()
   def get_namespace() do
     Process.get(:idiom_namespace) || Application.get_env(:idiom, :default_namespace) || "default"
   end

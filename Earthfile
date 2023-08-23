@@ -5,6 +5,7 @@ ARG --global --required BASE
 ci:
   BUILD +test
   BUILD +lint
+  BUILD +typespecs
 
 setup-base:
   FROM hexpm/elixir:$BASE
@@ -39,3 +40,8 @@ lint:
   COPY .credo.exs .formatter.exs .
   RUN mix format --check-formatted
   RUN mix credo
+
+typespecs:
+  FROM +build
+
+  RUN mix dialyzer
