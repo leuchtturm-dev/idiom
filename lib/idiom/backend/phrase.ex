@@ -5,7 +5,7 @@ defmodule Idiom.Backend.Phrase do
   **Not yet complete. Use at your own risk. The API might change without notice.**
   """
 
-  # TODO:
+  # NOTE:
   # The plan for this module is
   #   - to have locales configurable in application configuration, but also allow them to be fetched from Strings API (requires extra authentication)
   #   - default configuration should look something like
@@ -17,17 +17,41 @@ defmodule Idiom.Backend.Phrase do
   #   - ask Soenke for a way to get available locales without Strings API credentials?
 
   use GenServer
+  require Logger
   alias Idiom.Cache
+
+  @opts_schema [
+    base_url: [
+      type: :string,
+      default: "https://ota.eu.phrase.com"
+    ],
+    distribution_id: [
+      type: :string,
+      required: true
+    ],
+    distribution_secret: [
+      type: :string,
+      required: true
+    ],
+    locales: [
+      type: {:list, :string}
+    ]
+  ]
 
   def start_link(opts) do
     GenServer.start_link(__MODULE__, opts, name: __MODULE__)
   end
 
   def init(opts) do
-    Process.send(self(), :fetch_data, [])
+    case NimbleOptions.validate(opts, @opts_schema) do
+      {:ok, opts} ->
+        Process.send(self(), :fetch_data, [])
+        uuid = Uniq.UUID.uuid6()
+        {:ok, %{uuid: uuid, last_update: nil, opts: opts}}
 
-    uuid = Uniq.UUID.uuid6()
-    {:ok, %{uuid: uuid, last_update: nil, opts: opts}}
+      {:error, error} ->
+        raise "Could not start `Idiom.Backend.Phrase` due to misconfiguration: #{error.message}"
+    end
   end
 
   def handle_info(:fetch_data, %{uuid: uuid, last_update: last_update, opts: opts} = state) do
@@ -48,13 +72,10 @@ defmodule Idiom.Backend.Phrase do
   defp fetch_data(uuid, last_update, opts) do
     params = [client: "idiom", unique_identifier: uuid, last_update: last_update]
 
-    with base_url when is_binary(base_url) <- Keyword.get(opts, :base_url, "https://ota.eu.phrase.com"),
-         distribution_id when is_binary(distribution_id) <- Keyword.get(opts, :distribution_id),
-         distribution_secret when is_binary(distribution_secret) <- Keyword.get(opts, :distribution_secret) do
-      Keyword.get(opts, :locales, [])
-      |> Enum.map(&fetch_locale(base_url, distribution_id, distribution_secret, &1, params))
-      |> Enum.reduce(%{}, fn locale, acc -> Map.merge(locale, acc) end)
-    end
+    %{base_url: base_url, distribution_id: distribution_id, distribution_secret: distribution_secret, locales: locales} = Map.new(opts)
+
+    Enum.map(locales, &fetch_locale(base_url, distribution_id, distribution_secret, &1, params))
+    |> Enum.reduce(%{}, fn locale, acc -> Map.merge(locale, acc) end)
   end
 
   defp fetch_locale(base_url, distribution_id, distribution_secret, locale, params) do
