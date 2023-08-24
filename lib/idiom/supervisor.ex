@@ -10,6 +10,12 @@ defmodule Idiom.Supervisor do
       default_options()
       |> Keyword.merge(options)
 
+    local_data = Idiom.Local.data()
+    data = Keyword.get(options, :data, %{})
+
+    Map.merge(local_data, data)
+    |> Cache.init()
+
     name = Keyword.fetch!(options, :name)
     Supervisor.start_link(__MODULE__, options, name: name)
   end
@@ -19,20 +25,20 @@ defmodule Idiom.Supervisor do
   end
 
   @impl Supervisor
-  def init(options) do
-    data = Keyword.get(options, :data, %{})
-    backend = Application.get_env(:idiom, :backend)
-    local_data = Idiom.Local.data()
-
-    Map.merge(local_data, data)
-    |> Cache.init()
+  def init(_opts) do
+    backend = Application.get_env(:idiom, :backend, nil)
+    backend_opts = Application.get_env(:idiom, backend, [])
 
     children =
       [
         {Finch, name: IdiomFinch},
-        backend
+        {backend, backend_opts}
       ]
-      |> Enum.reject(&is_nil/1)
+      |> Enum.reject(fn
+        nil -> true
+        {nil, _opts} -> true
+        _ -> false
+      end)
 
     Supervisor.init(children, strategy: :one_for_one)
   end

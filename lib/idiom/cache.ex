@@ -32,7 +32,7 @@ defmodule Idiom.Cache do
   """
   @spec init(map(), atom()) :: :ok
   def init(initial_state \\ %{}, table_name \\ @cache_table_name) when is_map(initial_state) do
-    :ets.new(table_name, [:public, :named_table, read_concurrency: true])
+    :ets.new(table_name, [:set, :public, :named_table, read_concurrency: true, decentralized_counters: true])
     insert_keys(initial_state, table_name)
   end
 

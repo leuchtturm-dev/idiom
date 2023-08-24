@@ -1,6 +1,9 @@
 defmodule Idiom.Backend.Phrase do
-  # TODO: moduledoc
-  @moduledoc ""
+  @moduledoc """
+  Backend for [Phrase](https://phrase.com).
+
+  **Not yet complete. Use at your own risk. The API might change without notice.**
+  """
 
   # TODO:
   # The plan for this module is
@@ -12,9 +15,6 @@ defmodule Idiom.Backend.Phrase do
   #       fetch_interval: 120_000,
   #       ... credentials
   #   - ask Soenke for a way to get available locales without Strings API credentials?
-  # Open questions:
-  #   - How are namespaces assigned?
-  #     For keys like `signup.foo`, have `signup` be the namespace? What about keys without a dot?
 
   use GenServer
   alias Idiom.Cache
@@ -26,31 +26,44 @@ defmodule Idiom.Backend.Phrase do
   def init(opts) do
     Process.send(self(), :fetch_data, [])
 
-    locales = Keyword.get(opts, :locales, [])
-
-    {:ok, [locales: locales]}
+    uuid = Uniq.UUID.uuid6()
+    {:ok, %{uuid: uuid, last_update: nil, opts: opts}}
   end
 
-  def handle_info(:fetch_data, state) do
-    ["de-DE"]
-    |> Enum.map(&fetch_data/1)
-    |> Enum.reduce(%{}, fn data, acc -> Map.merge(data, acc) end)
+  def handle_info(:fetch_data, %{uuid: uuid, last_update: last_update, opts: opts} = state) do
+    fetch_data(uuid, last_update, opts)
     |> Cache.insert_keys()
 
-    schedule_refresh()
+    interval = Keyword.get(opts, :fetch_interval, 600_000)
+    schedule_refresh(interval)
 
-    {:noreply, state}
+    last_update = DateTime.utc_now() |> DateTime.to_unix()
+    {:noreply, %{state | last_update: last_update}}
   end
 
-  defp schedule_refresh() do
-    Process.send_after(self(), :fetch_data, 1_000)
+  defp schedule_refresh(interval) do
+    Process.send_after(self(), :fetch_data, interval)
   end
 
-  defp fetch_data(locale) do
-    with distribution_id when is_binary(distribution_id) <- "54070a20cb50153126e891eaee37121a",
-         distribution_secret when is_binary(distribution_secret) <- "K14wARUvEikIj_7-HlnuZc0uFLG1w_OgUviNi5mDpsQ",
-         {:ok, response} <- Req.get("https://ota.eu.phrase.com//#{distribution_id}/#{distribution_secret}/#{locale}/i18next_4") do
-      Map.new([{locale, %{"default" => response.body}}])
+  defp fetch_data(uuid, last_update, opts) do
+    params = [client: "idiom", unique_identifier: uuid, last_update: last_update]
+
+    with base_url when is_binary(base_url) <- Keyword.get(opts, :base_url, "https://ota.eu.phrase.com"),
+         distribution_id when is_binary(distribution_id) <- Keyword.get(opts, :distribution_id),
+         distribution_secret when is_binary(distribution_secret) <- Keyword.get(opts, :distribution_secret) do
+      Keyword.get(opts, :locales, [])
+      |> Enum.map(&fetch_locale(base_url, distribution_id, distribution_secret, &1, params))
+      |> Enum.reduce(%{}, fn locale, acc -> Map.merge(locale, acc) end)
+    end
+  end
+
+  defp fetch_locale(base_url, distribution_id, distribution_secret, locale, params) do
+    case Req.get("#{distribution_id}/#{distribution_secret}/#{locale}/i18next_4", base_url: base_url, params: params) do
+      {:ok, response} ->
+        Map.new([{locale, %{"default" => response.body}}])
+
+      _ ->
+        %{}
     end
   end
 end
