@@ -78,7 +78,7 @@ defmodule Idiom.Cache do
 
   defp map_to_cache_data(value, keys) when is_map(value) do
     Enum.flat_map(value, fn {key, value} ->
-      map_to_cache_data(value, List.insert_at(keys, -1, key))
+      map_to_cache_data(value, keys ++ [key])
     end)
   end
 
