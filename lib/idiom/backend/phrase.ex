@@ -14,7 +14,7 @@ defmodule Idiom.Backend.Phrase do
   ```
 
   ## Configuration
-  
+
   The Phrase backend currently supports the following configuration options:
 
   ```elixir
@@ -27,14 +27,14 @@ defmodule Idiom.Backend.Phrase do
   ```
 
   ### Creating a distribution
-  
+
   In order to create a Phrase Strings OTA distribution, head to the "Over the air" page in your Phrase dashboard and create a distribution using the
   `i18next (React Native)` platform. This will give you a Distribution ID as well as a secret for both development and production environments.
   """
 
   use GenServer
-  require Logger
   alias Idiom.Cache
+  require Logger
 
   @opts_schema [
     distribution_id: [
