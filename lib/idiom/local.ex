@@ -59,7 +59,7 @@ defmodule Idiom.Local do
         Application.get_env(:idiom, :data_dir) ||
         "priv/idiom"
 
-    Path.join(data_dir, "**/*.json")
+    Path.join(data_dir, "*/*.json")
     |> Path.wildcard()
     |> Enum.map(&parse_file/1)
     |> Enum.reject(&is_nil/1)
