@@ -35,6 +35,10 @@ defmodule Idiom.Backend.Phrase do
     ],
     locales: [
       type: {:list, :string}
+    ],
+    fetch_interval: [
+      type: :non_neg_integer,
+      default: 600_000
     ]
   ]
 
@@ -47,10 +51,11 @@ defmodule Idiom.Backend.Phrase do
       {:ok, opts} ->
         Process.send(self(), :fetch_data, [])
         uuid = Uniq.UUID.uuid6()
+
         {:ok, %{uuid: uuid, last_update: nil, opts: opts}}
 
-      {:error, error} ->
-        raise "Could not start `Idiom.Backend.Phrase` due to misconfiguration: #{error.message}"
+      {:error, %{message: message}} ->
+        raise "Could not start `Idiom.Backend.Phrase` due to misconfiguration: #{message}"
     end
   end
 
@@ -58,7 +63,7 @@ defmodule Idiom.Backend.Phrase do
     fetch_data(uuid, last_update, opts)
     |> Cache.insert_keys()
 
-    interval = Keyword.get(opts, :fetch_interval, 600_000)
+    interval = Keyword.get(opts, :fetch_interval)
     schedule_refresh(interval)
 
     last_update = DateTime.utc_now() |> DateTime.to_unix()
