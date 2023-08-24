@@ -38,7 +38,7 @@ and_condition     ->  relation and_op and_condition : and_ast('$1', '$3').
 and_condition     ->  relation                      : '$1'.
 
 relation          ->  expression not_equals range_list  : not_ast(conditional_ast(equals, '$1', '$3')).
-relation          ->  expression equals range_list : conditional_ast(equals, '$1', '$3').
+relation          ->  expression equals range_list      : conditional_ast(equals, '$1', '$3').
 relation          ->  expression not_op in range_list   : not_ast(conditional_ast(equals, '$1', '$4')).
 
 expression        ->  variable modulo_op value : mod_ast('$1', '$3').
