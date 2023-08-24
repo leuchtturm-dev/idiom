@@ -1,5 +1,4 @@
 VERSION 0.7
-PROJECT cschmatzler/idiom
 
 ARG --global --required BASE
 
