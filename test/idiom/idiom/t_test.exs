@@ -2,7 +2,7 @@ defmodule Idiom.Idiom.TTest do
   use ExUnit.Case, async: true
   alias Idiom.Cache
 
-  setup do
+  setup_all do
     File.read!("test/data.json")
     |> Jason.decode!()
     |> Cache.init(:t_test)

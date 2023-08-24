@@ -4,7 +4,7 @@ defmodule Idiom.Cache.GetTranslationTest do
 
   @cache_table_name :get_translation_test
 
-  setup do
+  setup_all do
     initial_state = File.read!("test/data.json") |> Jason.decode!()
     Cache.init(initial_state, @cache_table_name)
   end

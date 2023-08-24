@@ -4,7 +4,7 @@ defmodule Idiom.Cache.InsertKeysTest do
 
   @cache_table_name :insert_keys_test
 
-  setup do
+  setup_all do
     initial_state = File.read!("test/data.json") |> Jason.decode!()
     Cache.init(initial_state, @cache_table_name)
   end
