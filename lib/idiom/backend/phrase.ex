@@ -2,29 +2,41 @@ defmodule Idiom.Backend.Phrase do
   @moduledoc """
   Backend for [Phrase](https://phrase.com).
 
-  **Not yet complete. Use at your own risk. The API might change without notice.**
-  """
+  **Not yet complete. Use at your own risk. Things might break at any time.**
 
-  # NOTE:
-  # The plan for this module is
-  #   - to have locales configurable in application configuration, but also allow them to be fetched from Strings API (requires extra authentication)
-  #   - default configuration should look something like
-  #     config :idiom, Idiom.Backend.Phrase,
-  #       locales: ["de-DE", "en-US"],
-  #       fetch_locales_from_strings: false,
-  #       fetch_interval: 120_000,
-  #       ... credentials
-  #   - ask Soenke for a way to get available locales without Strings API credentials?
+  ## Usage
+
+  In order to use the Phrase backend, set it in your Idiom configuration:
+
+  ```elixir
+  config :idiom,
+    backend: Idiom.Backend.Phrase
+  ```
+
+  ## Configuration
+  
+  The Phrase backend currently supports the following configuration options:
+
+  ```elixir
+  config :idiom, Idiom.Backend.Phrase,
+    distribution_id: "", # required
+    distribution_secret: "", # required
+    locales: ["de-DE", "en-US"], # required
+    base_url: "https://ota.eu.phrase.com",
+    fetch_interval: 600_000
+  ```
+
+  ### Creating a distribution
+  
+  In order to create a Phrase Strings OTA distribution, head to the "Over the air" page in your Phrase dashboard and create a distribution using the
+  `i18next (React Native)` platform. This will give you a Distribution ID as well as a secret for both development and production environments.
+  """
 
   use GenServer
   require Logger
   alias Idiom.Cache
 
   @opts_schema [
-    base_url: [
-      type: :string,
-      default: "https://ota.eu.phrase.com"
-    ],
     distribution_id: [
       type: :string,
       required: true
@@ -34,7 +46,12 @@ defmodule Idiom.Backend.Phrase do
       required: true
     ],
     locales: [
-      type: {:list, :string}
+      type: {:list, :string},
+      required: true
+    ],
+    base_url: [
+      type: :string,
+      default: "https://ota.eu.phrase.com"
     ],
     fetch_interval: [
       type: :non_neg_integer,
@@ -42,10 +59,12 @@ defmodule Idiom.Backend.Phrase do
     ]
   ]
 
+  @doc false
   def start_link(opts) do
     GenServer.start_link(__MODULE__, opts, name: __MODULE__)
   end
 
+  @impl GenServer
   def init(opts) do
     case NimbleOptions.validate(opts, @opts_schema) do
       {:ok, opts} ->
@@ -55,10 +74,11 @@ defmodule Idiom.Backend.Phrase do
         {:ok, %{uuid: uuid, last_update: nil, opts: opts}}
 
       {:error, %{message: message}} ->
-        raise "Could not start `Idiom.Backend.Phrase` due to misconfiguration: #{message}"
+        raise "Could not start `Idiom.Backend.Phrase` due to invalid configuration: #{message}"
     end
   end
 
+  @impl GenServer
   def handle_info(:fetch_data, %{uuid: uuid, last_update: last_update, opts: opts} = state) do
     fetch_data(uuid, last_update, opts)
     |> Cache.insert_keys()
@@ -77,7 +97,7 @@ defmodule Idiom.Backend.Phrase do
   defp fetch_data(uuid, last_update, opts) do
     params = [client: "idiom", unique_identifier: uuid, last_update: last_update]
 
-    %{base_url: base_url, distribution_id: distribution_id, distribution_secret: distribution_secret, locales: locales} = Map.new(opts)
+    %{locales: locales, base_url: base_url, distribution_id: distribution_id, distribution_secret: distribution_secret} = Map.new(opts)
 
     Enum.map(locales, &fetch_locale(base_url, distribution_id, distribution_secret, &1, params))
     |> Enum.reduce(%{}, fn locale, acc -> Map.merge(locale, acc) end)
