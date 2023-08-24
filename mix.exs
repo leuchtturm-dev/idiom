@@ -35,9 +35,9 @@ defmodule Idiom.MixProject do
     [
       {:decimal, "~> 2.1"},
       {:jason, "~> 1.0"},
+      {:nimble_options, "~> 1.0"},
       {:req, "~> 0.3"},
       {:uniq, "~> 0.6"},
-      {:nimble_options, "~> 1.0"},
       {:credo, "~> 1.7", only: [:dev, :test]},
       {:ex_doc, "~> 0.30", only: :dev},
       {:dialyxir, "~> 1.3", only: [:dev, :test], runtime: false},
