@@ -1,30 +1,14 @@
 VERSION 0.7
 PROJECT cschmatzler/idiom
 
+ARG --global --required BASE
+
 ci:
-  PIPELINE
-  TRIGGER push main
-  TRIGGER pr main
-
-  BUILD +run --BASE=1.15.4-erlang-26.0.2-debian-bookworm-20230612-slim
-  BUILD +run --BASE=1.15.4-erlang-25.3.2.2-debian-bookworm-20230612-slim
-  BUILD +run --BASE=1.15.4-erlang-24.3.4.9-debian-bookworm-20230612-slim
-  BUILD +run --BASE=1.14.5-erlang-26.0.2-debian-bookworm-20230612-slim
-  BUILD +run --BASE=1.14.5-erlang-25.3.2.2-debian-bookworm-20230612-slim
-  BUILD +run --BASE=1.14.5-erlang-24.3.4.9-debian-bookworm-20230612-slim
-  BUILD +run --BASE=1.13.4-erlang-25.3.2.2-debian-bookworm-20230612-slim
-  BUILD +run --BASE=1.13.4-erlang-24.3.4.9-debian-bookworm-20230612-slim
-
-run:
-  ARG --required BASE
-
-  BUILD +test --BASE=$BASE
-  BUILD +lint --BASE=$BASE
-  BUILD +typespecs --BASE=$BASE
+  BUILD +test
+  BUILD +lint
+  BUILD +typespecs
 
 setup-base:
-  ARG --required BASE
-
   FROM hexpm/elixir:$BASE
 
   RUN apt-get update && apt-get install -y build-essential && rm -rf /var/lib/apt/lists/*
