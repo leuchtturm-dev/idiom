@@ -56,7 +56,7 @@ value             ->  integer : unwrap('$1').
 
 Erlang code.
 
-unwrap({_,_,V}) -> V.
+unwrap({_, _, V}) -> V.
 
 atom(Token) ->
   list_to_atom(unwrap(Token)).
