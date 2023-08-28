@@ -263,6 +263,13 @@ defmodule Idiom do
   require Logger
 
   @doc false
+  defmacro __using__(_opts) do
+    quote do
+      @before_compile Idiom.Compiler
+    end
+  end
+
+  @doc false
   defdelegate child_spec(options), to: Idiom.Supervisor
 
   @type translate_opts() :: [

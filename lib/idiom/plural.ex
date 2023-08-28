@@ -23,10 +23,25 @@ defmodule Idiom.Plural do
          |> File.read!()
          |> Jason.decode!()
          |> get_in(["supplemental", "plurals-type-cardinal"])
-         |> Enum.map(fn {lang, rules} -> {lang, parse_rules(rules)} end)
-         |> Map.new()
 
-  for {locale, rules} <- @rules do
+  @suffixes @rules
+            |> Enum.map(fn {lang, rules} ->
+              {lang,
+               Enum.reduce(rules, [], fn {"pluralRule-count-" <> suffix, _rule}, acc ->
+                 [suffix | acc]
+               end)}
+            end)
+            |> Map.new()
+
+  @functions "priv/idiom"
+             |> Path.join("/plurals.json")
+             |> File.read!()
+             |> Jason.decode!()
+             |> get_in(["supplemental", "plurals-type-cardinal"])
+             |> Enum.map(fn {lang, rules} -> {lang, parse_rules(rules)} end)
+             |> Map.new()
+
+  for {locale, rules} <- @functions do
     # | ----------|-------------------------------------------------------------------|
     # | Parameter | Value                                                             |
     # | ----------|------------------------------------------------------------------ |
@@ -47,6 +62,12 @@ defmodule Idiom.Plural do
   defp get_suffix(locale, _n, _i, _v, _w, _f, _t) do
     Logger.warning("No plural rules found for #{locale} - returning `other`")
     "other"
+  end
+
+  # TODO: docs and spec
+  def get_suffixes(locale) do
+    language = Locales.get_language(locale)
+    Map.get(@suffixes, language, ["other"])
   end
 
   @doc """
