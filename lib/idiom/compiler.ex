@@ -1,18 +1,12 @@
 defmodule Idiom.Compiler do
   defmacro __before_compile__(_env) do
-    quote do
-      unquote(macros())
-    end
-  end
-
-  defp macros() do
     quote unquote: false do
       defmacro t_extract(key, opts) do
         if Application.get_env(:idiom, :extracting?) do
           file = __CALLER__.file
           key = Idiom.Compiler.expand_to_binary(key, __CALLER__)
-          namespace = Keyword.get(opts, :namespace) |> Idiom.Compiler.expand_to_binary( __CALLER__)
-          has_count? = Keyword.has_key?(opts, :count) 
+          namespace = Keyword.get(opts, :namespace) |> Idiom.Compiler.expand_to_binary(__CALLER__)
+          has_count? = Keyword.has_key?(opts, :count)
 
           if is_binary(key) do
             :ets.insert(:extracted_keys, {%{file: file, key: key, namespace: namespace, has_count?: has_count?}})
