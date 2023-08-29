@@ -1,7 +1,7 @@
 defmodule Idiom.Idiom.TTest do
   use ExUnit.Case, async: true
   alias Idiom.Cache
-  import UseIdiom
+  require UseIdiom
 
   setup_all do
     File.read!("test/data.json")

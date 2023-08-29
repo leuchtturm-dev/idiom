@@ -278,7 +278,7 @@ defmodule Idiom do
 
       defmacro t(key, opts) when is_list(opts) do
         quote do
-          t_extract(unquote(key), unquote(opts))
+          unquote(__MODULE__).t_extract(unquote(key), unquote(opts))
 
           Idiom.t(unquote(key), %{}, unquote(opts))
         end
@@ -286,7 +286,7 @@ defmodule Idiom do
 
       defmacro t(key, bindings \\ Macro.escape(%{}), opts \\ Macro.escape([])) do
         quote do
-          t_extract(unquote(key), unquote(opts))
+          unquote(__MODULE__).t_extract(unquote(key), unquote(opts))
 
           Idiom.t(unquote(key), unquote(bindings), unquote(opts))
         end
