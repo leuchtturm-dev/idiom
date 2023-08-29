@@ -26,18 +26,16 @@ defmodule Idiom.Plural do
 
   @suffixes @rules
             |> Enum.map(fn {lang, rules} ->
-              {lang,
-               Enum.reduce(rules, [], fn {"pluralRule-count-" <> suffix, _rule}, acc ->
-                 [suffix | acc]
-               end)}
+              suffixes =
+                Enum.reduce(rules, [], fn {"pluralRule-count-" <> suffix, _rule}, acc ->
+                  [suffix | acc]
+                end)
+
+              {lang, suffixes}
             end)
             |> Map.new()
 
-  @functions "priv/idiom"
-             |> Path.join("/plurals.json")
-             |> File.read!()
-             |> Jason.decode!()
-             |> get_in(["supplemental", "plurals-type-cardinal"])
+  @functions @rules
              |> Enum.map(fn {lang, rules} -> {lang, parse_rules(rules)} end)
              |> Map.new()
 
