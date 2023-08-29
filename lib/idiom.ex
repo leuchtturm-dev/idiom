@@ -264,8 +264,33 @@ defmodule Idiom do
 
   @doc false
   defmacro __using__(_opts) do
-    quote do
-      @before_compile Idiom.Compiler
+    quote unquote: false do
+      defmacro t_extract(key, opts) do
+        file = __CALLER__.file
+        key = Idiom.Util.expand_to_binary(key, __CALLER__)
+        namespace = Keyword.get(opts, :namespace) |> Idiom.Util.expand_to_binary(__CALLER__)
+        has_count? = Keyword.has_key?(opts, :count)
+
+        if is_binary(key) and Application.get_env(:idiom, :extracting?) do
+          :ets.insert(:extracted_keys, {%{file: file, key: key, namespace: namespace, has_count?: has_count?}})
+        end
+      end
+
+      defmacro t(key, opts) when is_list(opts) do
+        quote do
+          t_extract(unquote(key), unquote(opts))
+
+          Idiom.t(unquote(key), %{}, unquote(opts))
+        end
+      end
+
+      defmacro t(key, bindings \\ Macro.escape(%{}), opts \\ Macro.escape([])) do
+        quote do
+          t_extract(unquote(key), unquote(opts))
+
+          Idiom.t(unquote(key), unquote(bindings), unquote(opts))
+        end
+      end
     end
   end
 
