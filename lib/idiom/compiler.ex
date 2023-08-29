@@ -7,48 +7,34 @@ defmodule Idiom.Compiler do
 
   defp macros() do
     quote unquote: false do
-      defmacro t_extract(key, bindings, opts) do
-        key =
-          Idiom.Compiler.expand_to_binary(key, __CALLER__)
-          |> IO.inspect(label: "key")
+      defmacro t_extract(key, opts) do
+        if Application.get_env(:idiom, :extracting?) do
+          file = __CALLER__.file
+          key = Idiom.Compiler.expand_to_binary(key, __CALLER__)
+          namespace = Keyword.get(opts, :namespace) |> Idiom.Compiler.expand_to_binary( __CALLER__)
+          has_count? = Keyword.has_key?(opts, :count) 
 
-        namespace =
-          opts[:namespace]
-          |> IO.inspect(label: "ns")
-
-        suffixes = Idiom.Plural.get_suffixes("en")
-
-        keys_with_suffixes =
-          if opts[:count],
-            do: Enum.map(suffixes, fn suffix -> key <> "_" <> suffix end),
-            else: [key]
-
-        IO.inspect(keys_with_suffixes)
-
-        key
-      end
-
-      defmacro t(key) do
-        quote do
-          key = t_extract(unquote(key), %{}, [])
-
-          Idiom.t(key, %{}, [])
+          if is_binary(key) do
+            :ets.insert(:extracted_keys, {%{file: file, key: key, namespace: namespace, has_count?: has_count?}})
+          end
+        else
+          :noop
         end
       end
 
-      defmacro t(key, opts) do
+      defmacro t(key, opts) when is_list(opts) do
         quote do
-          key = t_extract(unquote(key), %{}, unquote(opts))
+          t_extract(unquote(key), unquote(opts))
 
-          Idiom.t(key, %{}, unquote(opts))
+          Idiom.t(unquote(key), %{}, unquote(opts))
         end
       end
 
-      defmacro t(key, bindings, opts) do
+      defmacro t(key, bindings \\ Macro.escape(%{}), opts \\ Macro.escape([])) do
         quote do
-          key = t_extract(unquote(key), unquote(bindings), unquote(opts))
+          t_extract(unquote(key), unquote(opts))
 
-          Idiom.t(key, unquote(bindings), unquote(opts))
+          Idiom.t(unquote(key), unquote(bindings), unquote(opts))
         end
       end
     end
