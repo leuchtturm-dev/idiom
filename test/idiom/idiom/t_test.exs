@@ -1,6 +1,7 @@
 defmodule Idiom.Idiom.TTest do
   use ExUnit.Case, async: true
   alias Idiom.Cache
+  import UseIdiom
 
   setup_all do
     File.read!("test/data.json")
@@ -33,8 +34,12 @@ defmodule Idiom.Idiom.TTest do
     ]
 
     for %{key: key, opts: opts, expected: expected} <- tests do
-      test "correctly translates `#{key}` with opts `#{inspect(opts)}`" do
+      test "function - correctly translates `#{key}` with opts `#{inspect(opts)}`" do
         assert Idiom.t(unquote(key), unquote(opts)) == unquote(expected)
+      end
+
+      test "macro - correctly translates `#{key}` with opts `#{inspect(opts)}`" do
+        assert UseIdiom.t(unquote(key), unquote(opts)) == unquote(expected)
       end
     end
   end
