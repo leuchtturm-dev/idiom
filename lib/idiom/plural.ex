@@ -30,6 +30,7 @@ defmodule Idiom.Plural do
                 Enum.reduce(rules, [], fn {"pluralRule-count-" <> suffix, _rule}, acc ->
                   [suffix | acc]
                 end)
+                |> Enum.sort(&suffix_sorter/2)
 
               {lang, suffixes}
             end)

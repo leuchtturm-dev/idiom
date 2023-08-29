@@ -28,12 +28,12 @@ defmodule Idiom.PluralPreprocess do
     |> rules_to_cond()
   end
 
-  defp suffix_sorter({"zero", _}, _), do: true
-  defp suffix_sorter({"one", _}, {other, _}) when other in ["two", "few", "many", "other"], do: true
-  defp suffix_sorter({"two", _}, {other, _}) when other in ["few", "many", "other"], do: true
-  defp suffix_sorter({"few", _}, {other, _}) when other in ["many", "other"], do: true
-  defp suffix_sorter({"many", _}, {other, _}) when other in ["other"], do: true
-  defp suffix_sorter(_, _), do: false
+  def suffix_sorter({"zero", _}, _), do: true
+  def suffix_sorter({"one", _}, {other, _}) when other in ["two", "few", "many", "other"], do: true
+  def suffix_sorter({"two", _}, {other, _}) when other in ["few", "many", "other"], do: true
+  def suffix_sorter({"few", _}, {other, _}) when other in ["many", "other"], do: true
+  def suffix_sorter({"many", _}, {other, _}) when other in ["other"], do: true
+  def suffix_sorter(_, _), do: false
 
   defp parse([]), do: {:ok, []}
   defp parse(tokens) when is_list(tokens), do: :plural_parser.parse(tokens)
