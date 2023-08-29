@@ -13,7 +13,7 @@ defmodule Mix.Tasks.Idiom.Extract do
       Application.get_env(:idiom, :data_dir) ||
         "priv/idiom"
 
-    template_dir =   Path.join(base_dir, "template")
+    template_dir = Path.join(base_dir, "template")
     File.mkdir_p!(template_dir)
 
     :ets.tab2list(:extracted_keys)
