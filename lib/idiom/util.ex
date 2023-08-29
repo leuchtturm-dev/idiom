@@ -1,7 +1,7 @@
 defmodule Idiom.Util do
   def expand_to_binary(term, env) do
     case Macro.expand(term, env) do
-      term when is_binary(term) or is_nil(term) ->
+      term when is_binary(term) ->
         term
 
       {:<<>>, _, pieces} ->
