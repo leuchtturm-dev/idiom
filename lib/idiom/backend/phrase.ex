@@ -22,8 +22,9 @@ defmodule Idiom.Backend.Phrase do
     distribution_id: "", # required
     distribution_secret: "", # required
     locales: ["de-DE", "en-US"], # required
-    base_url: "https://ota.eu.phrase.com",
-    fetch_interval: 600_000
+    datacenter: "eu",
+    fetch_interval: 600_000,
+    otp_app: :foo # optional, for Phrase's appVersion support
   ```
 
   ### Creating a distribution
@@ -49,13 +50,16 @@ defmodule Idiom.Backend.Phrase do
       type: {:list, :string},
       required: true
     ],
-    base_url: [
+    datacenter: [
       type: :string,
-      default: "https://ota.eu.phrase.com"
+      default: "eu"
     ],
     fetch_interval: [
       type: :non_neg_integer,
       default: 600_000
+    ],
+    otp_app: [
+      type: :atom
     ]
   ]
 
@@ -69,8 +73,9 @@ defmodule Idiom.Backend.Phrase do
     case NimbleOptions.validate(opts, @opts_schema) do
       {:ok, opts} ->
         Process.send(self(), :fetch_data, [])
-        uuid = Uniq.UUID.uuid6()
 
+        uuid = Uniq.UUID.uuid6()
+        opts = maybe_add_app_version_to_opts(opts, opts[:otp_app])
         {:ok, %{uuid: uuid, per_locale_state: %{}, opts: opts}}
 
       {:error, %{message: message}} ->
@@ -93,19 +98,27 @@ defmodule Idiom.Backend.Phrase do
   end
 
   defp fetch_data(uuid, per_locale_state, opts) do
-    %{locales: locales, base_url: base_url, distribution_id: distribution_id, distribution_secret: distribution_secret} = Map.new(opts)
+    locales = Keyword.get(opts, :locales)
 
-    Enum.map(locales, &fetch_locale(uuid, base_url, distribution_id, distribution_secret, &1, per_locale_state))
+    Enum.map(locales, &fetch_locale(uuid, &1, per_locale_state, opts))
     |> Enum.reduce(per_locale_state, fn locale_state, acc -> Map.merge(acc, locale_state) end)
   end
 
-  defp fetch_locale(uuid, base_url, distribution_id, distribution_secret, locale, per_locale_state) do
-    locale_state =
-      Map.get(per_locale_state, locale, %{current_version: nil, last_update: nil})
+  defp fetch_locale(uuid, locale, per_locale_state, opts) do
+    %{locales: locales, datacenter: datacenter, distribution_id: distribution_id, distribution_secret: distribution_secret, app_version: app_version} =
+      Map.new(opts)
 
-    params = [client: "idiom", unique_identifier: uuid, current_version: locale_state.current_version, last_update: locale_state.last_update]
+    locale_state = Map.get(per_locale_state, locale, %{current_version: nil, last_update: nil})
 
-    case Req.new(url: "#{distribution_id}/#{distribution_secret}/#{locale}/i18next_4", base_url: base_url, params: params)
+    params = [
+      client: "idiom",
+      unique_identifier: uuid,
+      app_version: app_version,
+      current_version: locale_state.current_version,
+      last_update: locale_state.last_update
+    ]
+
+    case Req.new(url: "#{distribution_id}/#{distribution_secret}/#{locale}/i18next_4", base_url: base_url(datacenter), params: params)
          |> Req.Request.append_response_steps(add_version_to_response: &add_version_to_response/1)
          |> Req.get() do
       {:ok, %Req.Response{status: 304}} ->
@@ -123,6 +136,14 @@ defmodule Idiom.Backend.Phrase do
     end
   end
 
+  defp maybe_add_app_version_to_opts(opts, nil), do: opts
+
+  defp maybe_add_app_version_to_opts(opts, otp_app) do
+    app_version = Application.spec(otp_app, :vsn) |> to_string()
+
+    Keyword.put(opts, :app_version, app_version)
+  end
+
   defp add_version_to_response({%{url: %{query: query}} = request, response}) do
     version =
       query
@@ -133,4 +154,19 @@ defmodule Idiom.Backend.Phrase do
   end
 
   defp last_update(), do: DateTime.utc_now() |> DateTime.to_unix()
+
+  defp base_url(datacenter) do
+    case datacenter do
+      "us" ->
+        "https://ota.us.phrase.com"
+
+      "eu" ->
+        "https://ota.eu.phrase.com"
+
+      _ ->
+        Logger.error("#{datacenter} is not a valid Phrase datacenter. Falling back to `eu`.")
+
+        "https://ota.eu.phrase.com"
+    end
+  end
 end
