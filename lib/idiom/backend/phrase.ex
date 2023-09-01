@@ -72,9 +72,9 @@ defmodule Idiom.Backend.Phrase do
   def init(opts) do
     case NimbleOptions.validate(opts, @opts_schema) do
       {:ok, opts} ->
-        Process.send(self(), :fetch_data, [])
-
         opts = maybe_add_app_version_to_opts(opts, opts[:otp_app])
+
+        Process.send(self(), :fetch_data, [])
 
         {:ok, %{current_version: nil, last_update: nil, opts: opts}}
 
@@ -85,13 +85,10 @@ defmodule Idiom.Backend.Phrase do
 
   @impl GenServer
   def handle_info(:fetch_data, %{current_version: current_version, last_update: last_update, opts: opts} = state) do
-    current_version =
-      fetch_data(current_version, last_update, opts)
-      |> Enum.map(& &1.current_version)
-      |> Enum.min()
+    current_version = fetch_data(current_version, last_update, opts)
 
-    interval = Keyword.get(opts, :fetch_interval)
-    schedule_refresh(interval)
+    Keyword.get(opts, :fetch_interval)
+    |> schedule_refresh()
 
     {:noreply, %{state | current_version: current_version, last_update: last_update_now()}}
   end
@@ -103,7 +100,11 @@ defmodule Idiom.Backend.Phrase do
   defp fetch_data(current_version, last_update, opts) do
     locales = Keyword.get(opts, :locales)
 
-    Enum.map(locales, &fetch_locale(&1, current_version, last_update, opts))
+    Enum.map(locales, fn locale ->
+      fetch_locale(locale, current_version, last_update, opts)
+      |> Map.get(:current_version)
+    end)
+    |> Enum.min()
   end
 
   defp fetch_locale(locale, current_version, last_update, opts) do
