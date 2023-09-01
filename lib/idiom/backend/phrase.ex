@@ -71,7 +71,7 @@ defmodule Idiom.Backend.Phrase do
         Process.send(self(), :fetch_data, [])
         uuid = Uniq.UUID.uuid6()
 
-        {:ok, %{uuid: uuid, last_update: nil, opts: opts}}
+        {:ok, %{uuid: uuid, per_locale_state: %{}, opts: opts}}
 
       {:error, %{message: message}} ->
         raise "Could not start `Idiom.Backend.Phrase` due to invalid configuration: #{message}"
@@ -79,37 +79,58 @@ defmodule Idiom.Backend.Phrase do
   end
 
   @impl GenServer
-  def handle_info(:fetch_data, %{uuid: uuid, last_update: last_update, opts: opts} = state) do
-    fetch_data(uuid, last_update, opts)
-    |> Cache.insert_keys()
+  def handle_info(:fetch_data, %{uuid: uuid, per_locale_state: per_locale_state, opts: opts} = state) do
+    per_locale_state = fetch_data(uuid, per_locale_state, opts)
 
     interval = Keyword.get(opts, :fetch_interval)
     schedule_refresh(interval)
 
-    last_update = DateTime.utc_now() |> DateTime.to_unix()
-    {:noreply, %{state | last_update: last_update}}
+    {:noreply, %{state | per_locale_state: per_locale_state}}
   end
 
   defp schedule_refresh(interval) do
     Process.send_after(self(), :fetch_data, interval)
   end
 
-  defp fetch_data(uuid, last_update, opts) do
-    params = [client: "idiom", unique_identifier: uuid, last_update: last_update]
-
+  defp fetch_data(uuid, per_locale_state, opts) do
     %{locales: locales, base_url: base_url, distribution_id: distribution_id, distribution_secret: distribution_secret} = Map.new(opts)
 
-    Enum.map(locales, &fetch_locale(base_url, distribution_id, distribution_secret, &1, params))
-    |> Enum.reduce(%{}, fn locale, acc -> Map.merge(locale, acc) end)
+    Enum.map(locales, &fetch_locale(uuid, base_url, distribution_id, distribution_secret, &1, per_locale_state))
+    |> Enum.reduce(per_locale_state, fn locale_state, acc -> Map.merge(acc, locale_state) end)
   end
 
-  defp fetch_locale(base_url, distribution_id, distribution_secret, locale, params) do
-    case Req.get("#{distribution_id}/#{distribution_secret}/#{locale}/i18next_4", base_url: base_url, params: params) do
-      {:ok, response} ->
-        Map.new([{locale, %{"default" => response.body}}])
+  defp fetch_locale(uuid, base_url, distribution_id, distribution_secret, locale, per_locale_state) do
+    locale_state =
+      Map.get(per_locale_state, locale, %{current_version: nil, last_update: nil})
 
-      _ ->
-        %{}
+    params = [client: "idiom", unique_identifier: uuid, current_version: locale_state.current_version, last_update: locale_state.last_update]
+
+    case Req.new(url: "#{distribution_id}/#{distribution_secret}/#{locale}/i18next_4", base_url: base_url, params: params)
+         |> Req.Request.append_response_steps(add_version_to_response: &add_version_to_response/1)
+         |> Req.get() do
+      {:ok, %Req.Response{body: body} = response} ->
+        Map.new([{locale, %{"default" => body}}])
+        |> Cache.insert_keys()
+
+        [{locale, %{current_version: Req.Response.get_private(response, :version), last_update: last_update()}}]
+        |> Map.new()
+
+      {:ok, %Req.Response{status: 304}} ->
+        Map.new([{locale, locale_state}])
+
+      _error ->
+        Map.new([{locale, locale_state}])
     end
   end
+
+  defp add_version_to_response({%{url: %{query: query}} = request, response}) do
+    version =
+      query
+      |> URI.decode_query()
+      |> Map.get("version", 1)
+
+    {request, Req.Response.put_private(response, :version, version)}
+  end
+
+  defp last_update(), do: DateTime.utc_now() |> DateTime.to_unix()
 end

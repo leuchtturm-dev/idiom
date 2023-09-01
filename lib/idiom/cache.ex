@@ -56,6 +56,8 @@ defmodule Idiom.Cache do
     |> Enum.each(fn {key, value} ->
       :ets.insert(table_name, {key, value})
     end)
+
+    :ok
   end
 
   @doc """
