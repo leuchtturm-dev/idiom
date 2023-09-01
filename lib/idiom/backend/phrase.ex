@@ -100,10 +100,7 @@ defmodule Idiom.Backend.Phrase do
   defp fetch_data(current_version, last_update, opts) do
     locales = Keyword.get(opts, :locales)
 
-    Enum.map(locales, fn locale ->
-      fetch_locale(locale, current_version, last_update, opts)
-      |> Map.get(:current_version)
-    end)
+    Enum.map(locales, &fetch_locale(&1, current_version, last_update, opts))
     |> Enum.min()
   end
 
@@ -121,16 +118,16 @@ defmodule Idiom.Backend.Phrase do
          |> Req.Request.append_response_steps(add_version_to_response: &add_version_to_response/1)
          |> Req.get() do
       {:ok, %Req.Response{status: 304}} ->
-        %{current_version: current_version}
+         current_version
 
       {:ok, %Req.Response{body: body} = response} ->
         Map.new([{locale, %{"default" => body}}])
         |> Cache.insert_keys()
 
-        %{current_version: Req.Response.get_private(response, :version)}
+        Req.Response.get_private(response, :version)
 
       _error ->
-        %{current_version: current_version}
+         current_version
     end
   end
 
