@@ -74,10 +74,9 @@ defmodule Idiom.Backend.Phrase do
       {:ok, opts} ->
         Process.send(self(), :fetch_data, [])
 
-        uuid = Uniq.UUID.uuid6()
         opts = maybe_add_app_version_to_opts(opts, opts[:otp_app])
 
-        {:ok, %{uuid: uuid, current_version: nil, last_update: nil, opts: opts}}
+        {:ok, %{current_version: nil, last_update: nil, opts: opts}}
 
       {:error, %{message: message}} ->
         raise "Could not start `Idiom.Backend.Phrase` due to invalid configuration: #{message}"
@@ -85,9 +84,9 @@ defmodule Idiom.Backend.Phrase do
   end
 
   @impl GenServer
-  def handle_info(:fetch_data, %{uuid: uuid, current_version: current_version, last_update: last_update, opts: opts} = state) do
+  def handle_info(:fetch_data, %{current_version: current_version, last_update: last_update, opts: opts} = state) do
     current_version =
-      fetch_data(uuid, current_version, last_update, opts)
+      fetch_data(current_version, last_update, opts)
       |> Enum.map(& &1.current_version)
       |> Enum.min()
 
@@ -101,18 +100,17 @@ defmodule Idiom.Backend.Phrase do
     Process.send_after(self(), :fetch_data, interval)
   end
 
-  defp fetch_data(uuid, current_version, last_update, opts) do
+  defp fetch_data(current_version, last_update, opts) do
     locales = Keyword.get(opts, :locales)
 
-    Enum.map(locales, &fetch_locale(uuid, &1, current_version, last_update, opts))
+    Enum.map(locales, &fetch_locale(&1, current_version, last_update, opts))
   end
 
-  defp fetch_locale(uuid, locale, current_version, last_update, opts) do
+  defp fetch_locale(locale, current_version, last_update, opts) do
     %{datacenter: datacenter, distribution_id: distribution_id, distribution_secret: distribution_secret, app_version: app_version} = Map.new(opts)
 
     params = [
       client: "idiom",
-      unique_identifier: uuid,
       app_version: app_version,
       current_version: current_version,
       last_update: last_update
