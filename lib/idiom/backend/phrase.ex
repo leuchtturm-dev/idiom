@@ -147,8 +147,12 @@ defmodule Idiom.Backend.Phrase do
     version =
       query
       |> URI.decode_query()
-      |> Map.get("version", "0")
-      |> String.to_integer()
+      |> Map.get("version")
+      |> case do
+        nil -> nil
+        version when is_integer(version) -> version
+        version when is_binary(version) -> String.to_integer(version)
+      end
 
     {request, Req.Response.put_private(response, :version, version)}
   end
