@@ -105,8 +105,7 @@ defmodule Idiom.Backend.Phrase do
   end
 
   defp fetch_locale(uuid, locale, per_locale_state, opts) do
-    %{locales: locales, datacenter: datacenter, distribution_id: distribution_id, distribution_secret: distribution_secret, app_version: app_version} =
-      Map.new(opts)
+    %{datacenter: datacenter, distribution_id: distribution_id, distribution_secret: distribution_secret, app_version: app_version} = Map.new(opts)
 
     locale_state = Map.get(per_locale_state, locale, %{current_version: nil, last_update: nil})
 
