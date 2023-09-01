@@ -108,15 +108,15 @@ defmodule Idiom.Backend.Phrase do
     case Req.new(url: "#{distribution_id}/#{distribution_secret}/#{locale}/i18next_4", base_url: base_url, params: params)
          |> Req.Request.append_response_steps(add_version_to_response: &add_version_to_response/1)
          |> Req.get() do
+      {:ok, %Req.Response{status: 304}} ->
+        Map.new([{locale, locale_state}])
+
       {:ok, %Req.Response{body: body} = response} ->
         Map.new([{locale, %{"default" => body}}])
         |> Cache.insert_keys()
 
         [{locale, %{current_version: Req.Response.get_private(response, :version), last_update: last_update()}}]
         |> Map.new()
-
-      {:ok, %Req.Response{status: 304}} ->
-        Map.new([{locale, locale_state}])
 
       _error ->
         Map.new([{locale, locale_state}])
@@ -127,7 +127,7 @@ defmodule Idiom.Backend.Phrase do
     version =
       query
       |> URI.decode_query()
-      |> Map.get("version", 1)
+      |> Map.get("version")
 
     {request, Req.Response.put_private(response, :version, version)}
   end
