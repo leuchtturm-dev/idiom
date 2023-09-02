@@ -19,11 +19,13 @@ defmodule Idiom.Backend.Phrase do
 
   ```elixir
   config :idiom, Idiom.Backend.Phrase,
+    datacenter: "eu",
     distribution_id: "", # required
     distribution_secret: "", # required
     locales: ["de-DE", "en-US"], # required
-    base_url: "https://ota.eu.phrase.com",
-    fetch_interval: 600_000
+    namespace: "default",
+    fetch_interval: 600_000,
+    otp_app: nil # optional, for Phrase's appVersion support
   ```
 
   ### Creating a distribution
@@ -37,6 +39,10 @@ defmodule Idiom.Backend.Phrase do
   require Logger
 
   @opts_schema [
+    datacenter: [
+      type: :string,
+      default: "eu"
+    ],
     distribution_id: [
       type: :string,
       required: true
@@ -49,13 +55,16 @@ defmodule Idiom.Backend.Phrase do
       type: {:list, :string},
       required: true
     ],
-    base_url: [
+    namespace: [
       type: :string,
-      default: "https://ota.eu.phrase.com"
+      default: "default"
     ],
     fetch_interval: [
       type: :non_neg_integer,
       default: 600_000
+    ],
+    otp_app: [
+      type: :atom
     ]
   ]
 
@@ -68,10 +77,11 @@ defmodule Idiom.Backend.Phrase do
   def init(opts) do
     case NimbleOptions.validate(opts, @opts_schema) do
       {:ok, opts} ->
-        Process.send(self(), :fetch_data, [])
-        uuid = Uniq.UUID.uuid6()
+        opts = maybe_add_app_version_to_opts(opts, opts[:otp_app])
 
-        {:ok, %{uuid: uuid, per_locale_state: %{}, opts: opts}}
+        Process.send(self(), :fetch_data, [])
+
+        {:ok, %{current_version: nil, last_update: nil, opts: opts}}
 
       {:error, %{message: message}} ->
         raise "Could not start `Idiom.Backend.Phrase` due to invalid configuration: #{message}"
@@ -79,48 +89,60 @@ defmodule Idiom.Backend.Phrase do
   end
 
   @impl GenServer
-  def handle_info(:fetch_data, %{uuid: uuid, per_locale_state: per_locale_state, opts: opts} = state) do
-    per_locale_state = fetch_data(uuid, per_locale_state, opts)
+  def handle_info(:fetch_data, %{current_version: current_version, last_update: last_update, opts: opts} = state) do
+    current_version = fetch_data(current_version, last_update, opts)
 
-    interval = Keyword.get(opts, :fetch_interval)
-    schedule_refresh(interval)
+    Keyword.get(opts, :fetch_interval)
+    |> schedule_refresh()
 
-    {:noreply, %{state | per_locale_state: per_locale_state}}
+    {:noreply, %{state | current_version: current_version, last_update: last_update_now()}}
   end
 
   defp schedule_refresh(interval) do
     Process.send_after(self(), :fetch_data, interval)
   end
 
-  defp fetch_data(uuid, per_locale_state, opts) do
-    %{locales: locales, base_url: base_url, distribution_id: distribution_id, distribution_secret: distribution_secret} = Map.new(opts)
+  defp fetch_data(current_version, last_update, opts) do
+    locales = Keyword.get(opts, :locales)
 
-    Enum.map(locales, &fetch_locale(uuid, base_url, distribution_id, distribution_secret, &1, per_locale_state))
-    |> Enum.reduce(per_locale_state, fn locale_state, acc -> Map.merge(acc, locale_state) end)
+    Enum.map(locales, &fetch_locale(&1, current_version, last_update, opts))
+    |> Enum.min()
   end
 
-  defp fetch_locale(uuid, base_url, distribution_id, distribution_secret, locale, per_locale_state) do
-    locale_state =
-      Map.get(per_locale_state, locale, %{current_version: nil, last_update: nil})
+  defp fetch_locale(locale, current_version, last_update, opts) do
+    %{datacenter: datacenter, distribution_id: distribution_id, distribution_secret: distribution_secret, namespace: namespace, app_version: app_version} =
+      Map.new(opts)
 
-    params = [client: "idiom", unique_identifier: uuid, current_version: locale_state.current_version, last_update: locale_state.last_update]
+    params = [
+      client: "idiom",
+      app_version: app_version,
+      current_version: current_version,
+      last_update: last_update
+    ]
 
-    case Req.new(url: "#{distribution_id}/#{distribution_secret}/#{locale}/i18next_4", base_url: base_url, params: params)
+    case Req.new(url: "#{distribution_id}/#{distribution_secret}/#{locale}/i18next_4", base_url: base_url(datacenter), params: params)
          |> Req.Request.append_response_steps(add_version_to_response: &add_version_to_response/1)
          |> Req.get() do
       {:ok, %Req.Response{status: 304}} ->
-        Map.new([{locale, locale_state}])
+        current_version
 
       {:ok, %Req.Response{body: body} = response} ->
-        Map.new([{locale, %{"default" => body}}])
+        Map.new([{locale, %{namespace => body}}])
         |> Cache.insert_keys()
 
-        [{locale, %{current_version: Req.Response.get_private(response, :version), last_update: last_update()}}]
-        |> Map.new()
+        Req.Response.get_private(response, :version)
 
       _error ->
-        Map.new([{locale, locale_state}])
+        current_version
     end
+  end
+
+  defp maybe_add_app_version_to_opts(opts, nil), do: opts
+
+  defp maybe_add_app_version_to_opts(opts, otp_app) do
+    app_version = Application.spec(otp_app, :vsn) |> to_string()
+
+    Keyword.put(opts, :app_version, app_version)
   end
 
   defp add_version_to_response({%{url: %{query: query}} = request, response}) do
@@ -128,9 +150,29 @@ defmodule Idiom.Backend.Phrase do
       query
       |> URI.decode_query()
       |> Map.get("version")
+      |> case do
+        nil -> nil
+        version when is_integer(version) -> version
+        version when is_binary(version) -> String.to_integer(version)
+      end
 
     {request, Req.Response.put_private(response, :version, version)}
   end
 
-  defp last_update(), do: DateTime.utc_now() |> DateTime.to_unix()
+  defp last_update_now(), do: DateTime.utc_now() |> DateTime.to_unix()
+
+  defp base_url(datacenter) do
+    case datacenter do
+      "us" ->
+        "https://ota.us.phrase.com"
+
+      "eu" ->
+        "https://ota.eu.phrase.com"
+
+      _ ->
+        Logger.error("#{datacenter} is not a valid Phrase datacenter. Falling back to `eu`.")
+
+        "https://ota.eu.phrase.com"
+    end
+  end
 end
