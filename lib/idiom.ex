@@ -265,6 +265,8 @@ defmodule Idiom do
   @doc false
   defdelegate child_spec(options), to: Idiom.Supervisor
 
+  defdelegate direction(locale), to: Locales
+
   @type translate_opts() :: [
           namespace: String.t(),
           to: String.t(),
