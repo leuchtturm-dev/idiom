@@ -89,15 +89,15 @@ defmodule Idiom.Locales do
 
   ```elixir
   iex> Idiom.Locales.direction("en-US")
-  "ltr"
+  :ltr
 
   iex> Idiom.Locales.direction("ar")
-  "rtl"
+  :rtl
   ```
   """
-  @spec direction(String.t()) :: String.t()
+  @spec direction(String.t()) :: :ltr | :rtl
   def direction(locale) do
     language = get_language(locale)
-    if Enum.member?(@rtl_languages, language), do: "rtl", else: "ltr"
+    if Enum.member?(@rtl_languages, language), do: :rtl, else: :ltr
   end
 end
