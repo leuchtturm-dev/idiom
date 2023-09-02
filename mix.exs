@@ -54,8 +54,7 @@ defmodule Idiom.MixProject do
 
   defp docs do
     [
-      main: "Idiom",
-      extras: ["Cheatsheet.cheatmd"]
+      main: "Idiom"
     ]
   end
 end

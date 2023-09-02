@@ -5,6 +5,8 @@ defmodule Idiom.Locales do
   Locale identifiers consist of a language code, an optional script code, and an optional region code, separated by a hyphen (-).
   """
 
+  @rtl_languages ~w(ar dv fa ha he ks ps sd ur yi)
+
   @doc """
   Constructs a hierarchical list of locale identifiers from the given locale.
 
@@ -78,5 +80,24 @@ defmodule Idiom.Locales do
       parts when length(parts) <= 2 -> nil
       parts -> Enum.take(parts, 2) |> Enum.join("-")
     end
+  end
+
+  @doc """
+  Returns the writing direction of the script belonging to the locale.
+
+  ## Examples
+
+  ```elixir
+  iex> Idiom.Locales.direction("en-US")
+  "ltr"
+
+  iex> Idiom.Locales.direction("ar")
+  "rtl"
+  ```
+  """
+  @spec direction(String.t()) :: String.t()
+  def direction(locale) do
+    language = get_language(locale)
+    if Enum.member?(@rtl_languages, language), do: "rtl", else: "ltr"
   end
 end
