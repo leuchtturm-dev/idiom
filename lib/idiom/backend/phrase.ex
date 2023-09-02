@@ -19,12 +19,13 @@ defmodule Idiom.Backend.Phrase do
 
   ```elixir
   config :idiom, Idiom.Backend.Phrase,
+    datacenter: "eu",
     distribution_id: "", # required
     distribution_secret: "", # required
     locales: ["de-DE", "en-US"], # required
-    datacenter: "eu",
+    namespace: "default",
     fetch_interval: 600_000,
-    otp_app: :foo # optional, for Phrase's appVersion support
+    otp_app: nil # optional, for Phrase's appVersion support
   ```
 
   ### Creating a distribution
@@ -38,6 +39,10 @@ defmodule Idiom.Backend.Phrase do
   require Logger
 
   @opts_schema [
+    datacenter: [
+      type: :string,
+      default: "eu"
+    ],
     distribution_id: [
       type: :string,
       required: true
@@ -50,9 +55,9 @@ defmodule Idiom.Backend.Phrase do
       type: {:list, :string},
       required: true
     ],
-    datacenter: [
+    namespace: [
       type: :string,
-      default: "eu"
+      default: "default"
     ],
     fetch_interval: [
       type: :non_neg_integer,
@@ -105,7 +110,8 @@ defmodule Idiom.Backend.Phrase do
   end
 
   defp fetch_locale(locale, current_version, last_update, opts) do
-    %{datacenter: datacenter, distribution_id: distribution_id, distribution_secret: distribution_secret, app_version: app_version} = Map.new(opts)
+    %{datacenter: datacenter, distribution_id: distribution_id, distribution_secret: distribution_secret, namespace: namespace, app_version: app_version} =
+      Map.new(opts)
 
     params = [
       client: "idiom",
@@ -118,16 +124,16 @@ defmodule Idiom.Backend.Phrase do
          |> Req.Request.append_response_steps(add_version_to_response: &add_version_to_response/1)
          |> Req.get() do
       {:ok, %Req.Response{status: 304}} ->
-         current_version
+        current_version
 
       {:ok, %Req.Response{body: body} = response} ->
-        Map.new([{locale, %{"default" => body}}])
+        Map.new([{locale, %{namespace => body}}])
         |> Cache.insert_keys()
 
         Req.Response.get_private(response, :version)
 
       _error ->
-         current_version
+        current_version
     end
   end
 
