@@ -124,7 +124,7 @@ defmodule Idiom.Locales do
   ```
   """
   @spec format_locale(String.t()) :: String.t()
-  def format_locale(locale) do
+  def format_locale(locale) when is_binary(locale) do
     locale
     |> String.downcase()
     |> String.replace("_", "-")
@@ -142,8 +142,8 @@ defmodule Idiom.Locales do
       [language, script, region] when script in @scripts ->
         [language, String.capitalize(script), String.upcase(region)]
 
-      [language, region, rest] ->
-        [language, String.upcase(region), rest]
+      [language, region | rest] ->
+        [language, String.upcase(region), Enum.join(rest, "-")]
     end
     |> Enum.join("-")
   end
