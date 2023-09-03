@@ -69,8 +69,8 @@ defmodule Idiom.Local do
   defp parse_file(path) do
     with {:ok, contents} <- File.read(path),
          {:ok, map} <- Jason.decode(contents),
-         {lang, domain} <- extract_lang_and_domain(path) do
-      [{lang, Map.new([{domain, map}])}]
+         {locale, domain} <- extract_locale_and_domain(path) do
+      [{locale, Map.new([{domain, map}])}]
       |> Map.new()
     else
       {:error, _error} ->
@@ -79,7 +79,7 @@ defmodule Idiom.Local do
     end
   end
 
-  defp extract_lang_and_domain(path) do
+  defp extract_locale_and_domain(path) do
     path
     |> String.split("/")
     |> Enum.reverse()

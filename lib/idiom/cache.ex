@@ -6,6 +6,8 @@ defmodule Idiom.Cache do
   and retrieving values. table
   """
 
+  alias Idiom.Locales
+
   @cache_table_name :idiom_cache
 
   @doc false
@@ -85,7 +87,7 @@ defmodule Idiom.Cache do
   end
 
   defp map_to_cache_data(value, keys) when is_binary(value) do
-    locale = Enum.at(keys, 0)
+    locale = Enum.at(keys, 0) |> Locales.format_locale()
     namespace = Enum.at(keys, 1)
     key = Enum.slice(keys, 2..-1) |> Enum.join(".")
 

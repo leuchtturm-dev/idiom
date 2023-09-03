@@ -2,9 +2,10 @@ defmodule Idiom.Locales do
   @moduledoc """
   Utility functions for handling locales.
 
-  Locale identifiers consist of a language code, an optional script code, and an optional region code, separated by a hyphen (-).
+  Locale identifiers consist of a language code, an optional script code, and an optional region code, separated by a hyphen (-) or underscore (_).
   """
 
+  @scripts ~w(arab cans cyrl hans hant latn mong)
   @rtl_languages ~w(ar dv fa ha he ks ps sd ur yi)
 
   @doc """
@@ -29,7 +30,7 @@ defmodule Idiom.Locales do
     fallback = Keyword.get(opts, :fallback)
 
     [
-      locale,
+      format_locale(locale),
       get_language_and_script(locale),
       get_language(locale),
       fallback
@@ -55,6 +56,7 @@ defmodule Idiom.Locales do
   @spec get_language(String.t()) :: String.t()
   def get_language(locale) when is_binary(locale) do
     locale
+    |> format_locale()
     |> String.split("-")
     |> hd()
   end
@@ -76,7 +78,10 @@ defmodule Idiom.Locales do
   """
   @spec get_language_and_script(String.t()) :: String.t() | nil
   def get_language_and_script(locale) when is_binary(locale) do
-    case String.split(locale, "-") do
+    locale
+    |> format_locale()
+    |> String.split("-")
+    |> case do
       parts when length(parts) <= 2 -> nil
       parts -> Enum.take(parts, 2) |> Enum.join("-")
     end
@@ -98,6 +103,48 @@ defmodule Idiom.Locales do
   @spec direction(String.t()) :: :ltr | :rtl
   def direction(locale) do
     language = get_language(locale)
+
     if Enum.member?(@rtl_languages, language), do: :rtl, else: :ltr
+  end
+
+  @doc """
+  Formats a locale string.
+
+  Idiom internally supports separating different parts of the locale code by either hyphen or underscore, which is then normalised by this function. Different
+  locales also have different capitalisation rules, which are handled here.
+
+  ## Examples
+
+  ```elixir
+  iex> Idiom.Locales.format_locale("de_de")
+  "de-DE"
+
+  iex> Idiom.Locales.format_locale("zh-hant-hk")
+  "zh-Hant-HK"
+  ```
+  """
+  @spec format_locale(String.t()) :: String.t()
+  def format_locale(locale) do
+    locale
+    |> String.downcase()
+    |> String.replace("_", "-")
+    |> String.split("-")
+    |> case do
+      [locale] ->
+        [locale]
+
+      [language, script] when script in @scripts ->
+        [language, String.capitalize(script)]
+
+      [language, region] ->
+        [language, String.upcase(region)]
+
+      [language, script, region] when script in @scripts ->
+        [language, String.capitalize(script), String.upcase(region)]
+
+      [language, region, rest] ->
+        [language, String.upcase(region), rest]
+    end
+    |> Enum.join("-")
   end
 end
