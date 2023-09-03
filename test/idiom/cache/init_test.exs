@@ -1,5 +1,5 @@
 defmodule Idiom.Cache.InitTest do
-  use ExUnit.Case, async: true
+  use ExUnit.Case, async: false
   alias Idiom.Cache
 
   setup do
