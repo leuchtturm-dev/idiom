@@ -314,7 +314,27 @@ defmodule Idiom do
   def t(key_or_keys, bindings \\ %{}, opts \\ []) do
     locale = Keyword.get(opts, :to) || get_locale()
     namespace = Keyword.get(opts, :namespace) || get_namespace()
-    fallback = Keyword.get(opts, :fallback) || Application.get_env(:idiom, :default_fallback) || "en"
+
+    run_t(locale, namespace, key_or_keys, bindings, opts)
+  end
+
+  defp run_t(locale, namespace, key_or_keys, _binding, _opts) when is_nil(locale) or is_nil(namespace) do
+    Logger.warning("""
+    Idiom: Called `t/3` without a locale or namespace set. You can configure a default locale and namespace by adding
+
+      config :idiom,
+        default_locale: "en",
+        default_namespace: "default"
+
+    to your configuration.  
+    Returning the key untranslated: #{fallback_message(key_or_keys)}
+    """)
+
+    fallback_message(key_or_keys)
+  end
+
+  defp run_t(locale, namespace, key_or_keys, bindings, opts) do
+    fallback = Keyword.get(opts, :fallback) || Application.get_env(:idiom, :default_fallback)
     count = Keyword.get(opts, :count)
     bindings = Map.put_new(bindings, :count, count)
 
@@ -334,9 +354,7 @@ defmodule Idiom do
 
     cache_table_name = Keyword.get(opts, :cache_table_name, Cache.cache_table_name())
 
-    fallback_message = List.wrap(key_or_keys) |> List.first()
-
-    Enum.find_value(lookup_keys, fallback_message, fn {locale, namespace, key} -> Cache.get_translation(locale, namespace, key, cache_table_name) end)
+    Enum.find_value(lookup_keys, fallback_message(key_or_keys), fn {locale, namespace, key} -> Cache.get_translation(locale, namespace, key, cache_table_name) end)
     |> interpolate(bindings)
   end
 
@@ -352,7 +370,7 @@ defmodule Idiom do
   """
   @spec get_locale() :: String.t()
   def get_locale() do
-    Process.get(:idiom_locale) || Application.get_env(:idiom, :default_locale) || "en"
+    Process.get(:idiom_locale) || Application.get_env(:idiom, :default_locale)
   end
 
   @doc """
@@ -384,7 +402,7 @@ defmodule Idiom do
   """
   @spec get_namespace() :: String.t()
   def get_namespace() do
-    Process.get(:idiom_namespace) || Application.get_env(:idiom, :default_namespace) || "default"
+    Process.get(:idiom_namespace) || Application.get_env(:idiom, :default_namespace)
   end
 
   @doc """
@@ -403,4 +421,7 @@ defmodule Idiom do
 
     namespace
   end
+
+  defp fallback_message(key) when is_binary(key), do: key
+  defp fallback_message(keys) when is_list(keys), do: List.first(keys)
 end
