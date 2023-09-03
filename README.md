@@ -90,7 +90,8 @@ Since this is just a wrapper around the process dictionary, it needs to be set f
 > For ease of presentation, whenever an example in this module documentation includes a translation file for context, it will be merged from the multiple
 > files that `Idiom.Source.Local` actually expects. Instead of giving you the contents of all `en/default.json`, `en-US/default.json`, `en-GB/default.json`
 > and others, it will be represented here as one merged file, such as:
-> ```json
+
+> ```
 > { 
 >   "en": {"default": { [Contents of what would usually be `en/default.json` ] }},
 >   "en-US": {"default": { [Contents of what would usually be `en-US/default.json` ] }},
