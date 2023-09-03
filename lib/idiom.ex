@@ -278,8 +278,8 @@ defmodule Idiom do
   @doc """
   Alias of `t/3` for when you don't need any bindings.
   """
-  @spec t(String.t(), translate_opts()) :: String.t()
-  def t(key, opts) when is_list(opts), do: t(key, %{}, opts)
+  @spec t(String.t() | list(String.t()), translate_opts()) :: String.t()
+  def t(key_or_keys, opts) when is_list(opts), do: t(key_or_keys, %{}, opts)
 
   @doc """
   Translates a key into a target language.
@@ -310,7 +310,7 @@ defmodule Idiom do
   ```
   """
 
-  @spec t(String.t(), map(), translate_opts()) :: String.t()
+  @spec t(String.t() | list(String.t()), map(), translate_opts()) :: String.t()
   def t(key_or_keys, bindings \\ %{}, opts \\ []) do
     locale = Keyword.get(opts, :to) || get_locale()
     namespace = Keyword.get(opts, :namespace) || get_namespace()
