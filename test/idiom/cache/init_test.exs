@@ -35,19 +35,25 @@ defmodule Idiom.Cache.InitTest do
 
     Cache.init(data)
 
-    assert Map.new(:ets.tab2list(default_table_name)) == %{
-             {"de", "default", "butterfly"} => "Schmetterling",
-             {"de", "signup", "create.account"} => "Erstelle dein Konto",
-             {"en", "default", "Natural language: the colon-ing"} => "Colons",
-             {"en", "default", "carrot_one"} => "1 carrot",
-             {"en", "default", "carrot_other"} => "{{count}} carrots",
-             {"en", "default", "deep.foo"} => "Deep bar",
-             {"en", "default", "foo"} => "bar",
-             {"en", "default", "hello"} => "hello",
-             {"en", "default", "welcome"} => "welcome, {{name}}",
-             {"en", "signup", "create.account"} => "Create your account",
-             {"es", "default", "hello"} => "hola",
-             {"fr", "default", "hello"} => "bonjour"
-           }
+    assert :ets.tab2list(default_table_name)
+           |> Map.new() ==
+             %{
+               {"de", "default", "butterfly"} => "Schmetterling",
+               {"de", "signup", "create.account"} => "Erstelle dein Konto",
+               {"en", "default", "Natural language: the colon-ing"} => "Colons",
+               {"en", "default", "carrot_one"} => "1 carrot",
+               {"en", "default", "carrot_other"} => "{{count}} carrots",
+               {"en", "default", "deep.foo"} => "Deep bar",
+               {"en", "default", "foo"} => "bar",
+               {"en", "default", "hello"} => "hello",
+               {"en", "default", "welcome"} => "welcome, {{name}}",
+               {"en", "signup", "create.account"} => "Create your account",
+               {"es", "default", "hello"} => "hola",
+               {"fr", "default", "hello"} => "bonjour",
+               {"ar", "default", "Hello world"} => "مرحبا بالعالم",
+               {"en", "default", "Welcome to our site 😊"} => "Welcome to our site 😊",
+               {"ja", "default", "Hello world"} => "こんにちは世界",
+               {"zh", "default", "Hello world"} => "你好世界"
+             }
   end
 end

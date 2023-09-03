@@ -7,7 +7,8 @@
       "Natural language: the colon-ing": "Colons",
       "carrot_one": "1 carrot",
       "carrot_other": "{{count}} carrots",
-      "welcome": "welcome, {{name}}"
+      "welcome": "welcome, {{name}}",
+      "Welcome to our site 😊": "Welcome to our site 😊"
     },
     "signup": {
       "create.account": "Create your account"
@@ -29,6 +30,21 @@
   "fr": {
     "default": {
       "hello": "bonjour"
+    }
+  },
+  "ar": {
+    "default": {
+      "Hello world": "مرحبا بالعالم"
+    }
+  },
+  "zh": {
+    "default": {
+      "Hello world": "你好世界"
+    }
+  },
+  "ja": {
+    "default": {
+      "Hello world": "こんにちは世界"
     }
   }
 }

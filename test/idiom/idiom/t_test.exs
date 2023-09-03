@@ -29,7 +29,13 @@ defmodule Idiom.Idiom.TTest do
       %{key: "carrot", opts: [count: 1, cache_table_name: :t_test], expected: "1 carrot"},
       %{key: "carrot", opts: [count: 2, cache_table_name: :t_test], expected: "2 carrots"},
       # With plural key and explicit suffix
-      %{key: "carrot_one", opts: [count: 2, cache_table_name: :t_test], expected: "1 carrot"}
+      %{key: "carrot_one", opts: [count: 2, cache_table_name: :t_test], expected: "1 carrot"},
+      # With different scripts
+      %{key: "Hello world", opts: [to: "ar", cache_table_name: :t_test], expected: "مرحبا بالعالم"},
+      %{key: "Hello world", opts: [to: "zh", cache_table_name: :t_test], expected: "你好世界"},
+      %{key: "Hello world", opts: [to: "ja", cache_table_name: :t_test], expected: "こんにちは世界"},
+      # With emoji
+      %{key: "Welcome to our site 😊", opts: [ cache_table_name: :t_test], expected: "Welcome to our site 😊"}
     ]
 
     for %{key: key, opts: opts, expected: expected} <- tests do
