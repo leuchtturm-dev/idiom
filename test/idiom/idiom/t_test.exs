@@ -35,7 +35,7 @@ defmodule Idiom.Idiom.TTest do
       %{key: "Hello world", opts: [to: "zh", cache_table_name: :t_test], expected: "你好世界"},
       %{key: "Hello world", opts: [to: "ja", cache_table_name: :t_test], expected: "こんにちは世界"},
       # With emoji
-      %{key: "Welcome to our site 😊", opts: [ cache_table_name: :t_test], expected: "Welcome to our site 😊"}
+      %{key: "Welcome to our site 😊", opts: [cache_table_name: :t_test], expected: "Welcome to our site 😊"}
     ]
 
     for %{key: key, opts: opts, expected: expected} <- tests do
