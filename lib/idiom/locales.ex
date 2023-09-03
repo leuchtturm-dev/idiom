@@ -137,7 +137,7 @@ defmodule Idiom.Locales do
         [language, String.capitalize(script)]
 
       [language, region] ->
-       [language, String.upcase(region)]
+        [language, String.upcase(region)]
 
       [language, script, region] when script in @scripts ->
         [language, String.capitalize(script), String.upcase(region)]
