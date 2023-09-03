@@ -28,6 +28,7 @@ defmodule Idiom.Locales do
   @spec get_hierarchy(String.t(), get_hierarchy_opts()) :: list(String.t())
   def get_hierarchy(locale, opts \\ [])
   def get_hierarchy(nil, _opts), do: []
+
   def get_hierarchy(locale, opts) when is_binary(locale) do
     fallback = Keyword.get(opts, :fallback)
 

@@ -354,7 +354,9 @@ defmodule Idiom do
 
     cache_table_name = Keyword.get(opts, :cache_table_name, Cache.cache_table_name())
 
-    Enum.find_value(lookup_keys, fallback_message(key_or_keys), fn {locale, namespace, key} -> Cache.get_translation(locale, namespace, key, cache_table_name) end)
+    Enum.find_value(lookup_keys, fallback_message(key_or_keys), fn {locale, namespace, key} ->
+      Cache.get_translation(locale, namespace, key, cache_table_name)
+    end)
     |> interpolate(bindings)
   end
 
