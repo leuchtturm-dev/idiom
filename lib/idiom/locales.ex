@@ -26,7 +26,7 @@ defmodule Idiom.Locales do
   """
   @type get_hierarchy_opts() :: [fallback: String.t() | list(String.t())]
   @spec get_hierarchy(String.t(), get_hierarchy_opts()) :: list(String.t())
-  def get_hierarchy(locale, opts \\ []) do
+  def get_hierarchy(locale, opts \\ []) when is_binary(locale) do
     fallback = Keyword.get(opts, :fallback)
 
     [
@@ -101,7 +101,7 @@ defmodule Idiom.Locales do
   ```
   """
   @spec direction(String.t()) :: :ltr | :rtl
-  def direction(locale) do
+  def direction(locale) when is_binary(locale) do
     language = get_language(locale)
 
     if Enum.member?(@rtl_languages, language), do: :rtl, else: :ltr
