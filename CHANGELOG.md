@@ -1,5 +1,35 @@
 # Changelog
 
+## [0.5.0](https://github.com/cschmatzler/idiom/compare/v0.4.1...v0.5.0) (2023-09-04)
+
+
+### ⚠ BREAKING CHANGES
+
+* internal cleanup
+* no longer hardcode defaults for `locale`, `namespace` and
+
+### Features
+
+* `Backend.Phrase` add support for appVersion ([1b4db7a](https://github.com/cschmatzler/idiom/commit/1b4db7a4d785b1e9eb1cc6f592ea107744243ae5))
+* `Backend.Phrase`: add `namespace` option ([1b4db7a](https://github.com/cschmatzler/idiom/commit/1b4db7a4d785b1e9eb1cc6f592ea107744243ae5))
+* `Backend.Phrase`: Add versioning ([8826094](https://github.com/cschmatzler/idiom/commit/8826094f2b447e135e9b10f292f085eb5a6f70b0))
+* add `Idiom.direction/1` ([#23](https://github.com/cschmatzler/idiom/issues/23)) ([7654c03](https://github.com/cschmatzler/idiom/commit/7654c03e33060bb414b78731c20aa4d9925a995b))
+* format locales ([#24](https://github.com/cschmatzler/idiom/issues/24)) ([b0d3236](https://github.com/cschmatzler/idiom/commit/b0d3236cbd61ec1a628d75fd985a6b4ab9f42280))
+* no longer hardcode defaults for `locale`, `namespace` and ([d760d4d](https://github.com/cschmatzler/idiom/commit/d760d4d88fe8bdc07903dbfb1810b35271e1c05c))
+
+
+### Bug Fixes
+
+* `Backend.Phrase`: fix `case` order ([f758f81](https://github.com/cschmatzler/idiom/commit/f758f8121b90f527ad969c4d41358eaa034f404f))
+* allow locales with more than 3 parts ([10606b5](https://github.com/cschmatzler/idiom/commit/10606b5f52d207b7ce017f3bddd65e23f7c9e2b7))
+* correctly mark external resources ([74df0c9](https://github.com/cschmatzler/idiom/commit/74df0c9a4032129ad888e80bb8188222bf9eb79e))
+* fix typespecs for Idiom.t/2 and Idiom.t/3 ([aeb2098](https://github.com/cschmatzler/idiom/commit/aeb209883bd98613d0d6c4f7d13ab22a970de0d2))
+
+
+### Code Refactoring
+
+* internal cleanup ([ae3ec74](https://github.com/cschmatzler/idiom/commit/ae3ec748aef1f9dc69aecd918d67c66c0a801967))
+
 ## [0.4.1](https://github.com/cschmatzler/idiom/compare/0.4.0...v0.4.1) (2023-08-24)
 
 
