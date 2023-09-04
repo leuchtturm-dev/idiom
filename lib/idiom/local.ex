@@ -59,19 +59,21 @@ defmodule Idiom.Local do
         Application.get_env(:idiom, :data_dir) ||
         "priv/idiom"
 
-    Path.join(data_dir, "*/*.json")
+    data_dir
+    |> Path.join("*/*.json")
     |> Path.wildcard()
     |> Enum.map(&parse_file/1)
     |> Enum.reject(&is_nil/1)
-    |> Enum.reduce(%{}, fn keys, acc -> Map.merge(acc, keys, fn _k, v1, v2 -> Map.merge(v1, v2) end) end)
+    |> Enum.reduce(%{}, fn keys, acc ->
+      Map.merge(acc, keys, fn _k, v1, v2 -> Map.merge(v1, v2) end)
+    end)
   end
 
   defp parse_file(path) do
     with {:ok, contents} <- File.read(path),
          {:ok, map} <- Jason.decode(contents),
          {locale, domain} <- extract_locale_and_domain(path) do
-      [{locale, Map.new([{domain, map}])}]
-      |> Map.new()
+      Map.new([{locale, Map.new([{domain, map}])}])
     else
       {:error, _error} ->
         Logger.warning("Could not parse file #{path}")

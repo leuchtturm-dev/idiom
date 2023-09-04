@@ -35,7 +35,9 @@ defmodule Idiom.Backend.Phrase do
   """
 
   use GenServer
+
   alias Idiom.Cache
+
   require Logger
 
   @opts_schema [
@@ -89,13 +91,19 @@ defmodule Idiom.Backend.Phrase do
   end
 
   @impl GenServer
-  def handle_info(:fetch_data, %{current_version: current_version, last_update: last_update, opts: opts} = state) do
+  def handle_info(
+        :fetch_data,
+        %{current_version: current_version, last_update: last_update, opts: opts} =
+          state
+      ) do
     current_version = fetch_data(current_version, last_update, opts)
 
-    Keyword.get(opts, :fetch_interval)
+    opts
+    |> Keyword.get(:fetch_interval)
     |> schedule_refresh()
 
-    {:noreply, %{state | current_version: current_version, last_update: last_update_now()}}
+    {:noreply,
+     %{state | current_version: current_version, last_update: last_update_now()}}
   end
 
   defp schedule_refresh(interval) do
@@ -105,12 +113,19 @@ defmodule Idiom.Backend.Phrase do
   defp fetch_data(current_version, last_update, opts) do
     locales = Keyword.get(opts, :locales)
 
-    Enum.map(locales, &fetch_locale(&1, current_version, last_update, opts))
+    locales
+    |> Enum.map(&fetch_locale(&1, current_version, last_update, opts))
     |> Enum.min()
   end
 
   defp fetch_locale(locale, current_version, last_update, opts) do
-    %{datacenter: datacenter, distribution_id: distribution_id, distribution_secret: distribution_secret, namespace: namespace, app_version: app_version} =
+    %{
+      datacenter: datacenter,
+      distribution_id: distribution_id,
+      distribution_secret: distribution_secret,
+      namespace: namespace,
+      app_version: app_version
+    } =
       Map.new(opts)
 
     params = [
@@ -120,14 +135,22 @@ defmodule Idiom.Backend.Phrase do
       last_update: last_update
     ]
 
-    case Req.new(url: "#{distribution_id}/#{distribution_secret}/#{locale}/i18next_4", base_url: base_url(datacenter), params: params)
-         |> Req.Request.append_response_steps(add_version_to_response: &add_version_to_response/1)
+    case [
+           url: "#{distribution_id}/#{distribution_secret}/#{locale}/i18next_4",
+           base_url: base_url(datacenter),
+           params: params
+         ]
+         |> Req.new()
+         |> Req.Request.append_response_steps(
+           add_version_to_response: &add_version_to_response/1
+         )
          |> Req.get() do
       {:ok, %Req.Response{status: 304}} ->
         current_version
 
       {:ok, %Req.Response{body: body} = response} ->
-        Map.new([{locale, %{namespace => body}}])
+        [{locale, %{namespace => body}}]
+        |> Map.new()
         |> Cache.insert_keys()
 
         Req.Response.get_private(response, :version)
@@ -140,7 +163,7 @@ defmodule Idiom.Backend.Phrase do
   defp maybe_add_app_version_to_opts(opts, nil), do: opts
 
   defp maybe_add_app_version_to_opts(opts, otp_app) do
-    app_version = Application.spec(otp_app, :vsn) |> to_string()
+    app_version = otp_app |> Application.spec(:vsn) |> to_string()
 
     Keyword.put(opts, :app_version, app_version)
   end
@@ -159,7 +182,7 @@ defmodule Idiom.Backend.Phrase do
     {request, Req.Response.put_private(response, :version, version)}
   end
 
-  defp last_update_now(), do: DateTime.utc_now() |> DateTime.to_unix()
+  defp last_update_now, do: DateTime.to_unix(DateTime.utc_now())
 
   defp base_url(datacenter) do
     case datacenter do
@@ -170,7 +193,9 @@ defmodule Idiom.Backend.Phrase do
         "https://ota.eu.phrase.com"
 
       _ ->
-        Logger.error("#{datacenter} is not a valid Phrase datacenter. Falling back to `eu`.")
+        Logger.error(
+          "#{datacenter} is not a valid Phrase datacenter. Falling back to `eu`."
+        )
 
         "https://ota.eu.phrase.com"
     end

@@ -41,12 +41,14 @@ defmodule Idiom.Interpolation do
   end
 
   defp interpolate([], parts, _bindings) do
-    Enum.reverse(parts)
+    parts
+    |> Enum.reverse()
     |> Enum.join("")
   end
 
   defp parse(message) when is_binary(message) do
-    parse(message, "", [])
+    message
+    |> parse("", [])
     |> Enum.reject(fn part -> is_binary(part) and String.equivalent?(part, "") end)
     |> Enum.reverse()
   end

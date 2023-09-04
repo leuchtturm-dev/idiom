@@ -86,7 +86,7 @@ defmodule Idiom.Locales do
     |> String.split("-")
     |> case do
       parts when length(parts) <= 2 -> nil
-      parts -> Enum.take(parts, 2) |> Enum.join("-")
+      parts -> parts |> Enum.take(2) |> Enum.join("-")
     end
   end
 

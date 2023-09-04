@@ -1,5 +1,6 @@
 defmodule Idiom.Cache.InitTest do
   use ExUnit.Case, async: false
+
   alias Idiom.Cache
 
   setup do
@@ -14,7 +15,9 @@ defmodule Idiom.Cache.InitTest do
     %{default_table_name: default_table_name}
   end
 
-  test "initializes a public ETS with read concurrency table", %{default_table_name: default_table_name} do
+  test "initializes a public ETS with read concurrency table", %{
+    default_table_name: default_table_name
+  } do
     Cache.init()
     info = :ets.info(default_table_name)
 
@@ -31,11 +34,12 @@ defmodule Idiom.Cache.InitTest do
   end
 
   test "allows setting initial data", %{default_table_name: default_table_name} do
-    data = File.read!("test/data.json") |> Jason.decode!()
+    data = "test/data.json" |> File.read!() |> Jason.decode!()
 
     Cache.init(data)
 
-    assert :ets.tab2list(default_table_name)
+    assert default_table_name
+           |> :ets.tab2list()
            |> Map.new() ==
              %{
                {"de", "default", "butterfly"} => "Schmetterling",

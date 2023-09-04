@@ -33,8 +33,16 @@ defmodule Idiom.Cache do
   ```
   """
   @spec init(map(), atom()) :: :ok
-  def init(initial_state \\ %{}, table_name \\ @cache_table_name) when is_map(initial_state) do
-    :ets.new(table_name, [:set, :public, :named_table, read_concurrency: true, decentralized_counters: true])
+  def init(initial_state \\ %{}, table_name \\ @cache_table_name)
+      when is_map(initial_state) do
+    :ets.new(table_name, [
+      :set,
+      :public,
+      :named_table,
+      read_concurrency: true,
+      decentralized_counters: true
+    ])
+
     insert_keys(initial_state, table_name)
   end
 
@@ -87,9 +95,9 @@ defmodule Idiom.Cache do
   end
 
   defp map_to_cache_data(value, keys) when is_binary(value) do
-    locale = Enum.at(keys, 0) |> Locales.format_locale()
+    locale = keys |> Enum.at(0) |> Locales.format_locale()
     namespace = Enum.at(keys, 1)
-    key = Enum.slice(keys, 2..-1) |> Enum.join(".")
+    key = keys |> Enum.slice(2..-1) |> Enum.join(".")
 
     [{{locale, namespace, key}, value}]
   end

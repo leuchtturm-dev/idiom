@@ -15,7 +15,9 @@ defmodule Idiom.Plural do
   language.
   """
   import Idiom.PluralPreprocess
+
   alias Idiom.Locales
+
   require Logger
 
   @rules "priv/idiom"
@@ -80,7 +82,9 @@ defmodule Idiom.Plural do
   @spec get_suffix(String.t(), count()) :: String.t()
   def get_suffix(locale, count)
   def get_suffix(_locale, nil), do: "other"
-  def get_suffix(locale, count) when is_binary(count), do: get_suffix(locale, Decimal.new(count))
+
+  def get_suffix(locale, count) when is_binary(count),
+    do: get_suffix(locale, Decimal.new(count))
 
   def get_suffix(locale, count) when is_float(count) do
     count = count |> Float.to_string() |> Decimal.new()
@@ -96,10 +100,10 @@ defmodule Idiom.Plural do
 
   def get_suffix(locale, count) do
     n = Decimal.abs(count)
-    i = Decimal.round(count, 0, :floor) |> Decimal.to_integer()
+    i = count |> Decimal.round(0, :floor) |> Decimal.to_integer()
     v = abs(n.exp)
 
-    mult = Integer.pow(10, v) |> Decimal.new()
+    mult = 10 |> Integer.pow(v) |> Decimal.new()
 
     f =
       n
@@ -109,15 +113,17 @@ defmodule Idiom.Plural do
       |> Decimal.to_integer()
 
     t =
-      Integer.to_string(f)
+      f
+      |> Integer.to_string()
       |> String.trim_trailing("0")
       |> case do
         "" -> 0
-        other -> Decimal.new(other) |> Decimal.to_integer()
+        other -> other |> Decimal.new() |> Decimal.to_integer()
       end
 
     w =
-      Integer.to_string(f)
+      f
+      |> Integer.to_string()
       |> String.trim_trailing("0")
       |> String.length()
 

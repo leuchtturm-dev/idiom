@@ -20,7 +20,8 @@ defmodule Idiom.PluralPreprocess do
   """
   @spec parse_rules(list({String.t(), String.t()})) :: term()
   def parse_rules(rules) do
-    Enum.map(rules, fn {"pluralRule-count-" <> suffix, rule} ->
+    rules
+    |> Enum.map(fn {"pluralRule-count-" <> suffix, rule} ->
       {:ok, ast} = parse(rule)
       {suffix, ast}
     end)
@@ -29,8 +30,14 @@ defmodule Idiom.PluralPreprocess do
   end
 
   defp suffix_sorter({"zero", _}, _), do: true
-  defp suffix_sorter({"one", _}, {other, _}) when other in ["two", "few", "many", "other"], do: true
-  defp suffix_sorter({"two", _}, {other, _}) when other in ["few", "many", "other"], do: true
+
+  defp suffix_sorter({"one", _}, {other, _})
+       when other in ["two", "few", "many", "other"],
+       do: true
+
+  defp suffix_sorter({"two", _}, {other, _}) when other in ["few", "many", "other"],
+    do: true
+
   defp suffix_sorter({"few", _}, {other, _}) when other in ["many", "other"], do: true
   defp suffix_sorter({"many", _}, {other, _}) when other in ["other"], do: true
   defp suffix_sorter(_, _), do: false

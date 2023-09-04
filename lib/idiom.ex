@@ -5,9 +5,11 @@ defmodule Idiom do
              |> Enum.fetch!(1)
 
   import Idiom.Interpolation
+
   alias Idiom.Cache
   alias Idiom.Locales
   alias Idiom.Plural
+
   require Logger
 
   @doc false
@@ -66,7 +68,8 @@ defmodule Idiom do
     run_t(locale, namespace, key_or_keys, bindings, opts)
   end
 
-  defp run_t(locale, namespace, key_or_keys, _binding, _opts) when is_nil(locale) or is_nil(namespace) do
+  defp run_t(locale, namespace, key_or_keys, _binding, _opts)
+       when is_nil(locale) or is_nil(namespace) do
     Logger.warning("""
     Idiom: Called `t/3` without a locale or namespace set. You can configure a default locale and namespace by adding
 
@@ -82,7 +85,9 @@ defmodule Idiom do
   end
 
   defp run_t(locale, namespace, key_or_keys, bindings, opts) do
-    fallback = Keyword.get(opts, :fallback) || Application.get_env(:idiom, :default_fallback)
+    fallback =
+      Keyword.get(opts, :fallback) || Application.get_env(:idiom, :default_fallback)
+
     count = Keyword.get(opts, :count)
     bindings = Map.put_new(bindings, :count, count)
 
@@ -94,15 +99,20 @@ defmodule Idiom do
     lookup_keys =
       Enum.reduce(locale_resolve_hierarchy, [], fn locale, acc ->
         acc ++
-          (List.wrap(key_or_keys)
+          (key_or_keys
+           |> List.wrap()
            |> Enum.flat_map(fn key ->
-             [{locale, namespace, key}, {locale, namespace, "#{key}_#{Plural.get_suffix(locale, count)}"}]
+             [
+               {locale, namespace, key},
+               {locale, namespace, "#{key}_#{Plural.get_suffix(locale, count)}"}
+             ]
            end))
       end)
 
     cache_table_name = Keyword.get(opts, :cache_table_name, Cache.cache_table_name())
 
-    Enum.find_value(lookup_keys, fallback_message(key_or_keys), fn {locale, namespace, key} ->
+    lookup_keys
+    |> Enum.find_value(fallback_message(key_or_keys), fn {locale, namespace, key} ->
       Cache.get_translation(locale, namespace, key, cache_table_name)
     end)
     |> interpolate(bindings)
@@ -119,7 +129,7 @@ defmodule Idiom do
   ```
   """
   @spec get_locale() :: String.t()
-  def get_locale() do
+  def get_locale do
     Process.get(:idiom_locale) || Application.get_env(:idiom, :default_locale)
   end
 
@@ -151,7 +161,7 @@ defmodule Idiom do
   ```
   """
   @spec get_namespace() :: String.t()
-  def get_namespace() do
+  def get_namespace do
     Process.get(:idiom_namespace) || Application.get_env(:idiom, :default_namespace)
   end
 

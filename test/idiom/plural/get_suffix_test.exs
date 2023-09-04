@@ -1,6 +1,8 @@
 defmodule Idiom.PluralGetSuffixTest do
   use ExUnit.Case, async: true
+
   import ExUnit.CaptureLog
+
   alias Idiom.Plural
 
   describe "when count is nil" do
@@ -81,20 +83,22 @@ defmodule Idiom.PluralGetSuffixTest do
 
   describe "when count is a Decimal" do
     tests =
-      [
-        %{lang: "en", count: Decimal.new(0), expected: "other"},
-        %{lang: "en", count: Decimal.new(1), expected: "one"},
-        %{lang: "de", count: Decimal.new(1), expected: "one"},
-        %{lang: "ar", count: Decimal.new(0), expected: "zero"},
-        %{lang: "ar", count: Decimal.new(1), expected: "one"},
-        %{lang: "ar", count: Decimal.new("2"), expected: "two"},
-        %{lang: "ar", count: Decimal.new("3"), expected: "few"},
-        %{lang: "ar", count: Decimal.new("50"), expected: "many"},
-        %{lang: "ar", count: Decimal.new("500.0"), expected: "other"},
-        %{lang: "cy", count: Decimal.new("3.1"), expected: "other"},
-        %{lang: "cy", count: Decimal.new("6.5"), expected: "other"}
-      ]
-      |> Enum.map(fn test -> Map.update!(test, :count, &Macro.escape/1) end)
+      Enum.map(
+        [
+          %{lang: "en", count: Decimal.new(0), expected: "other"},
+          %{lang: "en", count: Decimal.new(1), expected: "one"},
+          %{lang: "de", count: Decimal.new(1), expected: "one"},
+          %{lang: "ar", count: Decimal.new(0), expected: "zero"},
+          %{lang: "ar", count: Decimal.new(1), expected: "one"},
+          %{lang: "ar", count: Decimal.new("2"), expected: "two"},
+          %{lang: "ar", count: Decimal.new("3"), expected: "few"},
+          %{lang: "ar", count: Decimal.new("50"), expected: "many"},
+          %{lang: "ar", count: Decimal.new("500.0"), expected: "other"},
+          %{lang: "cy", count: Decimal.new("3.1"), expected: "other"},
+          %{lang: "cy", count: Decimal.new("6.5"), expected: "other"}
+        ],
+        fn test -> Map.update!(test, :count, &Macro.escape/1) end
+      )
 
     for %{lang: lang, count: count, expected: expected} <- tests do
       test "returns the correct suffix for lang #{lang} and count #{inspect(count)}" do
