@@ -20,8 +20,9 @@ defmodule Idiom.Plural do
 
   require Logger
 
-  @rules "priv/idiom"
-         |> Path.join("/plurals.json")
+  @external_resource "priv/idiom/plurals.json"
+
+  @rules "priv/idiom/plurals.json"
          |> File.read!()
          |> Jason.decode!()
          |> get_in(["supplemental", "plurals-type-cardinal"])

@@ -12,6 +12,8 @@ defmodule Idiom do
 
   require Logger
 
+  @external_resource "README.md"
+
   @doc false
   defdelegate child_spec(options), to: Idiom.Supervisor
 
