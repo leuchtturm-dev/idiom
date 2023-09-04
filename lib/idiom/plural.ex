@@ -30,25 +30,30 @@ defmodule Idiom.Plural do
          |> Map.new()
 
   for {locale, rules} <- @rules do
-    # | ----------|-------------------------------------------------------------------|
-    # | Parameter | Value                                                             |
-    # | ----------|------------------------------------------------------------------ |
-    # | n         | absolute value of the source number (integer/float/decimal).      |
-    # | i         | integer digits of n.                                              |
-    # | v         | number of visible fractional digits in n, with trailing zeros.    |
-    # | w         | number of visible fractional digits in n, without trailing zeros. |
-    # | f         | visible fractional digits in n, with trailing zeros.              |
-    # | t         | visible fractional digits in n, without trailing zeros.           |
-    # | ----------|-------------------------------------------------------------------|
+    # Source: http://unicode.org/reports/tr35/tr35-numbers.html#Operands
+    # | ----------|--------------------------------------------------------------------------------------------- |
+    # | Parameter | Value                                                                                        |
+    # | ----------|--------------------------------------------------------------------------------------------- |
+    # | n         | the absolute value of N                                                                      |
+    # | i         | the integer digits of N                                                                      |
+    # | v         | the number of visible fraction digits in N, with trailing zeros                              |
+    # | w         | the number of visible fraction digits in N, without trailing zeros                           |
+    # | f         | the visible fraction digits in N, with trailing zeros, expressed as an integer               |
+    # | t         | the visible fraction digits in N, without trailing zeros, expressed as an integer            |
+    # | ----------|--------------------------------------------------------------------------------------------- |
     defp get_suffix(unquote(locale), n, i, v, w, f, t) do
+      # c/e are not used
       e = 0
-      _silence_unused_warnings = {n, i, v, w, f, t, e}
+
+      _silence_unused_variable_warnings = {n, i, v, w, f, t, e}
+
       unquote(rules)
     end
   end
 
   defp get_suffix(locale, _n, _i, _v, _w, _f, _t) do
     Logger.warning("No plural rules found for #{locale} - returning `other`")
+
     "other"
   end
 
