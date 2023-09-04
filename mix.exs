@@ -55,7 +55,8 @@ defmodule Idiom.MixProject do
 
   defp docs do
     [
-      main: "Idiom"
+      main: "Idiom",
+      extras: ["CHANGELOG.md"]
     ]
   end
 end
