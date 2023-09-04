@@ -1,5 +1,5 @@
-defmodule Idiom.PluralPreprocessTest do
+defmodule Idiom.PluralASTTest do
   use ExUnit.Case, async: true
 
-  doctest Idiom.PluralPreprocess
+  doctest Idiom.PluralAST
 end

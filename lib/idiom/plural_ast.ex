@@ -1,9 +1,9 @@
-defmodule Idiom.PluralPreprocess do
+defmodule Idiom.PluralAST do
   @moduledoc """
   Preprocessor for language-specific pluralization rules.
 
   Idiom uses Unicode CLDR plural rules, which they provide for download as a JSON file. This is stored in our `priv` directory.
-  The `Plural` and `PluralPreprocess` modules use these definitions to generate Elixir ASTs representing a `cond` statement for each language, which are then
+  The `Plural` and `PluralAST` modules use these definitions to generate Elixir ASTs representing a `cond` statement for each language, which are then
   used at compile-time to generate functions.
   This module builds on a lexer and parser inside the `src/` directory to generate the ASTs.
   """
@@ -14,7 +14,7 @@ defmodule Idiom.PluralPreprocess do
   ## Examples
 
   ```elixir
-  iex> Idiom.PluralPreprocess.parse_rules([{"pluralRule-count-one", "n = 1"}])
+  iex> Idiom.PluralAST.parse_rules([{"pluralRule-count-one", "n = 1"}])
   {:cond, [], [[do: [{:->, [], [[{:==, [], [{:n, [], nil}, 1]}], "one"]}]]]}
   ```
   """

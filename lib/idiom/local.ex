@@ -71,12 +71,13 @@ defmodule Idiom.Local do
 
   defp parse_file(path) do
     with {:ok, contents} <- File.read(path),
-         {:ok, map} <- Jason.decode(contents),
-         {locale, domain} <- extract_locale_and_domain(path) do
-      Map.new([{locale, Map.new([{domain, map}])}])
+         {:ok, data} <- Jason.decode(contents),
+         [locale, domain] <- extract_locale_and_domain(path) do
+      Map.new([{locale, Map.new([{domain, data}])}])
     else
       {:error, _error} ->
-        Logger.warning("Could not parse file #{path}")
+        Logger.error("Idiom: Could not parse file #{path}")
+
         nil
     end
   end
@@ -88,6 +89,5 @@ defmodule Idiom.Local do
     |> Enum.take(2)
     |> Enum.map(&Path.rootname/1)
     |> Enum.reverse()
-    |> List.to_tuple()
   end
 end

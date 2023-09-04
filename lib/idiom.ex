@@ -100,15 +100,17 @@ defmodule Idiom do
 
     lookup_keys =
       Enum.reduce(locale_resolve_hierarchy, [], fn locale, acc ->
-        acc ++
-          (key_or_keys
-           |> List.wrap()
-           |> Enum.flat_map(fn key ->
-             [
-               {locale, namespace, key},
-               {locale, namespace, "#{key}_#{Plural.get_suffix(locale, count)}"}
-             ]
-           end))
+        pluralised_keys =
+          key_or_keys
+          |> List.wrap()
+          |> Enum.flat_map(fn key ->
+            [
+              {locale, namespace, key},
+              {locale, namespace, "#{key}_#{Plural.get_suffix(locale, count)}"}
+            ]
+          end)
+
+        acc ++ pluralised_keys
       end)
 
     cache_table_name = Keyword.get(opts, :cache_table_name, Cache.cache_table_name())
@@ -184,6 +186,7 @@ defmodule Idiom do
     namespace
   end
 
+  defp fallback_message(key_or_keys)
   defp fallback_message(key) when is_binary(key), do: key
   defp fallback_message(keys) when is_list(keys), do: List.first(keys)
 end

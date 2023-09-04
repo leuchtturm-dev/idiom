@@ -1,7 +1,7 @@
-defmodule Idiom.PluralPreprocess.ParseRulesTest do
+defmodule Idiom.PluralAST.ParseRulesTest do
   use ExUnit.Case, async: true
 
-  alias Idiom.PluralPreprocess
+  alias Idiom.PluralAST
 
   # NOTE:
   # This is not testing public API, as these functions should never be used by an end user.
@@ -85,7 +85,7 @@ defmodule Idiom.PluralPreprocess.ParseRulesTest do
 
   for %{rule: rule, expected_ast: expected_ast} <- tests do
     test "generates the correct ast for rule #{inspect(rule)}" do
-      assert unquote(expected_ast) = PluralPreprocess.parse_rules(unquote(rule))
+      assert unquote(expected_ast) = PluralAST.parse_rules(unquote(rule))
     end
   end
 end

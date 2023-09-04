@@ -10,11 +10,11 @@ defmodule Idiom.Plural do
   - `many`
   - `other`
 
-  Used suffixes differ greatly by language. In order to support them all, and also make this module easier to keep up-to-date, the `PluralPreprocess` module
+  Used suffixes differ greatly by language. In order to support them all, and also make this module easier to keep up-to-date, the `PluralAST` module
   parses them and generates ASTs for `cond` expressions. This module reads the definition file at compile time, and generates helper functions for each
   language.
   """
-  import Idiom.PluralPreprocess
+  import Idiom.PluralAST
 
   alias Idiom.Locales
 
@@ -89,11 +89,13 @@ defmodule Idiom.Plural do
   def get_suffix(locale, count)
   def get_suffix(_locale, nil), do: "other"
 
-  def get_suffix(locale, count) when is_binary(count),
-    do: get_suffix(locale, Decimal.new(count))
+  def get_suffix(locale, count) when is_binary(count) do
+    get_suffix(locale, Decimal.new(count))
+  end
 
   def get_suffix(locale, count) when is_float(count) do
     count = count |> Float.to_string() |> Decimal.new()
+
     get_suffix(locale, count)
   end
 
@@ -101,6 +103,7 @@ defmodule Idiom.Plural do
     locale = Locales.get_language(locale)
     n = abs(count)
     i = abs(count)
+
     get_suffix(locale, n, i, 0, 0, 0, 0)
   end
 
@@ -148,12 +151,6 @@ defmodule Idiom.Plural do
     dividend - Float.floor(dividend / divisor) * divisor
   end
 
-  defp mod(dividend, divisor) when is_integer(dividend) and is_integer(divisor) do
-    modulo =
-      dividend
-      |> Integer.floor_div(divisor)
-      |> Kernel.*(divisor)
-
-    dividend - modulo
-  end
+  defp mod(dividend, divisor) when is_integer(dividend) and is_integer(divisor),
+    do: Integer.mod(dividend, divisor)
 end
