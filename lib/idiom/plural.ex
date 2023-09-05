@@ -20,16 +20,24 @@ defmodule Idiom.Plural do
 
   require Logger
 
-  @external_resource "priv/idiom/plurals.json"
+  @external_resource "priv/idiom/plurals-cardinal.json"
+  @external_resource "priv/idiom/plurals-ordinal.json"
 
-  @rules "priv/idiom/plurals.json"
-         |> File.read!()
-         |> Jason.decode!()
-         |> get_in(["supplemental", "plurals-type-cardinal"])
-         |> Enum.map(fn {lang, rules} -> {lang, parse_rules(rules)} end)
-         |> Map.new()
+  @cardinal_rules "priv/idiom/plurals-cardinal.json"
+                  |> File.read!()
+                  |> Jason.decode!()
+                  |> get_in(["supplemental", "plurals-type-cardinal"])
+                  |> Enum.map(fn {lang, rules} -> {lang, parse_rules(rules)} end)
+                  |> Map.new()
 
-  for {locale, rules} <- @rules do
+  @ordinal_rules "priv/idiom/plurals-ordinal.json"
+                 |> File.read!()
+                 |> Jason.decode!()
+                 |> get_in(["supplemental", "plurals-type-ordinal"])
+                 |> Enum.map(fn {lang, rules} -> {lang, parse_rules(rules)} end)
+                 |> Map.new()
+
+  for {locale, rules} <- @cardinal_rules do
     # Source: http://unicode.org/reports/tr35/tr35-numbers.html#Operands
     # | ----------|--------------------------------------------------------------------------------------------- |
     # | Parameter | Value                                                                                        |
@@ -41,7 +49,7 @@ defmodule Idiom.Plural do
     # | f         | the visible fraction digits in N, with trailing zeros, expressed as an integer               |
     # | t         | the visible fraction digits in N, without trailing zeros, expressed as an integer            |
     # | ----------|--------------------------------------------------------------------------------------------- |
-    defp get_suffix(unquote(locale), n, i, v, w, f, t) do
+    defp get_cardinal_suffix(unquote(locale), n, i, v, w, f, t) do
       # c/e are not used
       e = 0
 
@@ -51,17 +59,56 @@ defmodule Idiom.Plural do
     end
   end
 
-  defp get_suffix(locale, _n, _i, _v, _w, _f, _t) do
+  defp get_cardinal_suffix(locale, _n, _i, _v, _w, _f, _t) do
     Logger.warning("No plural rules found for #{locale} - returning `other`")
 
     "other"
   end
 
-  @doc """
-  Returns the appropriate plural suffix based on a given locale and count.
+  for {locale, rules} <- @ordinal_rules do
+    # Source: http://unicode.org/reports/tr35/tr35-numbers.html#Operands
+    # | ----------|--------------------------------------------------------------------------------------------- |
+    # | Parameter | Value                                                                                        |
+    # | ----------|--------------------------------------------------------------------------------------------- |
+    # | n         | the absolute value of N                                                                      |
+    # | i         | the integer digits of N                                                                      |
+    # | v         | the number of visible fraction digits in N, with trailing zeros                              |
+    # | w         | the number of visible fraction digits in N, without trailing zeros                           |
+    # | f         | the visible fraction digits in N, with trailing zeros, expressed as an integer               |
+    # | t         | the visible fraction digits in N, without trailing zeros, expressed as an integer            |
+    # | ----------|--------------------------------------------------------------------------------------------- |
+    defp get_ordinal_suffix(unquote(locale), n, i, v, w, f, t) do
+      # c/e are not used
+      e = 0
 
-  The function will determine the correct plural form to use based on the `count` parameter.
-  It supports different types of count values, including binary, float, integer and Decimal types.
+      _silence_unused_variable_warnings = {n, i, v, w, f, t, e}
+
+      unquote(rules)
+    end
+  end
+
+  defp get_ordinal_suffix(locale, _n, _i, _v, _w, _f, _t) do
+    Logger.warning("No plural rules found for #{locale} - returning `other`")
+
+    "other"
+  end
+
+  defp get_suffix(:cardinal, locale, n, i, v, w, f, t),
+    do: get_cardinal_suffix(locale, n, i, v, w, f, t)
+
+  defp get_suffix(:ordinal, locale, n, i, v, w, f, t),
+    do: get_ordinal_suffix(locale, n, i, v, w, f, t)
+
+  @doc """
+  Returns the appropriate plural suffix based on a given locale, count and plural type.
+
+  The function will determine the correct plural form to use based on the `count` 
+  parameter. It supports different types of count values, including binary, float, 
+  integer and Decimal types.
+
+  It also allows selecting whether you want to receive the suffix for cardinal or
+  ordinal plurals by passing `:cardinal` or `:ordinal` as the `type` option, where
+  cardinal is the default plural type.
 
   When the count is `nil`, the function will default to `other`.
 
@@ -71,8 +118,11 @@ defmodule Idiom.Plural do
   iex> Idiom.Plural.get_suffix("en", 1)
   "one"
 
-  iex> Idiom.Plural.get_suffix("en", 2)
+  iex> Idiom.Plural.get_suffix("en", 2, type: :cardinal)
   "other"
+
+  iex> Idiom.Plural.get_suffix("en", 2, type: :ordinal)
+  "two"
 
   iex> Idiom.Plural.get_suffix("ar", 0)
   "zero"
@@ -85,29 +135,31 @@ defmodule Idiom.Plural do
   ```
   """
   @type count() :: binary() | float() | integer() | Decimal.t()
-  @spec get_suffix(String.t(), count()) :: String.t()
-  def get_suffix(locale, count)
-  def get_suffix(_locale, nil), do: "other"
+  @spec get_suffix(String.t(), count(), type: :cardinal | :ordinal) :: String.t()
+  def get_suffix(locale, count, opts \\ [])
+  def get_suffix(_locale, nil, _opts), do: "other"
 
-  def get_suffix(locale, count) when is_binary(count) do
-    get_suffix(locale, Decimal.new(count))
+  def get_suffix(locale, count, opts) when is_binary(count) do
+    get_suffix(locale, Decimal.new(count), opts)
   end
 
-  def get_suffix(locale, count) when is_float(count) do
+  def get_suffix(locale, count, opts) when is_float(count) do
     count = count |> Float.to_string() |> Decimal.new()
 
-    get_suffix(locale, count)
+    get_suffix(locale, count, opts)
   end
 
-  def get_suffix(locale, count) when is_integer(count) do
+  def get_suffix(locale, count, opts) when is_integer(count) do
     locale = Locales.get_language(locale)
     n = abs(count)
     i = abs(count)
 
-    get_suffix(locale, n, i, 0, 0, 0, 0)
+    plural_type = Keyword.get(opts, :type, :cardinal)
+
+    get_suffix(plural_type, locale, n, i, 0, 0, 0, 0)
   end
 
-  def get_suffix(locale, count) do
+  def get_suffix(locale, count, opts) do
     n = Decimal.abs(count)
     i = count |> Decimal.round(0, :floor) |> Decimal.to_integer()
     v = abs(n.exp)
@@ -136,7 +188,18 @@ defmodule Idiom.Plural do
       |> String.trim_trailing("0")
       |> String.length()
 
-    get_suffix(Locales.get_language(locale), Decimal.to_float(n), i, v, f, t, w)
+    plural_type = Keyword.get(opts, :type, :cardinal)
+
+    get_suffix(
+      plural_type,
+      Locales.get_language(locale),
+      Decimal.to_float(n),
+      i,
+      v,
+      f,
+      t,
+      w
+    )
   end
 
   defp in?(number, range) when is_integer(number) do

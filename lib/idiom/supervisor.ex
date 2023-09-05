@@ -6,8 +6,7 @@ defmodule Idiom.Supervisor do
   alias Idiom.Cache
 
   def start_link(options) when is_list(options) do
-    options =
-      Keyword.merge(default_options(), options)
+    options = Keyword.merge(default_options(), options)
 
     local_data = Idiom.Local.data()
     data = Keyword.get(options, :data, %{})
