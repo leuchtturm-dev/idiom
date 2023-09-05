@@ -5,7 +5,7 @@ defmodule Idiom.MixProject do
     [
       app: :idiom,
       description: "Modern internationalization library",
-      version: "0.5.1",
+      version: "0.6.0",
       elixir: "~> 1.13",
       compilers: Mix.compilers() ++ [:leex, :yecc],
       elixirc_paths: elixirc_paths(Mix.env()),
@@ -47,7 +47,7 @@ defmodule Idiom.MixProject do
   defp package do
     [
       name: "idiom",
-      licenses: ["WTFPL"],
+      licenses: ["MIT"],
       maintainers: ["Christoph Schmatzler"],
       links: %{"GitHub" => "https://github.com/cschmatzler/idiom"}
     ]
