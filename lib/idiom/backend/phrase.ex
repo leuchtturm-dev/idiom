@@ -125,8 +125,7 @@ defmodule Idiom.Backend.Phrase do
       distribution_secret: distribution_secret,
       namespace: namespace,
       app_version: app_version
-    } =
-      Map.new(opts)
+    } = Map.new(opts)
 
     params = [
       client: "idiom",
