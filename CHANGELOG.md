@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.5.1](https://github.com/cschmatzler/idiom/compare/v0.5.0...v0.5.1) (2023-09-05)
+
+
+### Features
+
+* add support for ordinal plurals ([#26](https://github.com/cschmatzler/idiom/issues/26)) ([206c766](https://github.com/cschmatzler/idiom/commit/206c766922dce38bf5887f3a330f21950320c533))
+
 ## [0.5.0](https://github.com/cschmatzler/idiom/compare/v0.4.1...v0.5.0) (2023-09-04)
 
 
