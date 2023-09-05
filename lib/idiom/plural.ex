@@ -23,17 +23,13 @@ defmodule Idiom.Plural do
   @external_resource "priv/idiom/plurals-cardinal.json"
   @external_resource "priv/idiom/plurals-ordinal.json"
 
-  @cardinal_rules "priv/idiom/plurals-cardinal.json"
-                  |> File.read!()
-                  |> Jason.decode!()
-                  |> get_in(["supplemental", "plurals-type-cardinal"])
+  @cardinal_rules "cardinal"
+                  |> fetch_rules()
                   |> Enum.map(fn {lang, rules} -> {lang, parse_rules(rules)} end)
                   |> Map.new()
 
-  @ordinal_rules "priv/idiom/plurals-ordinal.json"
-                 |> File.read!()
-                 |> Jason.decode!()
-                 |> get_in(["supplemental", "plurals-type-ordinal"])
+  @ordinal_rules "ordinal"
+                 |> fetch_rules()
                  |> Enum.map(fn {lang, rules} -> {lang, parse_rules(rules)} end)
                  |> Map.new()
 

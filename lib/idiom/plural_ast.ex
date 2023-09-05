@@ -8,6 +8,14 @@ defmodule Idiom.PluralAST do
   This module builds on a lexer and parser inside the `src/` directory to generate the ASTs.
   """
 
+  @doc false
+  def fetch_rules(type) do
+    "priv/idiom/plurals-#{type}.json"
+    |> File.read!()
+    |> Jason.decode!()
+    |> get_in(["supplemental", "plurals-type-#{type}"])
+  end
+
   @doc """
   Parses a list of plural rules and converts them into a `:cond` expression, with the clauses sorted by plural suffix.
 
