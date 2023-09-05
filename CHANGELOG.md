@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.6.0](https://github.com/cschmatzler/idiom/compare/v0.5.1...v0.6.0) (2023-09-05)
+
+
+### ⚠ BREAKING CHANGES
+
+* relicense
+
+### Features
+
+* relicense ([0d36941](https://github.com/cschmatzler/idiom/commit/0d36941b7c37600c5183a433ecbb6c6e385d23f3))
+
 ## [0.5.1](https://github.com/cschmatzler/idiom/compare/v0.5.0...v0.5.1) (2023-09-05)
 
 
