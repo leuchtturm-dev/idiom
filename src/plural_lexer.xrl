@@ -1,6 +1,6 @@
 Definitions.
 
-Whitespace = [\s\n\t]
+Whitespace = \s
 Variable   = n|i|f|t|v|w|e
 And        = and
 Or         = or
