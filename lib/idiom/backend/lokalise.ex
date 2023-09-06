@@ -88,9 +88,7 @@ defmodule Idiom.Backend.Lokalise do
       fetch_interval: fetch_interval
     } = state
 
-    request_params =
-      Map.take(state, [:project_id, :api_token, :app_version, :current_version, :namespace])
-
+    request_params = Map.take(state, [:project_id, :api_token, :app_version, :current_version])
     new_version = fetch_data(namespace, request_params)
 
     schedule_refresh(fetch_interval)
