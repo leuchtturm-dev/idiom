@@ -27,7 +27,7 @@ defmodule Idiom.Backend.Lokalise do
   ## Creating a bundle
 
   Lokalise does not officially support any third-party SDKs or web application
-  libraries. The backend works by fetching a bundle in the format of Lokalise's
+  libraries. The Idiom backend works by fetching a bundle in the format of Lokalise's
   official Android SDK and then transforming the data. This means that when you create
   a localisation bundle in the "Download" tab of your Lokalise dashboard, you need to
   select "Android SDK" under the "File format" setting.  
