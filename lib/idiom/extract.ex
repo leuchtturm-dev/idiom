@@ -1,6 +1,6 @@
-defmodule Idiom.Util do
+defmodule Idiom.Extract do
   @moduledoc false
-  def expand_to_binary(term, env) do
+  defp expand_to_binary(term, env) do
     case Macro.expand(term, env) do
       term when is_binary(term) ->
         term
