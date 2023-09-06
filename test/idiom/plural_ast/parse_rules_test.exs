@@ -11,9 +11,7 @@ defmodule Idiom.PluralAST.ParseRulesTest do
     %{
       rule: [{"pluralRule-count-one", "n = 1"}],
       expected_ast:
-        quote(
-          do: {:cond, [], [[do: [{:->, [], [[{:==, [], [{:n, [], nil}, 1]}], "one"]}]]]}
-        )
+        quote(do: {:cond, [], [[do: [{:->, [], [[{:==, [], [{:n, [], nil}, 1]}], "one"]}]]]})
     },
     %{
       rule: [{"pluralRule-count-few", "n % 100 = 3..10 "}],
@@ -27,8 +25,7 @@ defmodule Idiom.PluralAST.ParseRulesTest do
                    {:->, [],
                     [
                       [
-                        {:in?, [],
-                         [{:mod, [], [{:n, [], nil}, 100]}, {:.., [], [3, 10]}]}
+                        {:in?, [], [{:mod, [], [{:n, [], nil}, 100]}, {:.., [], [3, 10]}]}
                       ],
                       "few"
                     ]}
@@ -61,15 +58,13 @@ defmodule Idiom.PluralAST.ParseRulesTest do
                              {:and, [],
                               [
                                 {:==, [], [{:mod, [], [{:i, [], nil}, 10]}, 1]},
-                                {:!, [],
-                                 [{:==, [], [{:mod, [], [{:i, [], nil}, 100]}, 11]}]}
+                                {:!, [], [{:==, [], [{:mod, [], [{:i, [], nil}, 100]}, 11]}]}
                               ]}
                            ]},
                           {:and, [],
                            [
                              {:==, [], [{:mod, [], [{:f, [], nil}, 10]}, 1]},
-                             {:!, [],
-                              [{:==, [], [{:mod, [], [{:f, [], nil}, 100]}, 11]}]}
+                             {:!, [], [{:==, [], [{:mod, [], [{:f, [], nil}, 100]}, 11]}]}
                            ]}
                         ]}
                      ],

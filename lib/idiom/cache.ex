@@ -33,8 +33,7 @@ defmodule Idiom.Cache do
   ```
   """
   @spec init(map(), atom()) :: :ok
-  def init(initial_state \\ %{}, table_name \\ @cache_table_name)
-      when is_map(initial_state) do
+  def init(initial_state \\ %{}, table_name \\ @cache_table_name) when is_map(initial_state) do
     :ets.new(table_name, [
       :set,
       :public,

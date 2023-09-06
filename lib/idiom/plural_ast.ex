@@ -39,12 +39,9 @@ defmodule Idiom.PluralAST do
 
   defp suffix_sorter({"zero", _}, _), do: true
 
-  defp suffix_sorter({"one", _}, {other, _})
-       when other in ["two", "few", "many", "other"],
-       do: true
+  defp suffix_sorter({"one", _}, {other, _}) when other in ["two", "few", "many", "other"], do: true
 
-  defp suffix_sorter({"two", _}, {other, _}) when other in ["few", "many", "other"],
-    do: true
+  defp suffix_sorter({"two", _}, {other, _}) when other in ["few", "many", "other"], do: true
 
   defp suffix_sorter({"few", _}, {other, _}) when other in ["many", "other"], do: true
   defp suffix_sorter({"many", _}, {other, _}) when other in ["other"], do: true

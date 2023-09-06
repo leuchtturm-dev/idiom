@@ -93,8 +93,7 @@ defmodule Idiom.Backend.Phrase do
   @impl GenServer
   def handle_info(
         :fetch_data,
-        %{current_version: current_version, last_update: last_update, opts: opts} =
-          state
+        %{current_version: current_version, last_update: last_update, opts: opts} = state
       ) do
     current_version = fetch_data(current_version, last_update, opts)
 
@@ -102,8 +101,7 @@ defmodule Idiom.Backend.Phrase do
     |> Keyword.get(:fetch_interval)
     |> schedule_refresh()
 
-    {:noreply,
-     %{state | current_version: current_version, last_update: last_update_now()}}
+    {:noreply, %{state | current_version: current_version, last_update: last_update_now()}}
   end
 
   defp schedule_refresh(interval) do
@@ -140,9 +138,7 @@ defmodule Idiom.Backend.Phrase do
            params: params
          ]
          |> Req.new()
-         |> Req.Request.append_response_steps(
-           add_version_to_response: &add_version_to_response/1
-         )
+         |> Req.Request.append_response_steps(add_version_to_response: &add_version_to_response/1)
          |> Req.get() do
       {:ok, %Req.Response{status: 304}} ->
         current_version
@@ -192,9 +188,7 @@ defmodule Idiom.Backend.Phrase do
         "https://ota.eu.phrase.com"
 
       _ ->
-        Logger.error(
-          "#{datacenter} is not a valid Phrase datacenter. Falling back to `eu`."
-        )
+        Logger.error("#{datacenter} is not a valid Phrase datacenter. Falling back to `eu`.")
 
         "https://ota.eu.phrase.com"
     end
