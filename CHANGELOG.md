@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.6.1](https://github.com/cschmatzler/idiom/compare/v0.6.0...v0.6.1) (2023-09-06)
+
+
+### Features
+
+* Add Lokalise support ([#30](https://github.com/cschmatzler/idiom/issues/30)) ([92b2211](https://github.com/cschmatzler/idiom/commit/92b2211f3a7239ef4a8bc678d4788a0ecd6c255f))
+
 ## [0.6.0](https://github.com/cschmatzler/idiom/compare/v0.5.1...v0.6.0) (2023-09-05)
 
 
