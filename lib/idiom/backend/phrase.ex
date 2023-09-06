@@ -19,7 +19,7 @@ defmodule Idiom.Backend.Phrase do
 
   ```elixir
   config :idiom, Idiom.Backend.Phrase,
-    datacenter: "eu",
+    datacenter: "eu", # or "us"
     distribution_id: "", # required
     distribution_secret: "", # required
     locales: ["de-DE", "en-US"], # required
