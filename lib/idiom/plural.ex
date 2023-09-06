@@ -152,7 +152,7 @@ defmodule Idiom.Plural do
     n = abs(count)
     i = abs(count)
 
-    plural_type = Keyword.get(opts, :type, :cardinal)
+    plural_type = Keyword.get(opts, :type) || :cardinal
 
     get_suffix(plural_type, locale, n, i, 0, 0, 0, 0)
   end

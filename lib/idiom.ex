@@ -129,7 +129,7 @@ defmodule Idiom do
       Keyword.get(opts, :fallback) || Application.get_env(:idiom, :default_fallback)
 
     count = Keyword.get(opts, :count)
-    plural = Keyword.get(opts, :plural, :cardinal)
+    plural = Keyword.get(opts, :plural)
     bindings = Map.put_new(bindings, :count, count)
 
     locale_resolve_hierarchy =
