@@ -1,14 +1,20 @@
 defmodule Idiom.Backend.Lokalise do
   @moduledoc """
   Backend for [Lokalise](https://lokalise.com).
+
   ## Usage
+
   In order to use the Lokalise backend, set it in your Idiom configuration:
+
   ```elixir
   config :idiom,
     backend: Idiom.Backend.Lokalise
   ```
+
   ## Configuration
+
   The Lokalise backend currently supports the following configuration options:
+
   ```elixir
   config :idiom, Idiom.Backend.Lokalise,
     project_id: "", # required
@@ -17,7 +23,9 @@ defmodule Idiom.Backend.Lokalise do
     fetch_interval: 600_000,
     otp_app: nil # optional, for Lokalise's bundle freeze support
   ```
+
   ## Creating a bundle
+
   Lokalise does not officially support any third-party SDKs or web application
   libraries. The Idiom backend works by fetching a bundle in the format of Lokalise's
   official Android SDK and then transforming the data. This means that when you create
@@ -25,7 +33,6 @@ defmodule Idiom.Backend.Lokalise do
   select "Android SDK" under the "File format" setting.  
   The `project_id` and `api_token` values can be found under the "More -> Settings" 
   page where you can find your Project ID and can generate a "Lokalise OTA Token". 
-  fixed
   """
 
   use GenServer
@@ -66,11 +73,14 @@ defmodule Idiom.Backend.Lokalise do
   def init(opts) do
     case NimbleOptions.validate(opts, @opts_schema) do
       {:ok, opts} ->
-        opts = Utilities.maybe_add_app_version_to_opts(opts, opts[:otp_app])
+        initial_state =
+          opts
+          |> Utilities.maybe_add_app_version_to_opts(opts[:otp_app])
+          |> Map.new()
+          |> Map.put(:current_version, 0)
 
         Process.send(self(), :fetch_data, [])
 
-        initial_state = opts |> Map.new() |> Map.put(:current_version, 0)
         {:ok, initial_state}
 
       {:error, %{message: message}} ->
@@ -81,15 +91,12 @@ defmodule Idiom.Backend.Lokalise do
   @impl GenServer
   def handle_info(:fetch_data, state) do
     %{
-      project_id: project_id,
-      api_token: api_token,
-      app_version: app_version,
-      current_version: current_version,
       namespace: namespace,
       fetch_interval: fetch_interval
     } = state
 
-    new_version = fetch_data(project_id, api_token, app_version, current_version, namespace)
+    request_params = Map.take(state, [:project_id, :api_token, :app_version, :current_version])
+    new_version = fetch_data(namespace, request_params)
 
     schedule_refresh(fetch_interval)
 
@@ -100,9 +107,16 @@ defmodule Idiom.Backend.Lokalise do
     Process.send_after(self(), :fetch_data, interval)
   end
 
-  defp fetch_data(project_id, api_token, app_version, current_version, namespace) do
+  defp fetch_data(namespace, request_params) do
+    %{
+      project_id: project_id,
+      api_token: api_token,
+      app_version: app_version,
+      current_version: current_version
+    } = request_params
+
     with {:ok, %{body: %{"data" => %{"url" => url, "version" => version}}}} <-
-           fetch_current_bundle(project_id, api_token, app_version, current_version),
+           fetch_bundle_info(project_id, api_token, app_version, current_version),
          {:ok, %{body: body}} <- fetch_bundle(url) do
       body
       |> transform_data(namespace)
@@ -121,10 +135,12 @@ defmodule Idiom.Backend.Lokalise do
         Logger.error(
           "Idiom.Backend.Lokalise: Failed fetching data from Lokalise - #{inspect(error)}"
         )
+
+        current_version
     end
   end
 
-  defp fetch_current_bundle(project_id, api_token, app_version, current_version) do
+  defp fetch_bundle_info(project_id, api_token, app_version, current_version) do
     [
       base_url: "https://ota.lokalise.com",
       url: "/v3/lokalise/projects/#{project_id}/frameworks/android_sdk",
