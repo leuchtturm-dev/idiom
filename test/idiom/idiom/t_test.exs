@@ -120,7 +120,7 @@ defmodule Idiom.Idiom.TTest do
     ]
 
     for %{key: key, bindings: bindings, opts: opts, expected: expected} <- tests do
-      test "correctly translates `#{key}` with bindings `#{inspect(bindings)}` and opts `#{inspect(opts)}`" do
+      test "function - correctly translates `#{key}` with bindings `#{inspect(bindings)}` and opts `#{inspect(opts)}`" do
         assert Idiom.t(unquote(key), unquote(bindings), unquote(opts)) ==
                  unquote(expected)
       end

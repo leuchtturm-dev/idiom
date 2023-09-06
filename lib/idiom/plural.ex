@@ -23,10 +23,18 @@ defmodule Idiom.Plural do
   @external_resource "priv/idiom/plurals-cardinal.json"
   @external_resource "priv/idiom/plurals-ordinal.json"
 
+  @cardinal_suffixes "cardinal"
+                     |> fetch_rules()
+                     |> get_suffixes()
+
   @cardinal_rules "cardinal"
                   |> fetch_rules()
                   |> Enum.map(fn {lang, rules} -> {lang, parse_rules(rules)} end)
                   |> Map.new()
+
+  @ordinal_suffixes "ordinal"
+                    |> fetch_rules()
+                    |> get_suffixes()
 
   @ordinal_rules "ordinal"
                  |> fetch_rules()
@@ -88,12 +96,6 @@ defmodule Idiom.Plural do
 
     "other"
   end
-
-  defp get_suffix(:cardinal, locale, n, i, v, w, f, t),
-    do: get_cardinal_suffix(locale, n, i, v, w, f, t)
-
-  defp get_suffix(:ordinal, locale, n, i, v, w, f, t),
-    do: get_ordinal_suffix(locale, n, i, v, w, f, t)
 
   @doc """
   Returns the appropriate plural suffix based on a given locale, count and plural type.
@@ -197,6 +199,40 @@ defmodule Idiom.Plural do
       w
     )
   end
+
+  @doc """
+  Returns a locale's plural suffixes for the specific plural type.
+
+  ## Examples
+
+  ```elixir
+  iex> Idiom.Plural.get_suffixes("en-US", :cardinal)
+  ["one", "other"]
+
+  iex> Idiom.Plural.get_suffixes("en-US", :ordinal)
+  ["one", "two", "few", "other"]
+  ```
+  """
+  @spec get_suffixes(String.t(), :cardinal | :ordinal) :: String.t()
+  def get_suffixes(locale, type)
+
+  def get_suffixes(locale, :cardinal) do
+    language = Locales.get_language(locale)
+
+    Map.get(@cardinal_suffixes, language, ["other"])
+  end
+
+  def get_suffixes(locale, :ordinal) do
+    language = Locales.get_language(locale)
+
+    Map.get(@ordinal_suffixes, language, ["other"])
+  end
+
+  defp get_suffix(:cardinal, locale, n, i, v, w, f, t),
+    do: get_cardinal_suffix(locale, n, i, v, w, f, t)
+
+  defp get_suffix(:ordinal, locale, n, i, v, w, f, t),
+    do: get_ordinal_suffix(locale, n, i, v, w, f, t)
 
   defp in?(number, range) when is_integer(number) do
     number in range

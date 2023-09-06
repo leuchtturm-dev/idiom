@@ -16,6 +16,22 @@ defmodule Idiom.PluralAST do
     |> get_in(["supplemental", "plurals-type-#{type}"])
   end
 
+  @doc false
+  def get_suffixes(rules) do
+    rules
+    |> Enum.map(fn {lang, rules} ->
+      suffixes =
+        rules
+        |> Enum.reduce([], fn {"pluralRule-count-" <> suffix, _rule}, acc ->
+          [suffix | acc]
+        end)
+        |> Enum.sort(&suffix_sorter/2)
+
+      {lang, suffixes}
+    end)
+    |> Map.new()
+  end
+
   @doc """
   Parses a list of plural rules and converts them into a `:cond` expression, with the clauses sorted by plural suffix.
 
@@ -33,18 +49,18 @@ defmodule Idiom.PluralAST do
       {:ok, ast} = parse(rule)
       {suffix, ast}
     end)
-    |> Enum.sort(&suffix_sorter/2)
+    |> Enum.sort(fn {first, _}, {second, _} -> suffix_sorter(first, second) end)
     |> rules_to_cond()
   end
 
-  defp suffix_sorter({"zero", _}, _), do: true
+  defp suffix_sorter("zero", _), do: true
 
-  defp suffix_sorter({"one", _}, {other, _}) when other in ["two", "few", "many", "other"], do: true
+  defp suffix_sorter("one", other) when other in ["two", "few", "many", "other"], do: true
 
-  defp suffix_sorter({"two", _}, {other, _}) when other in ["few", "many", "other"], do: true
+  defp suffix_sorter("two", other) when other in ["few", "many", "other"], do: true
 
-  defp suffix_sorter({"few", _}, {other, _}) when other in ["many", "other"], do: true
-  defp suffix_sorter({"many", _}, {other, _}) when other in ["other"], do: true
+  defp suffix_sorter("few", other) when other in ["many", "other"], do: true
+  defp suffix_sorter("many", other) when other in ["other"], do: true
   defp suffix_sorter(_, _), do: false
 
   defp parse([]), do: {:ok, []}
