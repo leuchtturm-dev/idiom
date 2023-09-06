@@ -72,33 +72,39 @@ defmodule Idiom.Backend.Lokalise do
 
         Process.send(self(), :fetch_data, [])
 
-        {:ok, %{current_version: 0, opts: opts}}
+        initial_state = opts |> Map.new() |> Map.put(:current_version, 0)
+        {:ok, initial_state}
 
       {:error, %{message: message}} ->
-        raise "Could not start `Idiom.Backend.Lokalise` due to invalid configuration: #{message}"
+        {:error, message}
     end
   end
 
   @impl GenServer
-  def handle_info(:fetch_data, %{current_version: current_version, opts: opts} = state) do
-    current_version = fetch_data(current_version, opts)
+  def handle_info(:fetch_data, state) do
+    %{
+      project_id: project_id,
+      api_token: api_token,
+      app_version: app_version,
+      current_version: current_version,
+      namespace: namespace,
+      fetch_interval: fetch_interval
+    } = state
 
-    opts
-    |> Keyword.get(:fetch_interval)
-    |> schedule_refresh()
+    new_version = fetch_data(project_id, api_token, app_version, current_version, namespace)
 
-    {:noreply, %{state | current_version: current_version}}
+    schedule_refresh(fetch_interval)
+
+    {:noreply, %{state | current_version: new_version}}
   end
 
   defp schedule_refresh(interval) do
     Process.send_after(self(), :fetch_data, interval)
   end
 
-  defp fetch_data(current_version, opts) do
-    namespace = Keyword.get(opts, :namespace)
-
+  defp fetch_data(project_id, api_token, app_version, current_version, namespace) do
     with {:ok, %{body: %{"data" => %{"url" => url, "version" => version}}}} <-
-           fetch_current_bundle(current_version, opts),
+           fetch_current_bundle(project_id, api_token, app_version, current_version),
          {:ok, %{body: body}} <- fetch_bundle(url) do
       body
       |> transform_data(namespace)
@@ -120,10 +126,7 @@ defmodule Idiom.Backend.Lokalise do
     end
   end
 
-  defp fetch_current_bundle(current_version, opts) do
-    %{project_id: project_id, api_token: api_token, app_version: app_version} =
-      Map.new(opts)
-
+  defp fetch_current_bundle(project_id, api_token, app_version, current_version) do
     [
       base_url: "https://ota.lokalise.com",
       url: "/v3/lokalise/projects/#{project_id}/frameworks/android_sdk",
