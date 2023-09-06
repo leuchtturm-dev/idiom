@@ -80,12 +80,14 @@ defmodule Idiom.Backend.Phrase do
   def init(opts) do
     case NimbleOptions.validate(opts, @opts_schema) do
       {:ok, opts} ->
-        opts = Utilities.maybe_add_app_version_to_opts(opts, opts[:otp_app])
+        initial_state =
+          opts
+          |> Utilities.maybe_add_app_version_to_opts(opts[:otp_app])
+          |> Map.new()
+          |> Map.put(:current_version, nil)
+          |> Map.put(:last_update, nil)
 
         Process.send(self(), :fetch_data, [])
-
-        initial_state =
-          opts |> Map.new() |> Map.put(:current_version, nil) |> Map.put(:last_update, nil)
 
         {:ok, initial_state}
 
