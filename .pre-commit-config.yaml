@@ -4,3 +4,8 @@ repos:
     hooks:
       - id: mix-format
       - id: credo
+  - repo: https://github.com/compilerla/conventional-pre-commit
+    rev: v2.4.0
+    hooks:
+      - id: conventional-pre-commit
+        stages: [commit-msg]
