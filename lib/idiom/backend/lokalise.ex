@@ -19,7 +19,11 @@ defmodule Idiom.Backend.Lokalise do
 
   ```elixir
   config :idiom, Idiom.Backend.Lokalise,
-    # TODO
+    project_id: "", # required
+    api_token: "", # required
+    namespace: "default",
+    fetch_interval: 600_000,
+    otp_app: nil # optional, for Lokalise's bundle freeze support
   ```
 
   """
