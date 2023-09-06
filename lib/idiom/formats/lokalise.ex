@@ -26,6 +26,6 @@ defmodule Idiom.Formats.Lokalise do
   defp transform_item(key, value) when is_binary(value), do: {key, value}
 
   defp transform_item(key, value) when is_map(value) do
-    Enum.map(value, fn {suffix, value} -> {key <> "_" <> suffix, value} end)
+    Enum.map(value, fn {suffix, value} -> {"#{key}_#{suffix}", value} end)
   end
 end
