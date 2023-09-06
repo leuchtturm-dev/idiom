@@ -84,47 +84,63 @@ defmodule Idiom.Backend.Phrase do
 
         Process.send(self(), :fetch_data, [])
 
-        {:ok, %{current_version: nil, last_update: nil, opts: opts}}
+        initial_state =
+          opts |> Map.new() |> Map.put(:current_version, nil) |> Map.put(:last_update, nil)
+
+        {:ok, initial_state}
 
       {:error, %{message: message}} ->
-        raise "Could not start `Idiom.Backend.Phrase` due to invalid configuration: #{message}"
+        {:error, message}
     end
   end
 
   @impl GenServer
-  def handle_info(
-        :fetch_data,
-        %{current_version: current_version, last_update: last_update, opts: opts} = state
-      ) do
-    current_version = fetch_data(current_version, last_update, opts)
+  def handle_info(:fetch_data, state) do
+    %{
+      locales: locales,
+      namespace: namespace,
+      fetch_interval: fetch_interval
+    } = state
 
-    opts
-    |> Keyword.get(:fetch_interval)
-    |> schedule_refresh()
+    request_params =
+      Map.take(state, [
+        :datacenter,
+        :distribution_id,
+        :distribution_secret,
+        :app_version,
+        :current_version,
+        :last_update
+      ])
 
-    {:noreply, %{state | current_version: current_version, last_update: last_update_now()}}
+    new_version = fetch_data(locales, namespace, request_params)
+
+    schedule_refresh(fetch_interval)
+
+    {:noreply, %{state | current_version: new_version, last_update: last_update_now()}}
   end
 
   defp schedule_refresh(interval) do
     Process.send_after(self(), :fetch_data, interval)
   end
 
-  defp fetch_data(current_version, last_update, opts) do
-    locales = Keyword.get(opts, :locales)
-
+  defp fetch_data(locales, namespace, request_params) do
     locales
-    |> Enum.map(&fetch_locale(&1, current_version, last_update, opts))
+    |> Enum.map(&fetch_locale(&1, namespace, request_params))
+    # When the Phrase OTA API returns multiple different versions, store the lowest
+    # one so that at the next refresh all locales are requested again to update to the
+    # newest version.
     |> Enum.min()
   end
 
-  defp fetch_locale(locale, current_version, last_update, opts) do
+  defp fetch_locale(locale, namespace, request_params) do
     %{
       datacenter: datacenter,
       distribution_id: distribution_id,
       distribution_secret: distribution_secret,
-      namespace: namespace,
-      app_version: app_version
-    } = Map.new(opts)
+      app_version: app_version,
+      current_version: current_version,
+      last_update: last_update
+    } = request_params
 
     params = [
       client: "idiom",
@@ -142,16 +158,24 @@ defmodule Idiom.Backend.Phrase do
          |> Req.Request.append_response_steps(add_version_to_response: &add_version_to_response/1)
          |> Req.get() do
       {:ok, %Req.Response{status: 304}} ->
+        Logger.debug("Idiom.Backend.Phrase: No new version for #{locale} - skipping cache update")
+
         current_version
 
       {:ok, %Req.Response{body: body} = response} ->
+        version = Req.Response.get_private(response, :version)
+
         [{locale, %{namespace => body}}]
         |> Map.new()
         |> Cache.insert_keys()
 
-        Req.Response.get_private(response, :version)
+        Logger.debug("Idiom.Backend.Phrase: Updated cache for #{locale} with version #{version}")
 
-      _error ->
+        version
+
+      error ->
+        Logger.error("Idiom.Backend.Phrase: Failed fetching data from Phrase - #{inspect(error)}")
+
         current_version
     end
   end
