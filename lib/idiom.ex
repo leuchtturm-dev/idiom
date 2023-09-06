@@ -59,6 +59,7 @@ defmodule Idiom do
           to: String.t(),
           fallback: String.t() | list(String.t()),
           count: integer() | float() | Decimal.t() | String.t(),
+          plural: :cardinal | :ordinal,
           cache_table_name: atom()
         ]
 
@@ -126,6 +127,7 @@ defmodule Idiom do
       Keyword.get(opts, :fallback) || Application.get_env(:idiom, :default_fallback)
 
     count = Keyword.get(opts, :count)
+    plural = Keyword.get(opts, :plural, :cardinal)
     bindings = Map.put_new(bindings, :count, count)
 
     locale_resolve_hierarchy =
@@ -141,7 +143,7 @@ defmodule Idiom do
           |> Enum.flat_map(fn key ->
             [
               {locale, namespace, key},
-              {locale, namespace, "#{key}_#{Plural.get_suffix(locale, count)}"}
+              {locale, namespace, "#{key}_#{Plural.get_suffix(locale, count, type: plural)}"}
             ]
           end)
 

@@ -57,7 +57,10 @@ defmodule Idiom.Cache.InitTest do
                {"ar", "default", "Hello world"} => "مرحبا بالعالم",
                {"en", "default", "Welcome to our site 😊"} => "Welcome to our site 😊",
                {"ja", "default", "Hello world"} => "こんにちは世界",
-               {"zh", "default", "Hello world"} => "你好世界"
+               {"zh", "default", "Hello world"} => "你好世界",
+               {"en", "default", "cake_one"} => "1st cake",
+               {"en", "default", "cake_other"} => "{{count}}th cake",
+               {"en", "default", "cake_two"} => "2nd cake"
              }
   end
 end
