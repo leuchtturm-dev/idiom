@@ -24,7 +24,8 @@ build:
   ENV MIX_ENV=test
   RUN mix deps.compile
 
-  COPY --dir lib src priv .
+  COPY --dir config lib src priv .
+  COPY README.md .
   RUN mix compile --warnings-as-errors
 
 test:
@@ -36,6 +37,5 @@ test:
 lint:
   FROM +build
 
-  COPY .credo.exs .formatter.exs .
-  RUN mix format --check-formatted
+  COPY .credo.exs .
   RUN mix credo

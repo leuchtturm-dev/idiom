@@ -19,11 +19,13 @@ defmodule Idiom.Backend.Phrase do
 
   ```elixir
   config :idiom, Idiom.Backend.Phrase,
+    datacenter: "eu",
     distribution_id: "", # required
     distribution_secret: "", # required
     locales: ["de-DE", "en-US"], # required
-    base_url: "https://ota.eu.phrase.com",
-    fetch_interval: 600_000
+    namespace: "default",
+    fetch_interval: 600_000,
+    otp_app: nil # optional, for Phrase's appVersion support
   ```
 
   ### Creating a distribution
@@ -33,10 +35,17 @@ defmodule Idiom.Backend.Phrase do
   """
 
   use GenServer
+
+  alias Idiom.Backend.Utilities
   alias Idiom.Cache
+
   require Logger
 
   @opts_schema [
+    datacenter: [
+      type: :string,
+      default: "eu"
+    ],
     distribution_id: [
       type: :string,
       required: true
@@ -49,13 +58,16 @@ defmodule Idiom.Backend.Phrase do
       type: {:list, :string},
       required: true
     ],
-    base_url: [
+    namespace: [
       type: :string,
-      default: "https://ota.eu.phrase.com"
+      default: "default"
     ],
     fetch_interval: [
       type: :non_neg_integer,
       default: 600_000
+    ],
+    otp_app: [
+      type: :atom
     ]
   ]
 
@@ -68,48 +80,136 @@ defmodule Idiom.Backend.Phrase do
   def init(opts) do
     case NimbleOptions.validate(opts, @opts_schema) do
       {:ok, opts} ->
-        Process.send(self(), :fetch_data, [])
-        uuid = Uniq.UUID.uuid6()
+        initial_state =
+          opts
+          |> Utilities.maybe_add_app_version_to_opts(opts[:otp_app])
+          |> Map.new()
+          |> Map.put(:current_version, nil)
+          |> Map.put(:last_update, nil)
 
-        {:ok, %{uuid: uuid, last_update: nil, opts: opts}}
+        Process.send(self(), :fetch_data, [])
+
+        {:ok, initial_state}
 
       {:error, %{message: message}} ->
-        raise "Could not start `Idiom.Backend.Phrase` due to invalid configuration: #{message}"
+        {:error, message}
     end
   end
 
   @impl GenServer
-  def handle_info(:fetch_data, %{uuid: uuid, last_update: last_update, opts: opts} = state) do
-    fetch_data(uuid, last_update, opts)
-    |> Cache.insert_keys()
+  def handle_info(:fetch_data, state) do
+    %{
+      locales: locales,
+      namespace: namespace,
+      fetch_interval: fetch_interval
+    } = state
 
-    interval = Keyword.get(opts, :fetch_interval)
-    schedule_refresh(interval)
+    request_params =
+      Map.take(state, [
+        :datacenter,
+        :distribution_id,
+        :distribution_secret,
+        :app_version,
+        :current_version,
+        :last_update
+      ])
 
-    last_update = DateTime.utc_now() |> DateTime.to_unix()
-    {:noreply, %{state | last_update: last_update}}
+    new_version = fetch_data(locales, namespace, request_params)
+
+    schedule_refresh(fetch_interval)
+
+    {:noreply, %{state | current_version: new_version, last_update: last_update_now()}}
   end
 
   defp schedule_refresh(interval) do
     Process.send_after(self(), :fetch_data, interval)
   end
 
-  defp fetch_data(uuid, last_update, opts) do
-    params = [client: "idiom", unique_identifier: uuid, last_update: last_update]
-
-    %{locales: locales, base_url: base_url, distribution_id: distribution_id, distribution_secret: distribution_secret} = Map.new(opts)
-
-    Enum.map(locales, &fetch_locale(base_url, distribution_id, distribution_secret, &1, params))
-    |> Enum.reduce(%{}, fn locale, acc -> Map.merge(locale, acc) end)
+  defp fetch_data(locales, namespace, request_params) do
+    locales
+    |> Enum.map(&fetch_locale(&1, namespace, request_params))
+    # When the Phrase OTA API returns multiple different versions, store the lowest
+    # one so that at the next refresh all locales are requested again to update to the
+    # newest version.
+    |> Enum.min()
   end
 
-  defp fetch_locale(base_url, distribution_id, distribution_secret, locale, params) do
-    case Req.get("#{distribution_id}/#{distribution_secret}/#{locale}/i18next_4", base_url: base_url, params: params) do
-      {:ok, response} ->
-        Map.new([{locale, %{"default" => response.body}}])
+  defp fetch_locale(locale, namespace, request_params) do
+    %{
+      datacenter: datacenter,
+      distribution_id: distribution_id,
+      distribution_secret: distribution_secret,
+      app_version: app_version,
+      current_version: current_version,
+      last_update: last_update
+    } = request_params
+
+    params = [
+      client: "idiom",
+      app_version: app_version,
+      current_version: current_version,
+      last_update: last_update
+    ]
+
+    case [
+           url: "#{distribution_id}/#{distribution_secret}/#{locale}/i18next_4",
+           base_url: base_url(datacenter),
+           params: params
+         ]
+         |> Req.new()
+         |> Req.Request.append_response_steps(add_version_to_response: &add_version_to_response/1)
+         |> Req.get() do
+      {:ok, %Req.Response{status: 304}} ->
+        Logger.debug("Idiom.Backend.Phrase: No new version for #{locale} - skipping cache update")
+
+        current_version
+
+      {:ok, %Req.Response{body: body} = response} ->
+        version = Req.Response.get_private(response, :version)
+
+        [{locale, %{namespace => body}}]
+        |> Map.new()
+        |> Cache.insert_keys()
+
+        Logger.debug("Idiom.Backend.Phrase: Updated cache for #{locale} with version #{version}")
+
+        version
+
+      error ->
+        Logger.error("Idiom.Backend.Phrase: Failed fetching data from Phrase - #{inspect(error)}")
+
+        current_version
+    end
+  end
+
+  defp add_version_to_response({%{url: %{query: query}} = request, response}) do
+    version =
+      query
+      |> URI.decode_query()
+      |> Map.get("version")
+      |> case do
+        nil -> nil
+        version when is_integer(version) -> version
+        version when is_binary(version) -> String.to_integer(version)
+      end
+
+    {request, Req.Response.put_private(response, :version, version)}
+  end
+
+  defp last_update_now, do: DateTime.to_unix(DateTime.utc_now())
+
+  defp base_url(datacenter) do
+    case datacenter do
+      "us" ->
+        "https://ota.us.phrase.com"
+
+      "eu" ->
+        "https://ota.eu.phrase.com"
 
       _ ->
-        %{}
+        Logger.error("#{datacenter} is not a valid Phrase datacenter. Falling back to `eu`.")
+
+        "https://ota.eu.phrase.com"
     end
   end
 end

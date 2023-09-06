@@ -6,14 +6,13 @@ defmodule Idiom.Supervisor do
   alias Idiom.Cache
 
   def start_link(options) when is_list(options) do
-    options =
-      default_options()
-      |> Keyword.merge(options)
+    options = Keyword.merge(default_options(), options)
 
     local_data = Idiom.Local.data()
     data = Keyword.get(options, :data, %{})
 
-    Map.merge(local_data, data)
+    local_data
+    |> Map.merge(data)
     |> Cache.init()
 
     name = Keyword.fetch!(options, :name)
@@ -30,11 +29,7 @@ defmodule Idiom.Supervisor do
     backend_opts = Application.get_env(:idiom, backend, [])
 
     children =
-      [
-        {Finch, name: IdiomFinch},
-        {backend, backend_opts}
-      ]
-      |> Enum.reject(fn
+      Enum.reject([{Finch, name: IdiomFinch}, {backend, backend_opts}], fn
         nil -> true
         {nil, _opts} -> true
         _ -> false

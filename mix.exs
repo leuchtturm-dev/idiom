@@ -5,7 +5,7 @@ defmodule Idiom.MixProject do
     [
       app: :idiom,
       description: "Modern internationalization library",
-      version: "0.4.1",
+      version: "0.6.1",
       elixir: "~> 1.13",
       compilers: Mix.compilers() ++ [:leex, :yecc],
       elixirc_paths: elixirc_paths(Mix.env()),
@@ -36,18 +36,18 @@ defmodule Idiom.MixProject do
       {:decimal, "~> 2.1"},
       {:jason, "~> 1.0"},
       {:nimble_options, "~> 1.0"},
-      {:req, "~> 0.3"},
-      {:uniq, "~> 0.6"},
+      {:req, "~> 0.4"},
       {:credo, "~> 1.7", only: [:dev, :test]},
       {:ex_doc, "~> 0.30", only: :dev},
-      {:excoveralls, "~> 0.17", only: :test}
+      {:excoveralls, "~> 0.17", only: :test},
+      {:styler, "~> 0.8", only: [:dev, :test], runtime: false}
     ]
   end
 
   defp package do
     [
       name: "idiom",
-      licenses: ["WTFPL"],
+      licenses: ["MIT"],
       maintainers: ["Christoph Schmatzler"],
       links: %{"GitHub" => "https://github.com/cschmatzler/idiom"}
     ]
@@ -56,7 +56,7 @@ defmodule Idiom.MixProject do
   defp docs do
     [
       main: "Idiom",
-      extras: ["Cheatsheet.cheatmd"]
+      extras: ["CHANGELOG.md"]
     ]
   end
 end

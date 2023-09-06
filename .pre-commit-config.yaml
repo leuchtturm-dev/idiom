@@ -1,0 +1,11 @@
+repos:
+  - repo: https://github.com/cschmatzler/pre-commit-hooks
+    rev: 1.0.0
+    hooks:
+      - id: mix-format
+      - id: credo
+  - repo: https://github.com/compilerla/conventional-pre-commit
+    rev: v2.4.0
+    hooks:
+      - id: conventional-pre-commit
+        stages: [commit-msg]

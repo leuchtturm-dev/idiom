@@ -59,33 +59,35 @@ defmodule Idiom.Local do
         Application.get_env(:idiom, :data_dir) ||
         "priv/idiom"
 
-    Path.join(data_dir, "*/*.json")
+    data_dir
+    |> Path.join("*/*.json")
     |> Path.wildcard()
     |> Enum.map(&parse_file/1)
     |> Enum.reject(&is_nil/1)
-    |> Enum.reduce(%{}, fn keys, acc -> Map.merge(acc, keys, fn _k, v1, v2 -> Map.merge(v1, v2) end) end)
+    |> Enum.reduce(%{}, fn keys, acc ->
+      Map.merge(acc, keys, fn _k, v1, v2 -> Map.merge(v1, v2) end)
+    end)
   end
 
   defp parse_file(path) do
     with {:ok, contents} <- File.read(path),
-         {:ok, map} <- Jason.decode(contents),
-         {lang, domain} <- extract_lang_and_domain(path) do
-      [{lang, Map.new([{domain, map}])}]
-      |> Map.new()
+         {:ok, data} <- Jason.decode(contents),
+         [locale, domain] <- extract_locale_and_domain(path) do
+      Map.new([{locale, Map.new([{domain, data}])}])
     else
       {:error, _error} ->
-        Logger.warning("Could not parse file #{path}")
+        Logger.error("Idiom: Could not parse file #{path}")
+
         nil
     end
   end
 
-  defp extract_lang_and_domain(path) do
+  defp extract_locale_and_domain(path) do
     path
     |> String.split("/")
     |> Enum.reverse()
     |> Enum.take(2)
     |> Enum.map(&Path.rootname/1)
     |> Enum.reverse()
-    |> List.to_tuple()
   end
 end

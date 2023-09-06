@@ -1,5 +1,6 @@
 defmodule Idiom.LocalesToHierarchyTest do
   use ExUnit.Case, async: true
+
   alias Idiom.Locales
 
   tests = [
@@ -22,10 +23,22 @@ defmodule Idiom.LocalesToHierarchyTest do
     %{locale: "en", opts: [fallback: ["fr", "en"]], expected: ["en", "fr"]},
     %{locale: "de", opts: [fallback: ["fr", "en"]], expected: ["de", "fr", "en"]},
     # With locale and fallback
-    %{locale: "de-CH", opts: [fallback: ["fr", "en"]], expected: ["de-CH", "de", "fr", "en"]},
+    %{
+      locale: "de-CH",
+      opts: [fallback: ["fr", "en"]],
+      expected: ["de-CH", "de", "fr", "en"]
+    },
     # With script and multiple fallbacks
-    %{locale: "az-Cyrl-AZ", opts: [fallback: ["fr", "en"]], expected: ["az-Cyrl-AZ", "az-Cyrl", "az", "fr", "en"]},
-    %{locale: "zh-Hant-MO", opts: [fallback: ["fr", "en"]], expected: ["zh-Hant-MO", "zh-Hant", "zh", "fr", "en"]}
+    %{
+      locale: "az-Cyrl-AZ",
+      opts: [fallback: ["fr", "en"]],
+      expected: ["az-Cyrl-AZ", "az-Cyrl", "az", "fr", "en"]
+    },
+    %{
+      locale: "zh-Hant-MO",
+      opts: [fallback: ["fr", "en"]],
+      expected: ["zh-Hant-MO", "zh-Hant", "zh", "fr", "en"]
+    }
   ]
 
   for %{locale: locale, opts: opts, expected: expected} <- tests do

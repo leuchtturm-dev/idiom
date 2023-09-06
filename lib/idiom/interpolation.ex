@@ -41,17 +41,20 @@ defmodule Idiom.Interpolation do
   end
 
   defp interpolate([], parts, _bindings) do
-    Enum.reverse(parts)
+    parts
+    |> Enum.reverse()
     |> Enum.join("")
   end
 
   defp parse(message) when is_binary(message) do
-    parse(message, "", [])
+    message
+    |> parse([])
     |> Enum.reject(fn part -> is_binary(part) and String.equivalent?(part, "") end)
     |> Enum.reverse()
   end
 
-  defp parse(message, current, acc) do
+  defp parse(message, acc) do
+    # Using Erlang's `:binary.split/2` with `global` disabled instead of `String.split/3` to only split at the first occurence.
     case :binary.split(message, :binary.compile_pattern("{{")) do
       [part] ->
         [part | acc]
@@ -59,10 +62,10 @@ defmodule Idiom.Interpolation do
       [previous_part, possible_binding_and_rest] ->
         case :binary.split(possible_binding_and_rest, :binary.compile_pattern("}}")) do
           [_rest] ->
-            [current <> message | acc]
+            [message | acc]
 
           [binding, rest] ->
-            parse(rest, "", [String.to_atom(binding) | [previous_part | acc]])
+            parse(rest, [String.to_atom(binding) | [previous_part | acc]])
         end
     end
   end

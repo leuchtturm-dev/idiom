@@ -1,4 +1,5 @@
 defmodule Mix.Tasks.Idiom.Extract do
+  @moduledoc false
   use Mix.Task
 
   # TODO: impl merge
@@ -25,11 +26,13 @@ defmodule Mix.Tasks.Idiom.Extract do
     default_namespace = Keyword.get(opts, :default_namespace) || Idiom.get_namespace()
 
     included_file_list =
-      Keyword.get(opts, :files, "lib/")
+      opts
+      |> Keyword.get(:files, "lib/")
       |> Path.wildcard()
       |> Enum.map(&Path.expand/1)
 
-    :ets.tab2list(:extracted_keys)
+    :extracted_keys
+    |> :ets.tab2list()
     |> Enum.filter(fn {%{file: file}} -> file in included_file_list end)
     |> Enum.map(fn
       {%{has_count?: true} = data} ->
@@ -47,13 +50,15 @@ defmodule Mix.Tasks.Idiom.Extract do
       data =
         Enum.reduce(data, %{}, fn %{key: key}, acc -> Map.put(acc, key, key) end)
 
-      Path.join(template_dir, [namespace, ".json"])
+      template_dir
+      |> Path.join([namespace, ".json"])
       |> File.write!(Jason.encode!(data, pretty: true))
     end)
   end
 
   defp generate_suffix_keys(data) do
-    Idiom.Plural.get_suffixes("en")
+    "en"
+    |> Idiom.Plural.get_suffixes()
     |> Enum.map(fn suffix ->
       Map.update!(data, :key, &(&1 <> "_" <> suffix))
     end)
