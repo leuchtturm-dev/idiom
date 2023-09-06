@@ -9,7 +9,7 @@ NotEquals  = !=
 Modulo     = %
 Comma      = ,
 Range      = \.\.
-Integer    = [0-9]+([c][0-9]+)?
+Integer    = [0-9]+
 Examples   = @.+
 
 Rules.
