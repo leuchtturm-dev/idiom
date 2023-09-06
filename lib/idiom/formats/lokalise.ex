@@ -1,9 +1,11 @@
 defmodule Idiom.Formats.Lokalise do
   @moduledoc false
   def transform(data, namespace) do
-    Enum.map(data, fn %{"iso" => locale, "items" => items} ->
+    data
+    |> Enum.map(fn %{"iso" => locale, "items" => items} ->
       Map.new([{locale, %{namespace => transform_items(items)}}])
     end)
+    |> Enum.reduce(%{}, fn locale, acc -> Map.merge(acc, locale) end)
   end
 
   defp transform_items(items) do

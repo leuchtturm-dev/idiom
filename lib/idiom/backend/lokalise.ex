@@ -90,7 +90,7 @@ defmodule Idiom.Backend.Lokalise do
          {:ok, %{body: body}} <- fetch_bundle(url) do
       body
       |> Idiom.Formats.Lokalise.transform(namespace)
-      |> Enum.each(&Cache.insert_keys/1)
+      |> Cache.insert_keys()
 
       Logger.debug("Idiom.Backend.Lokalise: Updated cache with version #{version}")
 
