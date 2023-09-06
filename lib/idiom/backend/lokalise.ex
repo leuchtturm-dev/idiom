@@ -2,8 +2,6 @@ defmodule Idiom.Backend.Lokalise do
   @moduledoc """
   Backend for [Lokalise](https://lokalise.com).
 
-  **Not yet complete. Use at your own risk. Things might break at any time.**
-
   ## Usage
 
   In order to use the Lokalise backend, set it in your Idiom configuration:
@@ -26,6 +24,16 @@ defmodule Idiom.Backend.Lokalise do
     otp_app: nil # optional, for Lokalise's bundle freeze support
   ```
 
+  ## Creating a bundle
+
+  Lokalise does not officially support any third-party SDKs or web application
+  libraries. The backend works by fetching a bundle in the format of Lokalise's
+  official Android SDK and then transforming the data. This means that when you create
+  a localisation bundle in the "Download" tab of your Lokalise dashboard, you need to
+  select "Android SDK" under the "File format" setting.  
+  The `project_id` and `api_token` values can be found under the "More -> Settings" 
+  page where you can find your fixed Project ID and can generate a "Lokalise OTA 
+  Token".
   """
 
   use GenServer
