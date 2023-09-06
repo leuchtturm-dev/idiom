@@ -58,6 +58,22 @@ defmodule Idiom.Idiom.TTest do
         opts: [count: 2, cache_table_name: :t_test],
         expected: "2 carrots"
       },
+      # With ordinal plural
+      %{
+        key: "cake",
+        opts: [count: 1, plural: :ordinal, cache_table_name: :t_test],
+        expected: "1st cake"
+      },
+      %{
+        key: "cake",
+        opts: [count: 2, plural: :ordinal, cache_table_name: :t_test],
+        expected: "2nd cake"
+      },
+      %{
+        key: "cake",
+        opts: [count: 10, plural: :ordinal, cache_table_name: :t_test],
+        expected: "10th cake"
+      },
       # With plural key and explicit suffix
       %{
         key: "carrot_one",

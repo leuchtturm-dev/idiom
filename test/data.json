@@ -7,6 +7,9 @@
       "Natural language: the colon-ing": "Colons",
       "carrot_one": "1 carrot",
       "carrot_other": "{{count}} carrots",
+      "cake_one": "1st cake",
+      "cake_two": "2nd cake",
+      "cake_other": "{{count}}th cake",
       "welcome": "welcome, {{name}}",
       "Welcome to our site 😊": "Welcome to our site 😊"
     },
