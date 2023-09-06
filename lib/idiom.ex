@@ -99,6 +99,7 @@ defmodule Idiom do
       [locale | List.wrap(fallback)]
       |> Enum.map(&Locales.get_hierarchy/1)
       |> List.flatten()
+      |> Enum.uniq()
 
     lookup_keys =
       Enum.reduce(locale_resolve_hierarchy, [], fn locale, acc ->
@@ -131,7 +132,7 @@ defmodule Idiom do
 
   ```elixir
   iex> Idiom.get_locale()
-  "en"
+  "en-US"
   ```
   """
   @spec get_locale() :: String.t()
