@@ -1,20 +1,14 @@
 defmodule Idiom.Backend.Lokalise do
   @moduledoc """
   Backend for [Lokalise](https://lokalise.com).
-
   ## Usage
-
   In order to use the Lokalise backend, set it in your Idiom configuration:
-
   ```elixir
   config :idiom,
     backend: Idiom.Backend.Lokalise
   ```
-
   ## Configuration
-
   The Lokalise backend currently supports the following configuration options:
-
   ```elixir
   config :idiom, Idiom.Backend.Lokalise,
     project_id: "", # required
@@ -23,17 +17,15 @@ defmodule Idiom.Backend.Lokalise do
     fetch_interval: 600_000,
     otp_app: nil # optional, for Lokalise's bundle freeze support
   ```
-
   ## Creating a bundle
-
   Lokalise does not officially support any third-party SDKs or web application
   libraries. The Idiom backend works by fetching a bundle in the format of Lokalise's
   official Android SDK and then transforming the data. This means that when you create
   a localisation bundle in the "Download" tab of your Lokalise dashboard, you need to
   select "Android SDK" under the "File format" setting.  
   The `project_id` and `api_token` values can be found under the "More -> Settings" 
-  page where you can find your fixed Project ID and can generate a "Lokalise OTA 
-  Token".
+  page where you can find your Project ID and can generate a "Lokalise OTA Token". 
+  fixed
   """
 
   use GenServer
@@ -44,8 +36,14 @@ defmodule Idiom.Backend.Lokalise do
   require Logger
 
   @opts_schema [
-    project_id: [type: :string, required: true],
-    api_token: [type: :string, required: true],
+    project_id: [
+      type: :string,
+      required: true
+    ],
+    api_token: [
+      type: :string,
+      required: true
+    ],
     namespace: [
       type: :string,
       default: "default"
