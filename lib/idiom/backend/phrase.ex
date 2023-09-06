@@ -36,6 +36,7 @@ defmodule Idiom.Backend.Phrase do
 
   use GenServer
 
+  alias Idiom.Backend.Utilities
   alias Idiom.Cache
 
   require Logger
@@ -79,7 +80,7 @@ defmodule Idiom.Backend.Phrase do
   def init(opts) do
     case NimbleOptions.validate(opts, @opts_schema) do
       {:ok, opts} ->
-        opts = maybe_add_app_version_to_opts(opts, opts[:otp_app])
+        opts = Utilities.maybe_add_app_version_to_opts(opts, opts[:otp_app])
 
         Process.send(self(), :fetch_data, [])
 
@@ -153,14 +154,6 @@ defmodule Idiom.Backend.Phrase do
       _error ->
         current_version
     end
-  end
-
-  defp maybe_add_app_version_to_opts(opts, nil), do: opts
-
-  defp maybe_add_app_version_to_opts(opts, otp_app) do
-    app_version = otp_app |> Application.spec(:vsn) |> to_string()
-
-    Keyword.put(opts, :app_version, app_version)
   end
 
   defp add_version_to_response({%{url: %{query: query}} = request, response}) do
