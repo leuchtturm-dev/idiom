@@ -2,6 +2,8 @@ defmodule Mix.Tasks.Idiom.Extract do
   @moduledoc false
   use Mix.Task
 
+  alias Idiom.Extract
+
   # TODO: impl merge
   @switches [data_dir: :string, default_namespace: :string, files: :string, merge: :boolean]
 
@@ -9,8 +11,8 @@ defmodule Mix.Tasks.Idiom.Extract do
   def run(args) do
     {opts, _} = OptionParser.parse!(args, switches: @switches)
 
+    Extract.create_table()
     Application.put_env(:idiom, :extracting?, true)
-    :ets.new(:extracted_keys, [:public, :named_table])
 
     Mix.Task.clear()
     Mix.Task.run("compile", ["--force"])
@@ -27,7 +29,7 @@ defmodule Mix.Tasks.Idiom.Extract do
 
     included_file_list =
       opts
-      |> Keyword.get(:files, "lib/")
+      |> Keyword.get(:files, "lib/**")
       |> Path.wildcard()
       |> Enum.map(&Path.expand/1)
 
@@ -35,8 +37,8 @@ defmodule Mix.Tasks.Idiom.Extract do
     |> :ets.tab2list()
     |> Enum.filter(fn {%{file: file}} -> file in included_file_list end)
     |> Enum.map(fn
-      {%{has_count?: true} = data} ->
-        generate_suffix_keys(data)
+      {%{has_count?: true, plural: plural} = data} ->
+        generate_suffix_keys(data, plural)
 
       {data} ->
         data
@@ -56,9 +58,9 @@ defmodule Mix.Tasks.Idiom.Extract do
     end)
   end
 
-  defp generate_suffix_keys(data) do
+  defp generate_suffix_keys(data, plural) do
     "en"
-    |> Idiom.Plural.get_suffixes()
+    |> Idiom.Plural.get_suffixes(plural)
     |> Enum.map(fn suffix ->
       Map.update!(data, :key, &(&1 <> "_" <> suffix))
     end)

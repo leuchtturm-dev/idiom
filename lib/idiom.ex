@@ -7,6 +7,7 @@ defmodule Idiom do
   import Idiom.Interpolation
 
   alias Idiom.Cache
+  alias Idiom.Extract
   alias Idiom.Locales
   alias Idiom.Plural
 
@@ -18,15 +19,16 @@ defmodule Idiom do
   defmacro __using__(_opts) do
     quote unquote: false do
       defmacro t_extract(key, opts) do
-        file = __CALLER__.file
-        key = Idiom.Util.expand_to_binary(key, __CALLER__)
-        namespace = opts |> Keyword.get(:namespace) |> Idiom.Util.expand_to_binary(__CALLER__)
-        has_count? = Keyword.has_key?(opts, :count)
-
         if is_binary(key) and Application.get_env(:idiom, :extracting?) do
+          file = __CALLER__.file
+          key = Extract.expand_to_binary(key, __CALLER__)
+          namespace = opts |> Keyword.get(:namespace) |> Extract.expand_to_binary(__CALLER__)
+          has_count? = Keyword.has_key?(opts, :count)
+          plural = Keyword.get(opts, :plural, :cardinal)
+
           :ets.insert(
             :extracted_keys,
-            {%{file: file, key: key, namespace: namespace, has_count?: has_count?}}
+            {%{file: file, key: key, namespace: namespace, has_count?: has_count?, plural: plural}}
           )
         end
       end
