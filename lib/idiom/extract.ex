@@ -12,7 +12,7 @@ defmodule Idiom.Extract do
   end
 
   def add_key(key) do
-    Agent.update(__MODULE__, &[key | &1])
+    Agent.update(__MODULE__, &Enum.uniq([key | &1]))
   end
 
   def expand_to_binary(term, env) do
