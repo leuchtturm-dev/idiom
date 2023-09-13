@@ -193,7 +193,7 @@ defmodule Idiom do
   defmacro __using__(_opts) do
     quote unquote: false do
       defmacro t_extract(key, opts) do
-        if Application.get_env(:idiom, :extracting?) and is_binary(key) do
+        if Application.get_env(:idiom, :extracting?, false) and is_binary(key) do
           file = __CALLER__.file
           key = Extract.expand_to_binary(key, __CALLER__)
           namespace = opts |> Keyword.get(:namespace) |> Extract.expand_to_binary(__CALLER__)
