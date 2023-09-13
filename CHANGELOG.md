@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.6.3](https://github.com/cschmatzler/idiom/compare/v0.6.2...v0.6.3) (2023-09-13)
+
+
+### Features
+
+* Add `mix idiom.extract` ([#15](https://github.com/cschmatzler/idiom/issues/15)) ([f59eecb](https://github.com/cschmatzler/idiom/commit/f59eecb324551e3e8ed201033b3bac63ee28ec87))
+
+
+### Bug Fixes
+
+* don't try resolving a locale multiple times ([c042af1](https://github.com/cschmatzler/idiom/commit/c042af1ba216846971ec2b27b42113af133de968))
+
 ## [0.6.2](https://github.com/cschmatzler/idiom/compare/v0.6.1...v0.6.2) (2023-09-06)
 
 
