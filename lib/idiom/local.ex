@@ -62,11 +62,18 @@ defmodule Idiom.Local do
     data_dir
     |> Path.join("*/*.json")
     |> Path.wildcard()
+    |> Enum.reject(&extract?(&1, data_dir))
     |> Enum.map(&parse_file/1)
     |> Enum.reject(&is_nil/1)
     |> Enum.reduce(%{}, fn keys, acc ->
       Map.merge(acc, keys, fn _k, v1, v2 -> Map.merge(v1, v2) end)
     end)
+  end
+
+  defp extract?(path, data_dir) do
+    path
+    |> String.trim_leading(data_dir)
+    |> String.starts_with?("/template/")
   end
 
   defp parse_file(path) do
