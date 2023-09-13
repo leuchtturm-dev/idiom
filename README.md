@@ -2,6 +2,12 @@
 
 [![Hex.pm](https://img.shields.io/hexpm/v/idiom.svg)](https://hex.pm/packages/idiom) [![Documentation](https://img.shields.io/badge/documentation-gray)](https://hexdocs.pm/idiom/)
 
+## Help wanted
+
+Having a comprehensive test suite for a localisation library is difficult. The amount of different languages, regions and scripts with different rules makes it
+impossible for a single person to create that test suite - I can only speak so many languages! If you speak a language that has a non-ASCII script, is RTL or
+has some extravagant pluralisation rules, please add tests for them in a PR or open an issue with input and expected output so I can add them.
+
 <!-- MDOC !-->
 
 A new take on internationalisation in Elixir.
