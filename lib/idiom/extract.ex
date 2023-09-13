@@ -1,8 +1,18 @@
 defmodule Idiom.Extract do
   @moduledoc false
 
-  def create_table do
-    :ets.new(:extracted_keys, [:public, :named_table])
+  use Agent
+
+  def start_link do
+    Agent.start_link(fn -> [] end, name: __MODULE__)
+  end
+
+  def keys do
+    Agent.get(__MODULE__, & &1)
+  end
+
+  def add_key(key) do
+    Agent.update(__MODULE__, &[key | &1])
   end
 
   def expand_to_binary(term, env) do

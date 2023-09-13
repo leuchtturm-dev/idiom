@@ -73,7 +73,7 @@ defmodule Idiom.Local do
   defp extract?(path, data_dir) do
     path
     |> String.trim_leading(data_dir)
-    |> String.starts_with?("/template/")
+    |> String.starts_with?("/template_")
   end
 
   defp parse_file(path) do
