@@ -7,6 +7,7 @@ defmodule Idiom do
   import Idiom.Interpolation
 
   alias Idiom.Cache
+  alias Idiom.Extract
   alias Idiom.Locales
   alias Idiom.Plural
 
@@ -92,7 +93,7 @@ defmodule Idiom do
       Keyword.get(opts, :fallback) || Application.get_env(:idiom, :default_fallback)
 
     count = Keyword.get(opts, :count)
-    plural = Keyword.get(opts, :plural, :cardinal)
+    plural = Keyword.get(opts, :plural)
     bindings = Map.put_new(bindings, :count, count)
 
     locale_resolve_hierarchy =
@@ -187,6 +188,45 @@ defmodule Idiom do
     Process.put(:idiom_namespace, namespace)
 
     namespace
+  end
+
+  @doc false
+  defmacro __using__(_opts) do
+    quote unquote: false do
+      defmacro t_extract(key, opts) do
+        if Application.get_env(:idiom, :extracting?, false) and is_binary(key) do
+          file = __CALLER__.file
+          key = Extract.expand_to_binary(key, __CALLER__)
+          namespace = opts |> Keyword.get(:namespace) |> Extract.expand_to_binary(__CALLER__)
+          has_count? = Keyword.has_key?(opts, :count)
+          plural_type = Keyword.get(opts, :plural, :cardinal)
+
+          Idiom.Extract.add_key(%{
+            file: file,
+            key: key,
+            namespace: namespace,
+            has_count?: has_count?,
+            plural_type: plural_type
+          })
+        end
+      end
+
+      defmacro t(key, opts) when is_list(opts) do
+        quote do
+          unquote(__MODULE__).t_extract(unquote(key), unquote(opts))
+
+          Idiom.t(unquote(key), %{}, unquote(opts))
+        end
+      end
+
+      defmacro t(key, bindings \\ Macro.escape(%{}), opts \\ Macro.escape([])) do
+        quote do
+          unquote(__MODULE__).t_extract(unquote(key), unquote(opts))
+
+          Idiom.t(unquote(key), unquote(bindings), unquote(opts))
+        end
+      end
+    end
   end
 
   defp fallback_message(key_or_keys)
