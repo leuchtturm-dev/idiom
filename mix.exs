@@ -40,7 +40,7 @@ defmodule Idiom.MixProject do
       {:credo, "~> 1.7", only: [:dev, :test]},
       {:ex_doc, "~> 0.30", only: :dev},
       {:excoveralls, "~> 0.17", only: :test},
-      {:styler, "~> 0.8", only: [:dev, :test], runtime: false}
+      {:styler, "~> 0.9", only: [:dev, :test], runtime: false}
     ]
   end
 
