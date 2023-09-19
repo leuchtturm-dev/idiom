@@ -71,7 +71,7 @@
           {Credo.Check.Design.SkipTestWithoutComment, []},
           {Credo.Check.Readability.AliasAs, []},
           {Credo.Check.Readability.ImplTrue, []},
-          {Credo.Check.Readability.NestedFunctionCalls, []},
+          {Credo.Check.Readability.NestedFunctionCalls, [min_pipeline_length: 3]},
           {Credo.Check.Readability.SeparateAliasRequire, []},
           {Credo.Check.Readability.SingleFunctionToBlockPipe, []},
           {Credo.Check.Readability.WithCustomTaggedTuple, []},

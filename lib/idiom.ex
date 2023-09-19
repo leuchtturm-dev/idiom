@@ -89,37 +89,25 @@ defmodule Idiom do
   end
 
   defp run_t(locale, namespace, key_or_keys, bindings, opts) do
-    fallback =
-      Keyword.get(opts, :fallback) || Application.get_env(:idiom, :default_fallback)
-
+    fallback = Keyword.get(opts, :fallback) || Application.get_env(:idiom, :default_fallback)
     count = Keyword.get(opts, :count)
-    plural = Keyword.get(opts, :plural)
+    plural_type = Keyword.get(opts, :plural)
     bindings = Map.put_new(bindings, :count, count)
-
-    locale_resolve_hierarchy =
-      [locale | List.wrap(fallback)]
-      |> Enum.map(&Locales.get_hierarchy/1)
-      |> List.flatten()
-      |> Enum.uniq()
-
-    lookup_keys =
-      Enum.reduce(locale_resolve_hierarchy, [], fn locale, acc ->
-        pluralised_keys =
-          key_or_keys
-          |> List.wrap()
-          |> Enum.flat_map(fn key ->
-            [
-              {locale, namespace, key},
-              {locale, namespace, "#{key}_#{Plural.get_suffix(locale, count, type: plural)}"}
-            ]
-          end)
-
-        acc ++ pluralised_keys
-      end)
-
     cache_table_name = Keyword.get(opts, :cache_table_name, Cache.default_table_name())
 
-    lookup_keys
+    locale
+    |> Locales.get_hierarchy(fallback: fallback)
+    |> Enum.reduce([], fn locale, acc ->
+      key_or_keys
+      |> List.wrap()
+      |> Enum.flat_map(fn key ->
+        [
+          {locale, namespace, key},
+          {locale, namespace, "#{key}_#{Plural.get_suffix(locale, count, type: plural_type)}"}
+        ]
+      end)
+      |> then(&Kernel.++(acc, &1))
+    end)
     |> Enum.find_value(fallback_message(key_or_keys), fn {locale, namespace, key} ->
       Cache.get_translation(locale, namespace, key, cache_table_name)
     end)
@@ -193,13 +181,13 @@ defmodule Idiom do
   @doc false
   defmacro __using__(_opts) do
     quote unquote: false do
-      defmacro t_extract(key, opts) do
+      defmacro set_to_extract(key, opts) do
         if Application.get_env(:idiom, :extracting?, false) and is_binary(key) do
           file = __CALLER__.file
           key = Extract.expand_to_binary(key, __CALLER__)
           namespace = opts |> Keyword.get(:namespace) |> Extract.expand_to_binary(__CALLER__)
           has_count? = Keyword.has_key?(opts, :count)
-          plural_type = Keyword.get(opts, :plural, :cardinal)
+          plural_type = Keyword.get(opts, :plural) || :cardinal
 
           Idiom.Extract.add_key(%{
             file: file,
@@ -213,7 +201,7 @@ defmodule Idiom do
 
       defmacro t(key, opts) when is_list(opts) do
         quote do
-          unquote(__MODULE__).t_extract(unquote(key), unquote(opts))
+          unquote(__MODULE__).set_to_extract(unquote(key), unquote(opts))
 
           Idiom.t(unquote(key), %{}, unquote(opts))
         end
@@ -221,7 +209,7 @@ defmodule Idiom do
 
       defmacro t(key, bindings \\ Macro.escape(%{}), opts \\ Macro.escape([])) do
         quote do
-          unquote(__MODULE__).t_extract(unquote(key), unquote(opts))
+          unquote(__MODULE__).set_to_extract(unquote(key), unquote(opts))
 
           Idiom.t(unquote(key), unquote(bindings), unquote(opts))
         end
