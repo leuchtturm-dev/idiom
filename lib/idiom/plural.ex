@@ -184,7 +184,7 @@ defmodule Idiom.Plural do
       |> String.trim_trailing("0")
       |> String.length()
 
-    get_suffix(plural_type, Locales.get_language(locale), Decimal.to_float(n), i, v, f, t, w)
+    get_suffix(plural_type, locale, Decimal.to_float(n), i, v, f, t, w)
   end
 
   @doc """
