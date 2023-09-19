@@ -80,14 +80,20 @@ defmodule Idiom.Backend.Phrase do
   def init(opts) do
     case NimbleOptions.validate(opts, @opts_schema) do
       {:ok, opts} ->
+        interval = Keyword.get(opts, :fetch_interval)
+        {:ok, timer} = :timer.send_interval(interval, self(), :update_data)
+
+        otp_app = Keyword.get(opts, :otp_app)
+
         initial_state =
           opts
-          |> Utilities.maybe_add_app_version_to_opts(opts[:otp_app])
+          |> Utilities.maybe_add_app_version_to_opts(otp_app)
           |> Map.new()
           |> Map.put(:current_version, nil)
           |> Map.put(:last_update, nil)
+          |> Map.put(:timer, timer)
 
-        Process.send(self(), :fetch_data, [])
+        send(self(), :update_data)
 
         {:ok, initial_state}
 
@@ -97,11 +103,10 @@ defmodule Idiom.Backend.Phrase do
   end
 
   @impl GenServer
-  def handle_info(:fetch_data, state) do
+  def handle_info(:update_data, state) do
     %{
       locales: locales,
-      namespace: namespace,
-      fetch_interval: fetch_interval
+      namespace: namespace
     } = state
 
     request_params =
@@ -114,18 +119,12 @@ defmodule Idiom.Backend.Phrase do
         :last_update
       ])
 
-    new_version = fetch_data(locales, namespace, request_params)
-
-    schedule_refresh(fetch_interval)
+    new_version = update_data(locales, namespace, request_params)
 
     {:noreply, %{state | current_version: new_version, last_update: last_update_now()}}
   end
 
-  defp schedule_refresh(interval) do
-    Process.send_after(self(), :fetch_data, interval)
-  end
-
-  defp fetch_data(locales, namespace, request_params) do
+  defp update_data(locales, namespace, request_params) do
     locales
     |> Enum.map(&fetch_locale(&1, namespace, request_params))
     # When the Phrase OTA API returns multiple different versions, store the lowest

@@ -11,6 +11,5 @@ defmodule Idiom.Backend do
   2. Write data to `Idiom.Cache`.
   Idiom's translations are stored inside an ETS table that is wrapped by `Idiom.Cache`. Your backend should update the cache by calling 
   `Idiom.Cache.insert_keys/2`. See the documentation for that function on the expected data structure.
-
   """
 end

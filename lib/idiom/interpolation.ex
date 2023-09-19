@@ -1,13 +1,15 @@
 defmodule Idiom.Interpolation do
   @moduledoc """
-  Functionality for interpolating variables into a message string.
+  Functionality for interpolating variables into a message.
   """
 
   @doc """
-  Interpolates a message string with a map of bindings.
+  Interpolates a message with a map of bindings.
 
-  The message string can include variables wrapped in `{{}}`. For example, in the string `Hello, {{name}}!`, `{{name}}` is a variable.  
-  If a variable exists in the message string, but not in the bindings, it is converted to a string in-place.
+  The message can include variables wrapped in `{{}}`. For example, in the string `Hello, {{name}}!`, `{{name}}` is a variable. If a variable exists in the 
+  message , but not in the bindings, it is converted to a string in-place.
+
+  The binding can be any value that implements the `String.Chars` protocol.
 
   ## Examples
 

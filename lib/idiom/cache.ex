@@ -20,7 +20,6 @@ defmodule Idiom.Cache do
   ## Parameters
 
   - `initial_state` - State to initialise the cache with. See the documentation for `insert_keys/2` for the expected format.
-  - `table_name` - Name of the ETS table. Used for testing.
 
   ## Examples
 
@@ -48,7 +47,6 @@ defmodule Idiom.Cache do
   ## Parameters
 
   - `keys` - Map of keys to add to the cache.
-  - `table_name` - Name of the ETS table. Used for testing.
 
   ## Format of `keys`
 

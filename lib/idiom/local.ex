@@ -52,8 +52,8 @@ defmodule Idiom.Local do
   @doc """
   Parses all local data.
   """
-  @spec data(keyword()) :: map()
-  def data(opts \\ []) do
+  @spec read(keyword()) :: map()
+  def read(opts \\ []) do
     data_dir =
       Keyword.get(opts, :data_dir) ||
         Application.get_env(:idiom, :data_dir) ||

@@ -1,6 +1,6 @@
 defmodule Idiom.Locales do
   @moduledoc """
-  Utility functions for handling locales.
+  Functionality for interacting with locales.
 
   Locale identifiers consist of a language code, an optional script code, and an optional region code, separated by a hyphen (-) or underscore (_).
   """
@@ -11,8 +11,8 @@ defmodule Idiom.Locales do
   @doc """
   Constructs a hierarchical list of locale identifiers from the given locale.
 
-  The `fallback` option allows you to specify a fallback locale that will be added to the end of the hierarchy if it's not already included. By default, no
-  fallback language is added.
+  The `fallback` option allows you to specify a fallback locale or a list of fallback locales that will be added to the end of the hierarchy if it's not 
+  already included. By default, no fallback language is added.
 
   ## Examples
 
@@ -22,6 +22,9 @@ defmodule Idiom.Locales do
 
   iex> Idiom.Locales.get_hierarchy("de-DE", fallback: "en")
   ["de-DE", "de", "en"]
+
+  iex> Idiom.Locales.get_hierarchy("de-DE", fallback: ["en-US", "fr"])
+  ["de-DE", "de", "en-US", "fr"]
   ```
   """
   @type get_hierarchy_opts() :: [fallback: String.t() | list(String.t())]
@@ -61,7 +64,7 @@ defmodule Idiom.Locales do
     locale
     |> format_locale()
     |> String.split("-")
-    |> hd()
+    |> List.first()
   end
 
   @doc """
@@ -119,8 +122,7 @@ defmodule Idiom.Locales do
   @doc """
   Formats a locale string.
 
-  Idiom internally supports separating different parts of the locale code by either hyphen or underscore, which is then normalised by this function. Different
-  locales also have different capitalisation rules, which are handled here.
+  Idiom internally supports separating different parts of the locale code by either hyphen or underscore, which is then normalised by this function.
 
   ## Examples
 

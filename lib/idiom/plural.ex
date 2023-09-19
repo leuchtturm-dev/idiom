@@ -9,11 +9,8 @@ defmodule Idiom.Plural do
   - `few`
   - `many`
   - `other`
-
-  Used suffixes differ greatly by language. In order to support them all, and also make this module easier to keep up-to-date, the `PluralAST` module
-  parses them and generates ASTs for `cond` expressions. This module reads the definition file at compile time, and generates helper functions for each
-  language.
   """
+
   import Idiom.PluralAST
 
   alias Idiom.Locales
@@ -149,15 +146,16 @@ defmodule Idiom.Plural do
 
   def get_suffix(locale, count, opts) when is_integer(count) do
     locale = Locales.get_language(locale)
+    plural_type = Keyword.get(opts, :type) || :cardinal
     n = abs(count)
     i = abs(count)
-
-    plural_type = Keyword.get(opts, :type) || :cardinal
 
     get_suffix(plural_type, locale, n, i, 0, 0, 0, 0)
   end
 
-  def get_suffix(locale, count, opts) do
+  def get_suffix(locale, %Decimal{} = count, opts) do
+    locale = Locales.get_language(locale)
+    plural_type = Keyword.get(opts, :type) || :cardinal
     n = Decimal.abs(count)
     i = count |> Decimal.round(0, :floor) |> Decimal.to_integer()
     v = abs(n.exp)
@@ -186,18 +184,7 @@ defmodule Idiom.Plural do
       |> String.trim_trailing("0")
       |> String.length()
 
-    plural_type = Keyword.get(opts, :type, :cardinal)
-
-    get_suffix(
-      plural_type,
-      Locales.get_language(locale),
-      Decimal.to_float(n),
-      i,
-      v,
-      f,
-      t,
-      w
-    )
+    get_suffix(plural_type, Locales.get_language(locale), Decimal.to_float(n), i, v, f, t, w)
   end
 
   @doc """

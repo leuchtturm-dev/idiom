@@ -5,6 +5,7 @@ defmodule Idiom.PluralAST do
   Idiom uses Unicode CLDR plural rules, which they provide for download as a JSON file. This is stored in our `priv` directory.
   The `Plural` and `PluralAST` modules use these definitions to generate Elixir ASTs representing a `cond` statement for each language, which are then
   used at compile-time to generate functions.
+
   This module builds on a lexer and parser inside the `src/` directory to generate the ASTs.
   """
 
@@ -32,17 +33,7 @@ defmodule Idiom.PluralAST do
     |> Map.new()
   end
 
-  @doc """
-  Parses a list of plural rules and converts them into a `:cond` expression, with the clauses sorted by plural suffix.
-
-  ## Examples
-
-  ```elixir
-  iex> Idiom.PluralAST.parse_rules([{"pluralRule-count-one", "n = 1"}])
-  {:cond, [], [[do: [{:->, [], [[{:==, [], [{:n, [], nil}, 1]}], "one"]}]]]}
-  ```
-  """
-  @spec parse_rules(list({String.t(), String.t()})) :: term()
+  @doc false
   def parse_rules(rules) do
     rules
     |> Enum.map(fn {"pluralRule-count-" <> suffix, rule} ->

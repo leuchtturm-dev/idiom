@@ -2,6 +2,14 @@ defmodule Idiom.Backend.Lokalise do
   @moduledoc """
   Backend for [Lokalise](https://lokalise.com).
 
+  > #### Information {: .info}
+  >
+  > The Lokalise backend is currently experimental.  
+  > Since Lokalise does not officially support third-party SDKs, this backend is piggy-backing off of Lokalise's Android SDK format and then runs a 
+  > transformation on the received data to match Idiom's data model. At this point, there is no guarantee that all variations of that format are handled 
+  > correctly.  
+  > If you find a bug, please [open an issue](https://github.com/cschmatzler/idiom/issues/new) with your Lokalise bundle data!
+
   ## Usage
 
   In order to use the Lokalise backend, set it in your Idiom configuration:
@@ -26,13 +34,10 @@ defmodule Idiom.Backend.Lokalise do
 
   ## Creating a bundle
 
-  Lokalise does not officially support any third-party SDKs or web application
-  libraries. The Idiom backend works by fetching a bundle in the format of Lokalise's
-  official Android SDK and then transforming the data. This means that when you create
-  a localisation bundle in the "Download" tab of your Lokalise dashboard, you need to
-  select "Android SDK" under the "File format" setting.  
-  The `project_id` and `api_token` values can be found under the "More -> Settings" 
-  page where you can find your Project ID and can generate a "Lokalise OTA Token". 
+  Lokalise does not officially support any third-party SDKs or web application libraries. The Idiom backend works by fetching a bundle in the format of 
+  Lokalise's official Android SDK and then transforming the data. This means that when you create a localisation bundle in the "Download" tab of your Lokalise
+  dashboard, you need to select "Android SDK" under the "File format" setting. The `project_id` and `api_token` values can be found under the 
+  "More -> Settings" page where you can find your Project ID and can generate a "Lokalise OTA Token". 
   """
 
   use GenServer
@@ -73,13 +78,19 @@ defmodule Idiom.Backend.Lokalise do
   def init(opts) do
     case NimbleOptions.validate(opts, @opts_schema) do
       {:ok, opts} ->
+        interval = Keyword.get(opts, :fetch_interval)
+        {:ok, timer} = :timer.send_interval(interval, self(), :update_data)
+
+        otp_app = Keyword.get(opts, :otp_app)
+
         initial_state =
           opts
-          |> Utilities.maybe_add_app_version_to_opts(opts[:otp_app])
+          |> Utilities.maybe_add_app_version_to_opts(otp_app)
           |> Map.new()
           |> Map.put(:current_version, 0)
+          |> Map.put(:timer, timer)
 
-        Process.send(self(), :fetch_data, [])
+        send(self(), :update_data)
 
         {:ok, initial_state}
 
@@ -89,25 +100,14 @@ defmodule Idiom.Backend.Lokalise do
   end
 
   @impl GenServer
-  def handle_info(:fetch_data, state) do
-    %{
-      namespace: namespace,
-      fetch_interval: fetch_interval
-    } = state
-
+  def handle_info(:update_data, state) do
     request_params = Map.take(state, [:project_id, :api_token, :app_version, :current_version])
-    new_version = fetch_data(namespace, request_params)
-
-    schedule_refresh(fetch_interval)
+    new_version = state |> Map.get(:namespace) |> update_data(request_params)
 
     {:noreply, %{state | current_version: new_version}}
   end
 
-  defp schedule_refresh(interval) do
-    Process.send_after(self(), :fetch_data, interval)
-  end
-
-  defp fetch_data(namespace, request_params) do
+  defp update_data(namespace, request_params) do
     %{
       project_id: project_id,
       api_token: api_token,

@@ -8,7 +8,7 @@ defmodule Idiom.Supervisor do
   def start_link(options) when is_list(options) do
     options = Keyword.merge(default_options(), options)
 
-    local_data = Idiom.Local.data()
+    local_data = Idiom.Local.read()
     data = Keyword.get(options, :data, %{})
 
     local_data
