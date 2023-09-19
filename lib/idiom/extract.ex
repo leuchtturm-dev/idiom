@@ -21,7 +21,7 @@ defmodule Idiom.Extract do
         term
 
       {:<<>>, _, pieces} ->
-        if Enum.all?(pieces, &is_binary/1), do: Enum.join(pieces), else: nil
+        if Enum.all?(pieces, &is_binary/1), do: Enum.join(pieces)
 
       _other ->
         nil
