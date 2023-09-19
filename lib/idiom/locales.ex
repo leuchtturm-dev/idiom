@@ -77,16 +77,22 @@ defmodule Idiom.Locales do
 
   iex> Idiom.Locales.get_language_and_script("de-DE")
   nil
+
+  iex> Idiom.Locales.get_language_and_script("de-de-de")
+  nil
   ```
   """
   @spec get_language_and_script(String.t()) :: String.t() | nil
   def get_language_and_script(locale) when is_binary(locale) do
     locale
-    |> format_locale()
+    |> String.downcase()
     |> String.split("-")
     |> case do
-      parts when length(parts) <= 2 -> nil
-      parts -> parts |> Enum.take(2) |> Enum.join("-")
+      [language, script | _rest] when script in @scripts ->
+        [language, script] |> Enum.join("-") |> format_locale()
+
+      _ ->
+        nil
     end
   end
 
