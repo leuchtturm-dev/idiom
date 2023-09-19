@@ -145,16 +145,16 @@ defmodule Idiom.Plural do
   end
 
   def get_suffix(locale, count, opts) when is_integer(count) do
-    locale = Locales.get_language(locale)
+    language = Locales.get_language(locale)
     plural_type = Keyword.get(opts, :type) || :cardinal
     n = abs(count)
     i = abs(count)
 
-    get_suffix(plural_type, locale, n, i, 0, 0, 0, 0)
+    get_suffix(plural_type, language, n, i, 0, 0, 0, 0)
   end
 
   def get_suffix(locale, %Decimal{} = count, opts) do
-    locale = Locales.get_language(locale)
+    language = Locales.get_language(locale)
     plural_type = Keyword.get(opts, :type) || :cardinal
     n = Decimal.abs(count)
     i = count |> Decimal.round(0, :floor) |> Decimal.to_integer()
@@ -184,7 +184,7 @@ defmodule Idiom.Plural do
       |> String.trim_trailing("0")
       |> String.length()
 
-    get_suffix(plural_type, locale, Decimal.to_float(n), i, v, f, t, w)
+    get_suffix(plural_type, language, Decimal.to_float(n), i, v, f, t, w)
   end
 
   @doc """
