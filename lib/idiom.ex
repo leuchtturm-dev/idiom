@@ -117,7 +117,7 @@ defmodule Idiom do
         acc ++ pluralised_keys
       end)
 
-    cache_table_name = Keyword.get(opts, :cache_table_name, Cache.cache_table_name())
+    cache_table_name = Keyword.get(opts, :cache_table_name, Cache.default_table_name())
 
     lookup_keys
     |> Enum.find_value(fallback_message(key_or_keys), fn {locale, namespace, key} ->

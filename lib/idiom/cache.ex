@@ -1,22 +1,26 @@
 defmodule Idiom.Cache do
   @moduledoc """
-  Cache for translations.
-  Idiom is flexible in terms of which source translations can be retrieved from. It comes with a few different ones out of the box, and can also be extended
-  through plugins. `Idiom.Cache` provides utilities to interact with the ETS that acts as a central storage for translations, both for adding/updating keys
-  and retrieving values. table
+  Cache for translations.  
+
+  Wraps an ETS table and offers functions to insert and fetch localisation data. table
   """
 
   alias Idiom.Locales
 
-  @cache_table_name :idiom_cache
+  @default_table_name :idiom_cache
 
   @doc false
-  def cache_table_name, do: @cache_table_name
+  def default_table_name, do: @default_table_name
 
   @doc """
   Starts a new cache.
 
   Allows adding initial state by passing it as first parameter.
+
+  ## Parameters
+
+  - `initial_state` - State to initialise the cache with. See the documentation for `insert_keys/2` for the expected format.
+  - `table_name` - Name of the ETS table. Used for testing.
 
   ## Examples
 
@@ -33,20 +37,46 @@ defmodule Idiom.Cache do
   ```
   """
   @spec init(map(), atom()) :: :ok
-  def init(initial_state \\ %{}, table_name \\ @cache_table_name) when is_map(initial_state) do
-    :ets.new(table_name, [
-      :set,
-      :public,
-      :named_table,
-      read_concurrency: true,
-      decentralized_counters: true
-    ])
-
+  def init(initial_state \\ %{}, table_name \\ @default_table_name) when is_map(initial_state) do
+    :ets.new(table_name, [:set, :public, :named_table, read_concurrency: true])
     insert_keys(initial_state, table_name)
   end
 
   @doc """
   Adds a map of keys to the cache.
+
+  ## Parameters
+
+  - `keys` - Map of keys to add to the cache.
+  - `table_name` - Name of the ETS table. Used for testing.
+
+  ## Format of `keys`
+
+  ```elixir
+  %{
+    "en" => %{"signup" => %{"Create your account" => "Create your account"}}, 
+    "de" => %{"signup" => %{"Create your account" => "Erstelle deinen Account"}}}
+  }
+  ```
+
+  where the first level is the locale, the second the namespace, and the third a map of the keys contained in the previous two. The keys can be nested further,
+  the cache will automatically flatten them as such:
+
+  ```elixir
+  %{
+    "en" => %{
+      "signup" => %{
+        "multiple" => %{
+          "levels" => %{
+            "nesting" => "Hello!"
+          }
+        }
+      }
+    }
+  }
+  ```
+
+  will result in a key of `multiple.levels.nesting` inside the `signup` namespace with a message value of `Hello!`.
 
   ## Examples
 
@@ -59,7 +89,7 @@ defmodule Idiom.Cache do
   ```
   """
   @spec insert_keys(map(), atom()) :: :ok
-  def insert_keys(keys, table_name \\ @cache_table_name) do
+  def insert_keys(keys, table_name \\ @default_table_name) do
     keys
     |> map_to_cache_data([])
     |> Enum.each(fn {key, value} ->
@@ -80,7 +110,7 @@ defmodule Idiom.Cache do
   ```
   """
   @spec get_translation(String.t(), String.t(), String.t(), atom()) :: String.t() | nil
-  def get_translation(locale, namespace, key, table_name \\ @cache_table_name) do
+  def get_translation(locale, namespace, key, table_name \\ @default_table_name) do
     case :ets.lookup(table_name, {locale, namespace, key}) do
       [{{^locale, ^namespace, ^key}, translation}] -> translation
       [] -> nil

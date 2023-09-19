@@ -29,7 +29,7 @@ defmodule Idiom.Supervisor do
     backend_opts = Application.get_env(:idiom, backend, [])
 
     children =
-      Enum.reject([{Finch, name: IdiomFinch}, {backend, backend_opts}], fn
+      Enum.reject([{backend, backend_opts}], fn
         nil -> true
         {nil, _opts} -> true
         _ -> false

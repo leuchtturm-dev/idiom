@@ -4,7 +4,7 @@ defmodule Idiom.Cache.InitTest do
   alias Idiom.Cache
 
   setup do
-    default_table_name = Cache.cache_table_name()
+    default_table_name = Cache.default_table_name()
 
     on_exit(fn ->
       if :ets.info(default_table_name) != :undefined do

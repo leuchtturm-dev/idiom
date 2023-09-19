@@ -1,9 +1,9 @@
 defmodule Idiom.Local do
   @moduledoc """
-  Local source for Idiom.
+  Local data provider for Idiom.
 
-  Idiom is backend-agnostic and can be used with many different sources. By default, it also loads resources from the local filesystem at boot time. This can
-  be turned off in configuration, but it is highly recommended to have it as a fallback in case your chosen backend is unavailable.
+  Idiom is backend-agnostic and can be used with many different providers. As a backup for when the selected source is unavailable, Idiom loads data from the
+  local file system on startup.
 
   ## Directory structure
 
