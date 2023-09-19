@@ -261,5 +261,13 @@ t("carrot", count: 2)
 
 ## Backends
 
-Idiom is designed to be extensible with multiple over the air providers. Please see the modules in `Idiom.Backend` for the ones built-in, and always feel 
-free to extend the ecosystem by creating new ones.
+Idiom is backend-agnostic and allows configuring different providers which are grouped under `Idiom.Backend`.
+
+### Phrase
+
+[Phrase Strings](https://phrase.com) is supported inside the `Idiom.Backend.Phrase` module.
+
+### Lokalise
+
+[Lokalise](https://lokalise.com) is supported inside the `Idiom.Backend.Lokalise` module.
+
