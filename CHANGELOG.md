@@ -5,7 +5,7 @@
 
 ### Bug Fixes
 
-* fix `Idiom.Locales.get_language_and_script/1` when second part is ([ca9443e](https://github.com/cschmatzler/idiom/commit/ca9443e2b75512609d33326bd60ceb6200ceb740))
+* fix `Idiom.Locales.get_language_and_script/1` when second part is not a script ([ca9443e](https://github.com/cschmatzler/idiom/commit/ca9443e2b75512609d33326bd60ceb6200ceb740))
 
 ## [0.6.3](https://github.com/cschmatzler/idiom/compare/v0.6.2...v0.6.3) (2023-09-13)
 
