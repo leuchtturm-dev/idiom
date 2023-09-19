@@ -16,3 +16,5 @@ jobs:
           package-name: idiom
           bump-minor-pre-major: true
           bump-patch-for-minor-pre-major: true
+          pull-request-header: ""
+          skip-labeling: true
