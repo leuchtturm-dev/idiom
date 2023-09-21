@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.6.5](https://github.com/cschmatzler/idiom/compare/v0.6.4...v0.6.5) (2023-09-21)
+
+
+### Bug Fixes
+
+* remove duplicate function call ([2260079](https://github.com/cschmatzler/idiom/commit/2260079b1b6e0fe039f91a05e370442f85e152dd))
+
 ## [0.6.4](https://github.com/cschmatzler/idiom/compare/v0.6.3...v0.6.4) (2023-09-19)
 
 
