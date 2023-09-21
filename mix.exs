@@ -56,7 +56,10 @@ defmodule Idiom.MixProject do
   defp docs do
     [
       main: "Idiom",
-      extras: ["CHANGELOG.md"]
+      extras: ["CHANGELOG.md"] ++ Path.wildcard("guides/**"),
+      groups_for_extras: [
+        Guides: Path.wildcard("guides/**")
+      ]
     ]
   end
 end
