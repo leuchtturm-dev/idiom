@@ -36,8 +36,11 @@ defmodule Idiom.Interpolation do
   end
 
   defp interpolate([part | rest], parts, bindings) when is_atom(part) do
+    part_as_string = Atom.to_string(part)
+
     case bindings do
       %{^part => binding} -> interpolate(rest, [to_string(binding) | parts], bindings)
+      %{^part_as_string => binding} -> interpolate(rest, [binding | parts], bindings)
       %{} -> interpolate(rest, [to_string(part) | parts], bindings)
     end
   end

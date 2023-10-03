@@ -14,6 +14,18 @@ defmodule Idiom.Interpolation.InterpolateTest do
         message: "It is {{month}} {{day}}, {{year}}",
         bindings: Macro.escape(%{month: "February", day: 3, year: 2023}),
         expected: "It is February 3, 2023"
+      },
+      # With string keys
+      %{
+        message: "{{count}} carrots",
+        bindings: Macro.escape(%{"count" => 5}),
+        expected: "5 carrots"
+      },
+      # With mixed keys
+      %{
+        message: "It is {{month}} {{day}}, {{year}}",
+        bindings: Macro.escape(%{"month" => "February", "day" => 3, year: 2023}),
+        expected: "It is February 3, 2023"
       }
     ]
 
