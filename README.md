@@ -4,9 +4,11 @@
 
 ## Help wanted
 
-Having a comprehensive test suite for a localisation library is difficult. The amount of different languages, regions and scripts with different rules makes it
-impossible for a single person to create that test suite - I can only speak so many languages! If you speak a language that has a non-ASCII script, is RTL or
-has some extravagant pluralisation rules, please add tests for them in a PR or open an issue with input and expected output so I can add them.
+Having a comprehensive test suite for a localisation library is difficult. The amount of different languages,
+regions and scripts with different rules makes it impossible for a single person to create that test suite - I
+can only speak so many languages! If you speak a language that has a non-ASCII script, is RTL or has some
+extravagant pluralisation rules, please add tests for them in a PR or open an issue with input and expected
+output so I can add them.
 
 <!-- MDOC !-->
 
@@ -134,15 +136,18 @@ The `Create your account` message is the same for both American and British Engl
 With Idiom's resolution hierarchy, you can use both `en-US` and `en-GB` to refer to the `Create your account` key as well.
 
 ```elixir
-t("Take the elevator", to: "en-US")
-# -> Take the elevator
-t("Take the elevator", to: "en-GB")
-# -> Take the lift
+iex> t("Take the elevator", to: "en-US")
+"Take the elevator"
+
+iex> t("Take the elevator", to: "en-GB")
+"Take the lift"
+
 # Will first try to resolve the key in the `en-US` locale, then, since it does not exist, try `en`.
-t("Create your account", to: "en-US")
-# -> Create your account
-t("Create your account", to: "en-GB")
-# -> Create your account
+iex> t("Create your account", to: "en-US")
+"Create your account"
+
+iex> t("Create your account", to: "en-GB")
+"Create your account"
 ```
 
 ### Fallback keys
@@ -219,10 +224,11 @@ Taking the following file as an example (see also [File format](#module-file-for
 These messages can then be interpolated as such:
 
 ```elixir
-t("Welcome, {{name}}", %{name: "Tim"})
-# -> Welcome, Tim
-t("It is currently {{temperature}} degrees in {{city}}", %{temperature: "31", city: "Hong Kong"})
-# -> It is currently 31 degrees in Hong Kong
+iex> t("Welcome, {{name}}", %{name: "Tim"})
+"Welcome, Tim"
+
+iex> t("It is currently {{temperature}} degrees in {{city}}", %{temperature: "31", city: "Hong Kong"})
+"It is currently 31 degrees in Hong Kong"
 ```
 
 ## Pluralisation
@@ -248,10 +254,11 @@ Your keys, for English, might then look like this:
 You can then pluralise your messages by passing `count` to `t/3`, such as:
 
 ```elixir
-t("carrot", count: 1)
-# -> 1 carrot
-t("carrot", count: 2)
-# -> 2 carrot
+iex> t("carrot", count: 1)
+"1 carrot"
+
+iex> t("carrot", count: 2)
+"2 carrots"
 ```
 
 > #### `{{count}}` and pluralisation {: .info}

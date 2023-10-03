@@ -17,6 +17,16 @@
       "create.account": "Create your account"
     }
   },
+  "en-US": {
+    "default": {
+      "Take the elevator": "Take the elevator"
+    }
+  },
+  "en-GB": {
+    "default": {
+      "Take the elevator": "Take the lift"
+    }
+  },
   "de": {
     "default": {
       "butterfly": "Schmetterling"
