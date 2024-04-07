@@ -12,13 +12,13 @@ jobs:
       matrix:
         include:
           - elixir: 1.11.4
-            otp: 22.3
+            otp: 22.3.4.27
           - elixir: 1.12.3
-            otp: 23.3
+            otp: 23.3.4.20
           - elixir: 1.14.5
-            otp: 25.3
+            otp: 25.3.2.10
           - elixir: 1.16.0
-            otp: 26.2
+            otp: 26.2.3
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout
@@ -29,7 +29,6 @@ jobs:
         with:
           elixir-version: ${{ matrix.elixir }}
           otp-version: ${{ matrix.otp }}
-          version-type: strict
 
       - name: Install Task
         uses: arduino/setup-task@v2
