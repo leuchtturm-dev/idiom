@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.6.6 (2024-04-08)
+
+### Features
+
+* Updates plural definitions: now supports the `blo` language code for plurals
+
+### Maintenance
+
+* Updates dependencies
+* Removes deprecation warnings for Elixir 1.16
+
 ## 0.6.5 (2023-10-03)
 
 ### Features
