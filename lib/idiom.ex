@@ -72,8 +72,7 @@ defmodule Idiom do
     run_t(locale, namespace, key_or_keys, bindings, opts)
   end
 
-  defp run_t(locale, namespace, key_or_keys, _binding, _opts)
-       when is_nil(locale) or is_nil(namespace) do
+  defp run_t(locale, namespace, key_or_keys, _binding, _opts) when is_nil(locale) or is_nil(namespace) do
     Logger.warning("""
     Idiom: Called `t/3` without a locale or namespace set. You can configure a default locale and namespace by adding
 

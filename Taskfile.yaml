@@ -1,0 +1,41 @@
+version: 3
+
+tasks:
+  format:
+    desc: Format the project
+    deps:
+      - mix-deps
+    cmd: mix format
+
+  test:
+    desc: Run tests
+    deps:
+      - mix-deps
+    env:
+      MIX_ENV: test
+    cmd: mix test
+
+  ci:
+    desc: Run CI tasks
+    deps:
+      - mix-deps
+    cmds:
+      - mix format --check-formatted
+      - mix credo
+      - mix hex.audit
+      - mix deps.unlock --check-unused
+      - task: test
+
+  # Internal
+  # --------
+  mix-deps:
+    internal: true
+    desc: Install mix dependencies
+    cmds:
+      - mix deps.get
+      - mix deps.compile
+    sources:
+      - mix.exs
+      - mix.lock
+    generates:
+      - deps/**

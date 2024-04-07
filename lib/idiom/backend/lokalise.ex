@@ -132,9 +132,7 @@ defmodule Idiom.Backend.Lokalise do
         current_version
 
       {:error, error} ->
-        Logger.error(
-          "Idiom.Backend.Lokalise: Failed fetching data from Lokalise - #{inspect(error)}"
-        )
+        Logger.error("Idiom.Backend.Lokalise: Failed fetching data from Lokalise - #{inspect(error)}")
 
         current_version
     end

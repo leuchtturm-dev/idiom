@@ -19,18 +19,14 @@ defmodule Idiom.PluralAST do
 
   @doc false
   def get_suffixes(rules) do
-    rules
-    |> Enum.map(fn {lang, rules} ->
+    Map.new(rules, fn {lang, rules} ->
       suffixes =
         rules
-        |> Enum.reduce([], fn {"pluralRule-count-" <> suffix, _rule}, acc ->
-          [suffix | acc]
-        end)
+        |> Enum.reduce([], fn {"pluralRule-count-" <> suffix, _rule}, acc -> [suffix | acc] end)
         |> Enum.sort(&suffix_sorter/2)
 
       {lang, suffixes}
     end)
-    |> Map.new()
   end
 
   @doc false

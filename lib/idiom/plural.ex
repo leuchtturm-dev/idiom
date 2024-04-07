@@ -24,19 +24,13 @@ defmodule Idiom.Plural do
                      |> fetch_rules()
                      |> get_suffixes()
 
-  @cardinal_rules "cardinal"
-                  |> fetch_rules()
-                  |> Enum.map(fn {lang, rules} -> {lang, parse_rules(rules)} end)
-                  |> Map.new()
+  @cardinal_rules "cardinal" |> fetch_rules() |> Map.new(fn {lang, rules} -> {lang, parse_rules(rules)} end)
 
   @ordinal_suffixes "ordinal"
                     |> fetch_rules()
                     |> get_suffixes()
 
-  @ordinal_rules "ordinal"
-                 |> fetch_rules()
-                 |> Enum.map(fn {lang, rules} -> {lang, parse_rules(rules)} end)
-                 |> Map.new()
+  @ordinal_rules "ordinal" |> fetch_rules() |> Map.new(fn {lang, rules} -> {lang, parse_rules(rules)} end)
 
   for {locale, rules} <- @cardinal_rules do
     # Source: http://unicode.org/reports/tr35/tr35-numbers.html#Operands
@@ -215,11 +209,9 @@ defmodule Idiom.Plural do
     Map.get(@ordinal_suffixes, language, ["other"])
   end
 
-  defp get_suffix(:cardinal, locale, n, i, v, w, f, t),
-    do: get_cardinal_suffix(locale, n, i, v, w, f, t)
+  defp get_suffix(:cardinal, locale, n, i, v, w, f, t), do: get_cardinal_suffix(locale, n, i, v, w, f, t)
 
-  defp get_suffix(:ordinal, locale, n, i, v, w, f, t),
-    do: get_ordinal_suffix(locale, n, i, v, w, f, t)
+  defp get_suffix(:ordinal, locale, n, i, v, w, f, t), do: get_ordinal_suffix(locale, n, i, v, w, f, t)
 
   defp in?(number, range) when is_integer(number) do
     number in range

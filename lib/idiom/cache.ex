@@ -124,7 +124,7 @@ defmodule Idiom.Cache do
   defp map_to_cache_data(value, keys) when is_binary(value) do
     locale = keys |> Enum.at(0) |> Locales.format_locale()
     namespace = Enum.at(keys, 1)
-    key = keys |> Enum.slice(2..-1) |> Enum.join(".")
+    key = keys |> Enum.slice(2..-1//1) |> Enum.join(".")
 
     [{{locale, namespace, key}, value}]
   end

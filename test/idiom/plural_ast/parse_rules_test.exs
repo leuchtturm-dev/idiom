@@ -10,8 +10,7 @@ defmodule Idiom.PluralAST.ParseRulesTest do
   tests = [
     %{
       rule: [{"pluralRule-count-one", "n = 1"}],
-      expected_ast:
-        quote(do: {:cond, [], [[do: [{:->, [], [[{:==, [], [{:n, [], nil}, 1]}], "one"]}]]]})
+      expected_ast: quote(do: {:cond, [], [[do: [{:->, [], [[{:==, [], [{:n, [], nil}, 1]}], "one"]}]]]})
     },
     %{
       rule: [{"pluralRule-count-few", "n % 100 = 3..10 "}],
@@ -36,8 +35,7 @@ defmodule Idiom.PluralAST.ParseRulesTest do
     },
     %{
       rule: [
-        {"pluralRule-count-one",
-         "v = 0 and i % 10 = 1 and i % 100 != 11 or f % 10 = 1 and f % 100 != 11"}
+        {"pluralRule-count-one", "v = 0 and i % 10 = 1 and i % 100 != 11 or f % 10 = 1 and f % 100 != 11"}
       ],
       expected_ast:
         quote(

@@ -7,24 +7,38 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        base:
-          - 1.15.5-erlang-26.0.2-debian-bookworm-20230612-slim
-          - 1.15.5-erlang-25.3.2.2-debian-bookworm-20230612-slim
-          - 1.15.5-erlang-24.3.4.9-debian-bookworm-20230612-slim
-          - 1.14.5-erlang-26.0.2-debian-bookworm-20230612-slim
-          - 1.14.5-erlang-25.3.2.2-debian-bookworm-20230612-slim
-          - 1.14.5-erlang-24.3.4.9-debian-bookworm-20230612-slim
-          - 1.13.4-erlang-25.3.2.2-debian-bookworm-20230612-slim
-          - 1.13.4-erlang-24.3.4.9-debian-bookworm-20230612-slim
+        include:
+          - elixir: 1.11.4
+            otp: 22.3
+          - elixir: 1.12.3
+            otp: 23.3
+          - elixir: 1.14.5
+            otp: 25.3
+          - elixir: 1.16.0
+            otp: 26.2
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout
-        uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608 # v4
-      - name: Setup Earthly
-        uses: earthly/actions-setup@v1
+        uses: actions/checkout@v4
+
+      - name: Set up Elixir
+        uses: erlef/setup-beam@v1
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-      - name: Run Earthly
-        run: earthly --org panda-den --sat idiom-ci --no-output +ci --BASE=${{ matrix.base }}
-        env:
-          EARTHLY_TOKEN: ${{ secrets.EARTHLY_TOKEN }}
+          elixir-version: ${{ matrix.elixir }}
+          otp-version: ${{ matrix.otp }}
+
+      - name: Install Task
+        uses: arduino/setup-task@v2
+
+      - name: Restore deps and _build cache
+        uses: actions/cache@v3
+        with:
+          path: |
+            deps
+            _build
+          key: deps-${{ runner.os }}-${{ matrix.otp }}-${{ matrix.elixir }}-${{ hashFiles('**/mix.lock') }}
+          restore-keys: |
+            deps-${{ runner.os }}-${{ matrix.otp }}-${{ matrix.elixir }}
+
+      - name: Run CI
+        run: task ci

@@ -1,8 +1,9 @@
 .DS_Store
-/.elixir-tools/
-/deps/
-/_build/
-/cover/
-/doc/
-/src/*.erl
+.elixir-tools/
+.task/
+_build/
+cover/
+deps/
+doc/
 erl_crash.dump
+src/*.erl
