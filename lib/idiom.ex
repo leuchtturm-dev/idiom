@@ -217,6 +217,7 @@ defmodule Idiom do
   end
 
   defp fallback_message(key_or_keys)
+  defp fallback_message(nil), do: ""
   defp fallback_message(key) when is_binary(key), do: key
   defp fallback_message(keys) when is_list(keys), do: List.first(keys)
 end
