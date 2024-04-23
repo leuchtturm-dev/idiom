@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.6.7 (2024-04-23)
+### Bug Fixes
+* Fixes crash when passing `nil` to `t/3`.
+
 ## 0.6.6 (2024-04-08)
 
 ### Features
