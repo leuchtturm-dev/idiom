@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.6.8 (2024-05-01)
+### Bug Fixes
+* Fixes crash when not setting `otp_app` in configuration.
+
 ## 0.6.7 (2024-04-23)
 ### Bug Fixes
 * Fixes crash when passing `nil` to `t/3`.

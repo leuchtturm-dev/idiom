@@ -5,7 +5,7 @@ defmodule Idiom.MixProject do
     [
       app: :idiom,
       description: "Modern internationalization library",
-      version: "0.6.7",
+      version: "0.6.8",
       elixir: "~> 1.13",
       compilers: [:leex, :yecc] ++ Mix.compilers(),
       elixirc_paths: elixirc_paths(Mix.env()),
