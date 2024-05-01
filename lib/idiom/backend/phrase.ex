@@ -138,14 +138,13 @@ defmodule Idiom.Backend.Phrase do
       datacenter: datacenter,
       distribution_id: distribution_id,
       distribution_secret: distribution_secret,
-      app_version: app_version,
       current_version: current_version,
       last_update: last_update
     } = request_params
 
     params = [
       client: "idiom",
-      app_version: app_version,
+      app_version: Map.get(request_params, :app_version),
       current_version: current_version,
       last_update: last_update
     ]
