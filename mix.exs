@@ -36,7 +36,7 @@ defmodule Idiom.MixProject do
       {:decimal, "~> 2.1"},
       {:jason, "~> 1.0"},
       {:nimble_options, "~> 1.0"},
-      {:req, "~> 0.4"},
+      {:req, "~> 0.5"},
       {:credo, "~> 1.7", only: [:dev, :test]},
       {:ex_doc, "~> 0.30", only: :dev},
       {:excoveralls, "~> 0.17", only: :test},
