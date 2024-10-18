@@ -5,8 +5,8 @@ defmodule Idiom.MixProject do
     [
       app: :idiom,
       description: "Modern internationalization library",
-      version: "0.6.8",
-      elixir: "~> 1.13",
+      version: "0.7.0",
+      elixir: "~> 1.14",
       compilers: [:leex, :yecc] ++ Mix.compilers(),
       elixirc_paths: elixirc_paths(Mix.env()),
       start_permanent: Mix.env() == :prod,
@@ -36,11 +36,11 @@ defmodule Idiom.MixProject do
       {:decimal, "~> 2.1"},
       {:jason, "~> 1.0"},
       {:nimble_options, "~> 1.0"},
-      {:req, "~> 0.4"},
+      {:req, "~> 0.5"},
       {:credo, "~> 1.7", only: [:dev, :test]},
-      {:ex_doc, "~> 0.30", only: :dev},
-      {:excoveralls, "~> 0.17", only: :test},
-      {:styler, "~> 0.9", only: [:dev, :test], runtime: false}
+      {:ex_doc, "~> 0.34", only: :dev},
+      {:excoveralls, "~> 0.18", only: :test},
+      {:styler, "~> 1.1", only: [:dev, :test], runtime: false}
     ]
   end
 

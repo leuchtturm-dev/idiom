@@ -32,7 +32,7 @@ defmodule Idiom do
   @doc """
   Alias of `t/3` for when you don't need any bindings.
   """
-  @spec t(String.t() | list(String.t()), translate_opts()) :: String.t()
+  @spec t(String.t() | list(String.t()) | atom() | list(atom()), translate_opts()) :: String.t()
   def t(key_or_keys, opts) when is_list(opts), do: t(key_or_keys, %{}, opts)
 
   @doc """
@@ -219,5 +219,6 @@ defmodule Idiom do
   defp fallback_message(key_or_keys)
   defp fallback_message(nil), do: ""
   defp fallback_message(key) when is_binary(key), do: key
+  defp fallback_message(key) when is_atom(key), do: Atom.to_string(key)
   defp fallback_message(keys) when is_list(keys), do: List.first(keys)
 end

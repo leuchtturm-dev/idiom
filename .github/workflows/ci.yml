@@ -8,7 +8,7 @@ on:
 jobs:
   test:
     name: Test
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -16,8 +16,8 @@ jobs:
       - name: Set up Elixir
         uses: erlef/setup-beam@v1
         with:
-          elixir-version: 1.16.2
-          otp-version: 26.2.3
+          elixir-version: 1.17.3
+          otp-version: 27.1.1
 
       - name: Install Task
         uses: arduino/setup-task@v2
